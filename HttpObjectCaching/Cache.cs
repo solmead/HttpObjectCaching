@@ -25,15 +25,18 @@ namespace HttpObjectCaching
                 {
                     if (area == CacheArea.Request)
                     {
-                            var ctx = (tt) context.Items[name];
+                        if (context.Items.Contains(name))
+                        {
+                            var ctx = (tt)context.Items[name];
                             return ctx;
+                        }
                     }
                     else if (area == CacheArea.Session)
                     {
                         if (context.Session != null)
                         {
-                            var ctx = (tt) context.Session[name];
-                            return ctx;
+                                var ctx = (tt) context.Session[name];
+                                return ctx;
                         } 
                     }
                     else if (area == CacheArea.Global)
