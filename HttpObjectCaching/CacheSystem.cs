@@ -15,6 +15,10 @@ namespace HttpObjectCaching
         public delegate void SessionEvent(string sessionId);
         public event SessionEvent SessionExpired;
 
+        private object sessionCreateLock = new object();
+        private object sessionSetLock = new object();
+        private object requestSetLock = new object();
+
         private string _sessionId = "";
 
         private CacheSystem()
@@ -105,12 +109,19 @@ namespace HttpObjectCaching
                 var sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
                 if (sess == null)
                 {
-                    sess = new Dictionary<string, object>();
-                    HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
-                                             System.Web.Caching.Cache.NoAbsoluteExpiration,
-                                             new TimeSpan(0, 30, 0),
-                                             CacheItemPriority.Default,
-                                                this.ReportRemovedCallback);
+                    lock (sessionCreateLock)
+                    {
+                        sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
+                        if (sess == null)
+                        {
+                            sess = new Dictionary<string, object>();
+                            HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
+                                System.Web.Caching.Cache.NoAbsoluteExpiration,
+                                new TimeSpan(0, 30, 0),
+                                CacheItemPriority.Default,
+                                this.ReportRemovedCallback);
+                        }
+                    }
                 }
                 return sess;
             }
@@ -170,12 +181,15 @@ namespace HttpObjectCaching
             var context = HttpContext.Current;
             if (context != null)
             {
-                if (context.Items.Contains(name.ToUpper()))
+                lock (requestSetLock)
                 {
-                    var ctx = (tt)context.Items[name.ToUpper()];
-                    return ctx;
+                    if (context.Items.Contains(name.ToUpper()))
+                    {
+                        var ctx = (tt) context.Items[name.ToUpper()];
+                        return ctx;
+                    }
+                    return default(tt);
                 }
-                return default(tt);
             }
             else {
                 return GetFromThread<tt>(name.ToUpper());
@@ -187,11 +201,14 @@ namespace HttpObjectCaching
             var context = HttpContext.Current;
             if (context != null)
             {
-                if (context.Items.Contains(name.ToUpper()))
+                lock (requestSetLock)
                 {
-                    context.Items.Remove(name.ToUpper());
+                    if (context.Items.Contains(name.ToUpper()))
+                    {
+                        context.Items.Remove(name.ToUpper());
+                    }
+                    context.Items.Add(name.ToUpper(), obj);
                 }
-                context.Items.Add(name.ToUpper(), obj);
             }
             else
             {
@@ -210,11 +227,14 @@ namespace HttpObjectCaching
 
         public void SetInSession<tt>(string name, tt obj)
         {
-            if (Session.ContainsKey(name.ToUpper()))
+            lock (sessionSetLock)
             {
-                Session.Remove(name.ToUpper());
+                if (Session.ContainsKey(name.ToUpper()))
+                {
+                    Session.Remove(name.ToUpper());
+                }
+                Session.Add(name.ToUpper(), obj);
             }
-            Session.Add(name.ToUpper(), obj);
         }
 
     }
