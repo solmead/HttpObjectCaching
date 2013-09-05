@@ -17,67 +17,34 @@ namespace HttpObjectCaching
     public static class Cache
     {
 
-        public static tt GetItem<tt>(CacheArea area, string name)
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue = default(tt))
         {
+            if (area == CacheArea.Thread)
+            {
+                return CacheSystem.Instance.GetFromThread<tt>(name, defaultValue);
+            }
             if (area == CacheArea.Request)
             {
-                return CacheSystem.Instance.GetFromRequest<tt>(name);
+                return CacheSystem.Instance.GetFromRequest<tt>(name, defaultValue);
             }
             if (area == CacheArea.Session)
             {
-                return CacheSystem.Instance.GetFromSession<tt>(name);
+                return CacheSystem.Instance.GetFromSession<tt>(name, defaultValue);
             }
             if (area == CacheArea.Global)
             {
-                return CacheSystem.Instance.GetFromApplication<tt>(name);
+                return CacheSystem.Instance.GetFromApplication<tt>(name, defaultValue);
             }
-            //try
-            //{
-            //    var context = HttpContext.Current;
-            //    if (context != null)
-            //    {
-            //        if (area == CacheArea.Request)
-            //        {
-            //            if (context.Items.Contains(name))
-            //            {
-            //                var ctx = (tt)context.Items[name];
-            //                return ctx;
-            //            }
-            //        }
-            //        else if (area == CacheArea.Session)
-            //        {
-            //            if (context.Session != null)
-            //            {
-            //                    var ctx = (tt) context.Session[name];
-            //                    return ctx;
-            //            } 
-            //        }
-            //        else if (area == CacheArea.Global)
-            //        {
-            //            if (context.Application != null)
-            //            {
-            //                var ctx = (tt)context.Application[name];
-            //                return ctx;
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        //var app = System.AppDomain.CurrentDomain;
-            //        //var app = Application.Current;
-
-            //    }
-                
-            //}
-            //catch (Exception)
-            //{
-            //    return default(tt);
-            //}
+            
             return default(tt);
         }
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
 
+            if (area == CacheArea.Thread )
+            {
+                CacheSystem.Instance.SetInThread<tt>(name, obj);
+            }
             if (area == CacheArea.Request)
             {
                 CacheSystem.Instance.SetInRequest<tt>(name, obj);
@@ -90,42 +57,7 @@ namespace HttpObjectCaching
             {
                 CacheSystem.Instance.SetInApplication<tt>(name, obj);
             }
-            //var nullTT = default(tt);
-            //var context = HttpContext.Current;
-            //if (context != null)
-            //{
-            //    if (area == CacheArea.Request)
-            //    {
-            //        if (context.Items.Contains(name))
-            //        {
-            //            context.Items.Remove(name);
-            //        }
-            //        context.Items.Add(name, obj);
-            //    } else if (area == CacheArea.Session)
-            //    {
-            //        if (context.Session != null)
-            //        {
-            //            var c = context.Session[name];
-            //            if (c != null)
-            //            {
-            //                context.Session.Remove(name);
-            //            }
-            //            context.Session[name] = obj;
-            //        }
-            //    }
-            //    else if (area == CacheArea.Global)
-            //    {
-            //        if (context.Application != null)
-            //        {
-            //            var ctx = context.Application[name];
-            //            if (ctx != null)
-            //            {
-            //                context.Application.Remove(name);
-            //            }
-            //            context.Application[name] = obj;
-            //        }
-            //    }
-            //}
+            
     }
 
     }

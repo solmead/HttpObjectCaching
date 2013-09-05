@@ -129,11 +129,18 @@ namespace HttpObjectCaching
 
 
 
-        public tt GetFromThread<tt>(string name)
+        public tt GetFromThread<tt>(string name, tt defaultValue = default(tt))
         {
             try
             {
                 var t = (tt)Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper()));
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    t = defaultValue;
+                    SetInThread(name, t);
+                }
                 return t;
             }
             catch
@@ -149,11 +156,18 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromApplication<tt>(string name)
+        public tt GetFromApplication<tt>(string name, tt defaultValue = default(tt))
         {
             try
             {
                 var t = (tt)HttpRuntime.Cache[name.ToUpper()];
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    t = defaultValue;
+                    SetInApplication(name, t);
+                }
                 return t;
             }
             catch
@@ -176,7 +190,7 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromRequest<tt>(string name)
+        public tt GetFromRequest<tt>(string name, tt defaultValue = default(tt))
         {
             var context = HttpContext.Current;
             if (context != null)
@@ -185,10 +199,23 @@ namespace HttpObjectCaching
                 {
                     if (context.Items.Contains(name.ToUpper()))
                     {
-                        var ctx = (tt) context.Items[name.ToUpper()];
-                        return ctx;
+                        var t = (tt) context.Items[name.ToUpper()];
+
+                        object comp = t;
+                        object empty = default(tt);
+                        if (comp == empty)
+                        {
+                            t = defaultValue;
+                            SetInRequest(name, t);
+                        }
+                        return t;
                     }
-                    return default(tt);
+                    else
+                    {
+                        var t = default(tt);
+                        SetInRequest(name, t);
+                        return t;
+                    }
                 }
             }
             else {
@@ -215,12 +242,26 @@ namespace HttpObjectCaching
                 SetInThread(name, obj);
             }
         }
-        
-        public tt GetFromSession<tt>(string name)
+
+        public tt GetFromSession<tt>(string name, tt defaultValue = default(tt))
         {
             if (Session.ContainsKey(name.ToUpper()))
             {
-                return (tt)Session[name.ToUpper()];
+                var t = (tt)Session[name.ToUpper()];
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    t = defaultValue;
+                    SetInSession(name, t);
+                }
+                return t;
+            }
+            else
+            {
+                var t = default(tt);
+                SetInSession(name, t);
+                return t;
             }
             return default(tt);
         }
