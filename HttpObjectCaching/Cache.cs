@@ -16,27 +16,35 @@ namespace HttpObjectCaching
     }
     public static class Cache
     {
-
-        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue = default(tt))
+        
+        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod)
         {
             if (area == CacheArea.Thread)
             {
-                return CacheSystem.Instance.GetFromThread<tt>(name, defaultValue);
+                return CacheSystem.Instance.GetFromThread<tt>(name, createMethod);
             }
             if (area == CacheArea.Request)
             {
-                return CacheSystem.Instance.GetFromRequest<tt>(name, defaultValue);
+                return CacheSystem.Instance.GetFromRequest<tt>(name, createMethod);
             }
             if (area == CacheArea.Session)
             {
-                return CacheSystem.Instance.GetFromSession<tt>(name, defaultValue);
+                return CacheSystem.Instance.GetFromSession<tt>(name, createMethod);
             }
             if (area == CacheArea.Global)
             {
-                return CacheSystem.Instance.GetFromApplication<tt>(name, defaultValue);
+                return CacheSystem.Instance.GetFromApplication<tt>(name, createMethod);
             }
-            
+
             return default(tt);
+        }
+        public static tt GetItem<tt>(CacheArea area, string name)
+        {
+            return GetItem<tt>(area, name, ()=> default(tt));
+        }
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue)
+        {
+            return GetItem<tt>(area, name, () => defaultValue);
         }
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {

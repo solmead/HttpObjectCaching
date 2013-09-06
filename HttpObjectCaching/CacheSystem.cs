@@ -71,17 +71,15 @@ namespace HttpObjectCaching
         {
             get
             {
+                var context = HttpContext.Current;
+                if (context != null && context.Session != null)
+                {
+                    _sessionId = context.Session.SessionID;
+                    context.Session["__MySessionLock"] = "112233";
+                }
                 if (string.IsNullOrWhiteSpace(_sessionId))
                 {
-                    var context = HttpContext.Current;
-                    if (context != null && context.Session != null)
-                    {
-                        _sessionId = context.Session.SessionID;
-                    }
-                    else
-                    {
-                        _sessionId = Guid.NewGuid().ToString();
-                    }
+                    _sessionId = Guid.NewGuid().ToString();
                 }
                 return _sessionId;
             }
@@ -129,7 +127,7 @@ namespace HttpObjectCaching
 
 
 
-        public tt GetFromThread<tt>(string name, tt defaultValue = default(tt))
+        public tt GetFromThread<tt>(string name, Func<tt> createMethod = null)
         {
             try
             {
@@ -138,8 +136,11 @@ namespace HttpObjectCaching
                 object empty = default(tt);
                 if (comp == empty)
                 {
-                    t = defaultValue;
-                    SetInThread(name, t);
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInThread(name, t);
+                    }
                 }
                 return t;
             }
@@ -156,7 +157,7 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromApplication<tt>(string name, tt defaultValue = default(tt))
+        public tt GetFromApplication<tt>(string name, Func<tt> createMethod = null)
         {
             try
             {
@@ -165,8 +166,11 @@ namespace HttpObjectCaching
                 object empty = default(tt);
                 if (comp == empty)
                 {
-                    t = defaultValue;
-                    SetInApplication(name, t);
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInApplication(name, t);
+                    }
                 }
                 return t;
             }
@@ -190,7 +194,7 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromRequest<tt>(string name, tt defaultValue = default(tt))
+        public tt GetFromRequest<tt>(string name, Func<tt> createMethod = null)
         {
             var context = HttpContext.Current;
             if (context != null)
@@ -205,22 +209,29 @@ namespace HttpObjectCaching
                         object empty = default(tt);
                         if (comp == empty)
                         {
-                            t = defaultValue;
-                            SetInRequest(name, t);
+                            if (createMethod != null)
+                            {
+                                t = createMethod();
+                                SetInRequest(name, t);
+                            }
                         }
                         return t;
                     }
                     else
                     {
-                        var t = default(tt);
-                        SetInRequest(name, t);
-                        return t;
+                        if (createMethod != null)
+                        {
+                            var t = createMethod();
+                            SetInRequest(name, t);
+                            return t;
+                        }
                     }
                 }
             }
             else {
                 return GetFromThread<tt>(name.ToUpper());
             }
+            return default(tt);
         }
 
         public void SetInRequest<tt>(string name, tt obj)
@@ -243,7 +254,7 @@ namespace HttpObjectCaching
             }
         }
 
-        public tt GetFromSession<tt>(string name, tt defaultValue = default(tt))
+        public tt GetFromSession<tt>(string name, Func<tt> createMethod = null)
         {
             if (Session.ContainsKey(name.ToUpper()))
             {
@@ -252,16 +263,22 @@ namespace HttpObjectCaching
                 object empty = default(tt);
                 if (comp == empty)
                 {
-                    t = defaultValue;
-                    SetInSession(name, t);
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInSession(name, t);
+                    }
                 }
                 return t;
             }
             else
             {
-                var t = default(tt);
-                SetInSession(name, t);
-                return t;
+                if (createMethod != null)
+                {
+                    var t = createMethod();
+                    SetInSession(name, t);
+                    return t;
+                }
             }
             return default(tt);
         }
