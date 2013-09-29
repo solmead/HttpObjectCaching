@@ -15,6 +15,10 @@ namespace HttpObjectCaching
         public delegate void SessionEvent(string sessionId);
         public event SessionEvent SessionExpired;
 
+        private object sessionCreateLock = new object();
+        private object sessionSetLock = new object();
+        private object requestSetLock = new object();
+
         private string _sessionId = "";
 
         private CacheSystem()
@@ -67,17 +71,15 @@ namespace HttpObjectCaching
         {
             get
             {
+                var context = HttpContext.Current;
+                if (context != null && context.Session != null)
+                {
+                    _sessionId = context.Session.SessionID;
+                    context.Session["__MySessionLock"] = "112233";
+                }
                 if (string.IsNullOrWhiteSpace(_sessionId))
                 {
-                    var context = HttpContext.Current;
-                    if (context != null && context.Session != null)
-                    {
-                        _sessionId = context.Session.SessionID;
-                    }
-                    else
-                    {
-                        _sessionId = Guid.NewGuid().ToString();
-                    }
+                    _sessionId = Guid.NewGuid().ToString();
                 }
                 return _sessionId;
             }
@@ -105,12 +107,19 @@ namespace HttpObjectCaching
                 var sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
                 if (sess == null)
                 {
-                    sess = new Dictionary<string, object>();
-                    HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
-                                             System.Web.Caching.Cache.NoAbsoluteExpiration,
-                                             new TimeSpan(0, 30, 0),
-                                             CacheItemPriority.Default,
-                                                this.ReportRemovedCallback);
+                    lock (sessionCreateLock)
+                    {
+                        sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
+                        if (sess == null)
+                        {
+                            sess = new Dictionary<string, object>();
+                            HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
+                                System.Web.Caching.Cache.NoAbsoluteExpiration,
+                                new TimeSpan(0, 30, 0),
+                                CacheItemPriority.Default,
+                                this.ReportRemovedCallback);
+                        }
+                    }
                 }
                 return sess;
             }
@@ -118,11 +127,21 @@ namespace HttpObjectCaching
 
 
 
-        public tt GetFromThread<tt>(string name)
+        public tt GetFromThread<tt>(string name, Func<tt> createMethod = null)
         {
             try
             {
                 var t = (tt)Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper()));
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInThread(name, t);
+                    }
+                }
                 return t;
             }
             catch
@@ -138,11 +157,21 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromApplication<tt>(string name)
+        public tt GetFromApplication<tt>(string name, Func<tt> createMethod = null)
         {
             try
             {
                 var t = (tt)HttpRuntime.Cache[name.ToUpper()];
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInApplication(name, t);
+                    }
+                }
                 return t;
             }
             catch
@@ -165,21 +194,44 @@ namespace HttpObjectCaching
         }
 
 
-        public tt GetFromRequest<tt>(string name)
+        public tt GetFromRequest<tt>(string name, Func<tt> createMethod = null)
         {
             var context = HttpContext.Current;
             if (context != null)
             {
-                if (context.Items.Contains(name.ToUpper()))
+                lock (requestSetLock)
                 {
-                    var ctx = (tt)context.Items[name.ToUpper()];
-                    return ctx;
+                    if (context.Items.Contains(name.ToUpper()))
+                    {
+                        var t = (tt) context.Items[name.ToUpper()];
+
+                        object comp = t;
+                        object empty = default(tt);
+                        if (comp == empty)
+                        {
+                            if (createMethod != null)
+                            {
+                                t = createMethod();
+                                SetInRequest(name, t);
+                            }
+                        }
+                        return t;
+                    }
+                    else
+                    {
+                        if (createMethod != null)
+                        {
+                            var t = createMethod();
+                            SetInRequest(name, t);
+                            return t;
+                        }
+                    }
                 }
-                return default(tt);
             }
             else {
                 return GetFromThread<tt>(name.ToUpper());
             }
+            return default(tt);
         }
 
         public void SetInRequest<tt>(string name, tt obj)
@@ -187,34 +239,60 @@ namespace HttpObjectCaching
             var context = HttpContext.Current;
             if (context != null)
             {
-                if (context.Items.Contains(name.ToUpper()))
+                lock (requestSetLock)
                 {
-                    context.Items.Remove(name.ToUpper());
+                    if (context.Items.Contains(name.ToUpper()))
+                    {
+                        context.Items.Remove(name.ToUpper());
+                    }
+                    context.Items.Add(name.ToUpper(), obj);
                 }
-                context.Items.Add(name.ToUpper(), obj);
             }
             else
             {
                 SetInThread(name, obj);
             }
         }
-        
-        public tt GetFromSession<tt>(string name)
+
+        public tt GetFromSession<tt>(string name, Func<tt> createMethod = null)
         {
             if (Session.ContainsKey(name.ToUpper()))
             {
-                return (tt)Session[name.ToUpper()];
+                var t = (tt)Session[name.ToUpper()];
+                object comp = t;
+                object empty = default(tt);
+                if (comp == empty)
+                {
+                    if (createMethod != null)
+                    {
+                        t = createMethod();
+                        SetInSession(name, t);
+                    }
+                }
+                return t;
+            }
+            else
+            {
+                if (createMethod != null)
+                {
+                    var t = createMethod();
+                    SetInSession(name, t);
+                    return t;
+                }
             }
             return default(tt);
         }
 
         public void SetInSession<tt>(string name, tt obj)
         {
-            if (Session.ContainsKey(name.ToUpper()))
+            lock (sessionSetLock)
             {
-                Session.Remove(name.ToUpper());
+                if (Session.ContainsKey(name.ToUpper()))
+                {
+                    Session.Remove(name.ToUpper());
+                }
+                Session.Add(name.ToUpper(), obj);
             }
-            Session.Add(name.ToUpper(), obj);
         }
 
     }

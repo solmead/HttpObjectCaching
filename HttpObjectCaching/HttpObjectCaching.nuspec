@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/solmead/HttpObjectCaching</licenseUrl>
+    <projectUrl>https://github.com/solmead/HttpObjectCaching</projectUrl>
+    <iconUrl>https://github.com/solmead/HttpObjectCaching</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial NuGet Release.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags></tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\net40\HttpObjectCaching.dll" target="lib\net40\HttpObjectCaching.dll" />
+    <file src="bin\Release\net40\HttpObjectCaching.pdb" target="lib\net40\HttpObjectCaching.pdb" />
+    <file src="bin\Release\net40\HttpObjectCaching.xml" target="lib\net40\HttpObjectCaching.xml" />
+    <file src="bin\Release\net45\HttpObjectCaching.dll" target="lib\net45\HttpObjectCaching.dll" />
+    <file src="bin\Release\net45\HttpObjectCaching.pdb" target="lib\net45\HttpObjectCaching.pdb" />
+    <file src="bin\Release\net45\HttpObjectCaching.xml" target="lib\net45\HttpObjectCaching.xml" />
+  </files>
+</package>

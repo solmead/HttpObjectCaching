@@ -16,68 +16,72 @@ namespace HttpObjectCaching
     }
     public static class Cache
     {
-
-        public static tt GetItem<tt>(CacheArea area, string name)
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod)
         {
+            if (area == CacheArea.Thread)
+            {
+                return CacheSystem.Instance.GetFromThread<tt>(name, createMethod);
+            }
             if (area == CacheArea.Request)
             {
-                return CacheSystem.Instance.GetFromRequest<tt>(name);
+                return CacheSystem.Instance.GetFromRequest<tt>(name, createMethod);
             }
             if (area == CacheArea.Session)
             {
-                return CacheSystem.Instance.GetFromSession<tt>(name);
+                return CacheSystem.Instance.GetFromSession<tt>(name, createMethod);
             }
             if (area == CacheArea.Global)
             {
-                return CacheSystem.Instance.GetFromApplication<tt>(name);
+                return CacheSystem.Instance.GetFromApplication<tt>(name, createMethod);
             }
-            //try
-            //{
-            //    var context = HttpContext.Current;
-            //    if (context != null)
-            //    {
-            //        if (area == CacheArea.Request)
-            //        {
-            //            if (context.Items.Contains(name))
-            //            {
-            //                var ctx = (tt)context.Items[name];
-            //                return ctx;
-            //            }
-            //        }
-            //        else if (area == CacheArea.Session)
-            //        {
-            //            if (context.Session != null)
-            //            {
-            //                    var ctx = (tt) context.Session[name];
-            //                    return ctx;
-            //            } 
-            //        }
-            //        else if (area == CacheArea.Global)
-            //        {
-            //            if (context.Application != null)
-            //            {
-            //                var ctx = (tt)context.Application[name];
-            //                return ctx;
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        //var app = System.AppDomain.CurrentDomain;
-            //        //var app = Application.Current;
 
-            //    }
-                
-            //}
-            //catch (Exception)
-            //{
-            //    return default(tt);
-            //}
             return default(tt);
         }
+        /// <summary>
+        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name)
+        {
+            return GetItem<tt>(area, name, ()=> default(tt));
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue)
+        {
+            return GetItem<tt>(area, name, () => defaultValue);
+        }
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
 
+            if (area == CacheArea.Thread )
+            {
+                CacheSystem.Instance.SetInThread<tt>(name, obj);
+            }
             if (area == CacheArea.Request)
             {
                 CacheSystem.Instance.SetInRequest<tt>(name, obj);
@@ -90,42 +94,7 @@ namespace HttpObjectCaching
             {
                 CacheSystem.Instance.SetInApplication<tt>(name, obj);
             }
-            //var nullTT = default(tt);
-            //var context = HttpContext.Current;
-            //if (context != null)
-            //{
-            //    if (area == CacheArea.Request)
-            //    {
-            //        if (context.Items.Contains(name))
-            //        {
-            //            context.Items.Remove(name);
-            //        }
-            //        context.Items.Add(name, obj);
-            //    } else if (area == CacheArea.Session)
-            //    {
-            //        if (context.Session != null)
-            //        {
-            //            var c = context.Session[name];
-            //            if (c != null)
-            //            {
-            //                context.Session.Remove(name);
-            //            }
-            //            context.Session[name] = obj;
-            //        }
-            //    }
-            //    else if (area == CacheArea.Global)
-            //    {
-            //        if (context.Application != null)
-            //        {
-            //            var ctx = context.Application[name];
-            //            if (ctx != null)
-            //            {
-            //                context.Application.Remove(name);
-            //            }
-            //            context.Application[name] = obj;
-            //        }
-            //    }
-            //}
+            
     }
 
     }
