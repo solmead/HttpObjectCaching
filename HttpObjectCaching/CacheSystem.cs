@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,19 @@ namespace HttpObjectCaching
         private CacheSystem()
         {
             
+        }
+
+        public static bool CacheEnabled
+        {
+            get { 
+                var b = Cache.GetItem<Boolean?>(CacheArea.Global, "IsCacheEnabled", () => true);
+                if (b.HasValue)
+                {
+                    return b.Value;
+                }
+                return true;
+            }
+            set { Cache.SetItem<Boolean?>(CacheArea.Global, "IsCacheEnabled", value); }
         }
 
         public static CacheSystem Instance
@@ -129,6 +143,14 @@ namespace HttpObjectCaching
 
         public tt GetFromThread<tt>(string name, Func<tt> createMethod = null)
         {
+            if (!name.Contains("CacheEnabled") && !CacheEnabled)
+            {
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+                return default(tt);
+            }
             try
             {
                 var t = (tt)Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper()));
@@ -146,7 +168,7 @@ namespace HttpObjectCaching
             }
             catch
             {
-                
+                throw;
             }
             return default(tt);
         }
@@ -159,6 +181,14 @@ namespace HttpObjectCaching
 
         public tt GetFromApplication<tt>(string name, Func<tt> createMethod = null)
         {
+            if (!name.Contains("CacheEnabled") && !CacheEnabled)
+            {
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+                return default(tt);
+            }
             try
             {
                 var t = (tt)HttpRuntime.Cache[name.ToUpper()];
@@ -176,7 +206,7 @@ namespace HttpObjectCaching
             }
             catch
             {
-                
+                throw;
             }
             return default(tt);
         }
@@ -196,6 +226,14 @@ namespace HttpObjectCaching
 
         public tt GetFromRequest<tt>(string name, Func<tt> createMethod = null)
         {
+            if (!name.Contains("CacheEnabled") && !CacheEnabled)
+            {
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+                return default(tt);
+            }
             var context = HttpContext.Current;
             if (context != null)
             {
@@ -256,6 +294,14 @@ namespace HttpObjectCaching
 
         public tt GetFromSession<tt>(string name, Func<tt> createMethod = null)
         {
+            if (!name.Contains("CacheEnabled") && !CacheEnabled)
+            {
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+                return default(tt);
+            }
             if (Session.ContainsKey(name.ToUpper()))
             {
                 var t = (tt)Session[name.ToUpper()];
