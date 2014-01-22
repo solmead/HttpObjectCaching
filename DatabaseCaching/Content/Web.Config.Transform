@@ -1,0 +1,5 @@
+﻿<configuration>
+  <connectionStrings>
+    <add name="DbCachingConnection" providerName="System.Data.SqlServerCe.4.0" connectionString="Data Source=|DataDirectory|\DbCaching.sdf" />
+  </connectionStrings>
+</configuration>

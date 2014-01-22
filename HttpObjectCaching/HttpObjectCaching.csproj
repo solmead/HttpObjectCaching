@@ -76,6 +76,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+    <Compile Include="CacheAreas\Caches\ApplicationCache.cs" />
+    <Compile Include="CacheAreas\Caches\RequestCache.cs" />
+    <Compile Include="CacheAreas\Caches\SessionCache.cs" />
+    <Compile Include="CacheAreas\ICacheArea.cs" />
+    <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
