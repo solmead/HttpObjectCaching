@@ -20,6 +20,16 @@ namespace DatabaseCaching
 
         public CacheArea Area { get { return CacheArea.Permanent; } }
         public string Name { get { return "DatabaseDefault"; } }
+        public void ClearCache()
+        {
+            var lst = (from ce in DataContext.Current.CachedEntries select ce).ToList();
+            if (lst.Count > 0)
+            {
+                DataContext.Current.CachedEntries.RemoveRange(lst);
+            }
+            DataContext.Current.SaveChanges();
+        }
+
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
             var o = Cache.GetItem<tt>(CacheArea.Global, name) as object;

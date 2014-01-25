@@ -9,6 +9,7 @@ namespace HttpObjectCaching.CacheAreas
     {
         CacheArea Area { get; }
         string Name { get; }
+        void ClearCache();
         tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null);
         void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null);
     }

@@ -14,13 +14,10 @@ namespace HttpObjectCaching
 {
     public class CacheSystem
     {
-        public delegate void SessionEvent(string sessionId);
-        public event SessionEvent SessionExpired;
-
-        private object sessionCreateLock = new object();
         private static object CacheSystemCreateLock = new object();
 
-        private string _sessionId = "";
+        //private string _sessionId = "";
+        //private string _cookieId = "";
 
         public Dictionary<CacheArea, ICacheArea> CacheAreas { get; private set; }
 
@@ -89,10 +86,34 @@ namespace HttpObjectCaching
             }
         }
 
+        public string CookieId
+        {
+            get
+            {
+                var _cookieId = Cache.GetItem<string>(CacheArea.Thread, "_cookieId", () => Guid.NewGuid().ToString());
+                var context = HttpContext.Current;
+                if (context != null)
+                {
+                    var cookie = context.Request.Cookies["cookieCache"];
+                    if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
+                    {
+                        _cookieId = cookie.Value;
+                    }
+                    else
+                    {
+                        context.Response.SetCookie(new HttpCookie("cookieCache",_cookieId));
+                    }
+                }
+                return _cookieId;
+            }
+            set { Cache.SetItem<string>(CacheArea.Thread, "_cookieId",  value); }
+        }
+
         public string SessionId
         {
             get
             {
+                var _sessionId = Cache.GetItem<string>(CacheArea.Thread, "_sessionId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null && context.Session != null)
                 {
@@ -105,46 +126,13 @@ namespace HttpObjectCaching
                 }
                 return _sessionId;
             }
-            set { _sessionId = value; }
+            set {Cache.SetItem<string>(CacheArea.Thread, "_sessionId",  value); }
         }
 
         public void ClearSession()
         {
-            var sess = HttpRuntime.Cache["Session_" + SessionId] as NameValueCollection;
-            if (sess != null)
-            {
-                HttpRuntime.Cache.Remove("Session_" + SessionId);
-            }
+            GetCacheArea(CacheArea.Session).ClearCache();
         }
 
-        public void ReportRemovedCallback(String key, object value,
-        CacheItemRemovedReason removedReason)
-        {
-            
-        }
-
-        public Dictionary<string, object> Session
-        {
-            get {
-                var sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
-                if (sess == null)
-                {
-                    lock (sessionCreateLock)
-                    {
-                        sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
-                        if (sess == null)
-                        {
-                            sess = new Dictionary<string, object>();
-                            HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
-                                System.Web.Caching.Cache.NoAbsoluteExpiration,
-                                new TimeSpan(0, 30, 0),
-                                CacheItemPriority.Default,
-                                this.ReportRemovedCallback);
-                        }
-                    }
-                }
-                return sess;
-            }
-        }
     }
 }

@@ -4,28 +4,27 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Caching;
 
 namespace HttpObjectCaching.CacheAreas.Caches
 {
-    public class SessionCache : ICacheArea
+    public class CookieCache : ICacheArea
     {
-        private object sessionCreateLock = new object();
-        private object sessionSetLock = new object();
-        public CacheArea Area { get { return CacheArea.Session; } }
-        public string Name { get { return "DefaultSession"; } }
+        private object createLock = new object();
+        private object setLock = new object();
+        public CacheArea Area { get { return CacheArea.Cookie ; } }
+        public string Name { get { return "DefaultCookie"; } }
         public void ClearCache()
         {
-            Cache.SetItem<Dictionary<string, object>>(CacheArea.Global, "Session_" + CacheSystem.Instance.SessionId, null);
+            Cache.SetItem<Dictionary<string, object>>(CacheArea.Permanent, "Cookie_" + CacheSystem.Instance.CookieId, null);
         }
 
-        public Dictionary<string, object> Session
+        public Dictionary<string, object> Cookie
         {
             get
             {
-                lock (sessionCreateLock)
+                lock (createLock)
                 {
-                    return Cache.GetItem(CacheArea.Global, "Session_" + CacheSystem.Instance.SessionId, () => new Dictionary<string, object>(), 30*60);
+                    return Cache.GetItem(CacheArea.Permanent, "Cookie_" + CacheSystem.Instance.CookieId, () => new Dictionary<string, object>());
                 }
             }
         }
@@ -33,9 +32,9 @@ namespace HttpObjectCaching.CacheAreas.Caches
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            if (Session.ContainsKey(name.ToUpper()))
+            if (Cookie.ContainsKey(name.ToUpper()))
             {
-                var t = (tt)Session[name.ToUpper()];
+                var t = (tt)Cookie[name.ToUpper()];
                 object comp = t;
                 object empty = default(tt);
                 if (comp == empty)
@@ -62,13 +61,13 @@ namespace HttpObjectCaching.CacheAreas.Caches
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            lock (sessionSetLock)
+            lock (setLock)
             {
-                if (Session.ContainsKey(name.ToUpper()))
+                if (Cookie.ContainsKey(name.ToUpper()))
                 {
-                    Session.Remove(name.ToUpper());
+                    Cookie.Remove(name.ToUpper());
                 }
-                Session.Add(name.ToUpper(), obj);
+                Cookie.Add(name.ToUpper(), obj);
             }
         }
     }

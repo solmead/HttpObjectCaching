@@ -12,6 +12,11 @@ namespace HttpObjectCaching.CacheAreas.Caches
 
         public CacheArea Area { get { return CacheArea.Request; } }
         public string Name { get { return "DefaultRequest"; } }
+        public void ClearCache()
+        {
+            throw new NotImplementedException();
+        }
+
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
             var context = HttpContext.Current;

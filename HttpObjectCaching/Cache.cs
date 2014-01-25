@@ -13,6 +13,7 @@ namespace HttpObjectCaching
         Other,
         Permanent,
         Global,
+        Cookie,
         Session,
         Request,
         Thread

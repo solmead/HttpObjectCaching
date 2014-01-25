@@ -7,6 +7,11 @@ namespace HttpObjectCaching.CacheAreas.Caches
     {
         public CacheArea Area { get { return CacheArea.Thread; } }
         public string Name { get { return "DefaultThread"; } }
+        public void ClearCache()
+        {
+            throw new NotImplementedException();
+        }
+
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
             try
