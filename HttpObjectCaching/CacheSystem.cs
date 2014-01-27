@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.CacheAreas.Caches;
 
 namespace HttpObjectCaching
 {
@@ -134,5 +135,12 @@ namespace HttpObjectCaching
             GetCacheArea(CacheArea.Session).ClearCache();
         }
 
+        public Dictionary<string, object> Session
+        {
+            get
+            {
+                return ((SessionCache) (GetCacheArea(CacheArea.Session))).Session;
+            }
+        }
     }
 }
