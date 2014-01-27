@@ -82,6 +82,7 @@
     <Compile Include="CacheAreas\Caches\SessionCache.cs" />
     <Compile Include="CacheAreas\ICacheArea.cs" />
     <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
+    <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

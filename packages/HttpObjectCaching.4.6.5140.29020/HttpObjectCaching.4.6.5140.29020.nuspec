@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>HttpObjectCaching</id>
-    <version>4.6.5137.29123</version>
+    <version>4.6.5140.29020</version>
     <title>HttpObjectCaching</title>
     <authors>Solmead Productions</authors>
     <owners>Solmead Productions</owners>

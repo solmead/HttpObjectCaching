@@ -8,7 +8,7 @@ using System.Web.Caching;
 
 namespace HttpObjectCaching.CacheAreas.Caches
 {
-    public class SessionCache : ICacheArea
+    public class SessionCache : ICacheArea, INameValueLister
     {
         private object sessionCreateLock = new object();
         private object sessionSetLock = new object();
@@ -17,6 +17,11 @@ namespace HttpObjectCaching.CacheAreas.Caches
         public void ClearCache()
         {
             Cache.SetItem<Dictionary<string, object>>(CacheArea.Global, "Session_" + CacheSystem.Instance.SessionId, null);
+        }
+
+        public Dictionary<string, object> DataDictionary
+        {
+            get { return Session; }
         }
 
         public Dictionary<string, object> Session
@@ -71,5 +76,6 @@ namespace HttpObjectCaching.CacheAreas.Caches
                 Session.Add(name.ToUpper(), obj);
             }
         }
+
     }
 }

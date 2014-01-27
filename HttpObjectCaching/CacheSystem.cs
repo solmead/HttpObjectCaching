@@ -130,17 +130,36 @@ namespace HttpObjectCaching
             set {Cache.SetItem<string>(CacheArea.Thread, "_sessionId",  value); }
         }
 
+        [Obsolete("ClearSession is deprecated, please use ClearCache(CacheArea.Session) instead.")]
         public void ClearSession()
         {
             GetCacheArea(CacheArea.Session).ClearCache();
         }
+        public void ClearAllCacheAreas()
+        {
+            foreach (var area in CacheAreas.Keys)
+            {
+                GetCacheArea(area).ClearCache();
+            }
+        }
+        public void ClearCache(CacheArea area)
+        {
+            GetCacheArea(area).ClearCache();
+        }
 
+        public Dictionary<string, object> GetDataDictionary(CacheArea area)
+        {
+            var nvl = GetCacheArea(area) as INameValueLister;
+            if (nvl != null)
+            {
+                return nvl.DataDictionary;
+            }
+            return null;
+        }
+        [Obsolete("Session is deprecated, please use GetDataDictionary(CacheArea.Session) instead.")]
         public Dictionary<string, object> Session
         {
-            get
-            {
-                return ((SessionCache) (GetCacheArea(CacheArea.Session))).Session;
-            }
+            get { return GetDataDictionary(CacheArea.Session); }
         }
     }
 }

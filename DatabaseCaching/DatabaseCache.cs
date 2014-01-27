@@ -30,6 +30,19 @@ namespace DatabaseCaching
             DataContext.Current.SaveChanges();
         }
 
+        public DateTime? GetModifiedTime(string name)
+        {
+            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?)ce.Changed).FirstOrDefault();
+        }
+        public DateTime? GetCreatedTime(string name)
+        {
+            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?)ce.Created).FirstOrDefault();
+        }
+        public DateTime? GetTimeOut(string name)
+        {
+            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce.TimeOut).FirstOrDefault();
+        }
+
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
             var o = Cache.GetItem<tt>(CacheArea.Global, name) as object;
@@ -79,30 +92,40 @@ namespace DatabaseCaching
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
             var itm = (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce).FirstOrDefault();
-            if (itm == null)
+            if (obj == null)
             {
-                itm = new CachedEntry()
+                if (itm != null)
                 {
-                    Created = DateTime.Now,
-                    Name = name,
-                    Changed = DateTime.Now,
-                    Object=""
-                };
-                DataContext.Current.CachedEntries.Add(itm);
+                    DataContext.Current.CachedEntries.Remove(itm);
+                }
             }
-            if (lifeSpanSeconds.HasValue)
+            else
             {
-                itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-            }
-            itm.Changed = DateTime.Now;
-            try
-            {
-                itm.Object = XmlSerializer.Serialize(obj);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                throw;
+                if (itm == null)
+                {
+                    itm = new CachedEntry()
+                    {
+                        Created = DateTime.Now,
+                        Name = name,
+                        Changed = DateTime.Now,
+                        Object = ""
+                    };
+                    DataContext.Current.CachedEntries.Add(itm);
+                }
+                if (lifeSpanSeconds.HasValue)
+                {
+                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                }
+                itm.Changed = DateTime.Now;
+                try
+                {
+                    itm.Object = XmlSerializer.Serialize(obj);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                    throw;
+                }
             }
             Cache.SetItem<tt>(CacheArea.Global, name, obj);
             var lst =

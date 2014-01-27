@@ -7,7 +7,7 @@ using System.Web;
 
 namespace HttpObjectCaching.CacheAreas.Caches
 {
-    public class CookieCache : ICacheArea
+    public class CookieCache : ICacheArea, INameValueLister
     {
         private object createLock = new object();
         private object setLock = new object();
@@ -18,6 +18,10 @@ namespace HttpObjectCaching.CacheAreas.Caches
             Cache.SetItem<Dictionary<string, object>>(CacheArea.Permanent, "Cookie_" + CacheSystem.Instance.CookieId, null);
         }
 
+        public Dictionary<string, object> DataDictionary
+        {
+            get { return Cookie; }
+        }
         public Dictionary<string, object> Cookie
         {
             get
