@@ -83,6 +83,8 @@ namespace HttpObjectCaching
                         }
                     }
                 }
+                var cId = ctx.CookieId;
+                var sId = ctx.SessionId;
                 return ctx;
             }
         }

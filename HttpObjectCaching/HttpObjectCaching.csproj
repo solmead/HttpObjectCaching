@@ -80,6 +80,7 @@
     <Compile Include="CacheAreas\Caches\CookieCache.cs" />
     <Compile Include="CacheAreas\Caches\RequestCache.cs" />
     <Compile Include="CacheAreas\Caches\SessionCache.cs" />
+    <Compile Include="CacheAreas\DictionaryCache.cs" />
     <Compile Include="CacheAreas\ICacheArea.cs" />
     <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
     <Compile Include="CacheAreas\INameValueLister.cs" />

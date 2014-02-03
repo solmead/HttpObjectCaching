@@ -10,13 +10,22 @@ namespace HttpObjectCaching
 {
     public enum CacheArea
     {
-        Other,
-        Permanent,
-        Global,
-        Cookie,
-        Session,
-        Request,
-        Thread
+        Other = 0,
+        Permanent = 1,
+        Global = 2,
+        Cookie = 3,
+        Session = 4,
+        Request = 5,
+        Thread = 6
+    }
+
+    public enum BaseCacheArea
+    {
+        Other = 0,
+        Permanent = 1,
+        Global = 2,
+        Request = 5,
+        Thread = 6
     }
     public static class Cache
     {
