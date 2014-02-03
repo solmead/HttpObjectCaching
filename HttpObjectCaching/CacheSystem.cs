@@ -2,75 +2,121 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.CacheAreas.Caches;
 
 namespace HttpObjectCaching
 {
     public class CacheSystem
     {
-        public delegate void SessionEvent(string sessionId);
-        public event SessionEvent SessionExpired;
+        private static object CacheSystemCreateLock = new object();
 
-        private object sessionCreateLock = new object();
-        private object sessionSetLock = new object();
-        private object requestSetLock = new object();
+        //private string _sessionId = "";
+        //private string _cookieId = "";
 
-        private string _sessionId = "";
+        public Dictionary<CacheArea, ICacheArea> CacheAreas { get; private set; }
+
+        public bool CacheEnabled { get; set; }
 
         private CacheSystem()
         {
-            
+            CacheEnabled = true;
+
+            var cList = (from c in GetCacheAreaList() where c.Name.Contains("Default") select c).ToList();
+            var keys = (from c in cList select c.Area).Distinct().ToList();
+            CacheAreas = keys
+                .Select(item => new { Key = item , Item = (from c in cList where c.Area==item select c).First() })
+                .ToDictionary(i => i.Key, i=>i.Item);
         }
+
+        private static IEnumerable<ICacheArea> GetCacheAreaList()
+        {
+            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                    from t in assembly.GetTypes()
+                    where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+                          t.GetConstructor(Type.EmptyTypes) != null
+                    select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+        }
+
+        public ICacheArea GetCacheArea(CacheArea area)
+        {
+            if (CacheAreas.ContainsKey(area))
+            {
+                return CacheAreas[area];
+            }
+            //area doesn't exist, go through each level till we find a level that works.
+            var maxval = (from int v in Enum.GetValues(typeof (CacheArea)) select v).Max();
+            for (var a = (int)area; a<= maxval; a++)
+            {
+                var ea = (CacheArea) a;
+                if (CacheAreas.ContainsKey(ea))
+                {
+                    return CacheAreas[ea];
+                }
+            }
+
+            return null;
+        }
+
 
         public static CacheSystem Instance
         {
+
             get
             {
+                var ctx = HttpRuntime.Cache["CurrentCacheInstance"] as CacheSystem;
+                if (ctx == null)
+                {
+                    lock (CacheSystemCreateLock)
+                    {
+                        ctx = HttpRuntime.Cache["CurrentCacheInstance"] as CacheSystem;
+                        if (ctx == null)
+                        {
+                            ctx = new CacheSystem();
+                            HttpRuntime.Cache.Insert("CurrentCacheInstance", ctx);
+                        }
+                    }
+                }
+                var cId = ctx.CookieId;
+                var sId = ctx.SessionId;
+                return ctx;
+            }
+        }
+
+        public string CookieId
+        {
+            get
+            {
+                var _cookieId = Cache.GetItem<string>(CacheArea.Thread, "_cookieId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null)
                 {
-                    if (context.Items.Contains("CurrentCacheInstance"))
+                    var cookie = context.Request.Cookies["cookieCache"];
+                    if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
                     {
-                        var ctx = (CacheSystem) context.Items["CurrentCacheInstance"];
-                        return ctx;
+                        _cookieId = cookie.Value;
                     }
                     else
                     {
-                        var ctx = new CacheSystem();
-                        context.Items.Add("CurrentCacheInstance",ctx);
-                        return ctx;
+                        context.Response.SetCookie(new HttpCookie("cookieCache",_cookieId));
                     }
                 }
-                else
-                {
-                    try
-                    {
-                        var t = (CacheSystem)Thread.GetData(Thread.GetNamedDataSlot("CurrentCacheInstance"));
-                        if (t == null)
-                        {
-                            t = new CacheSystem();
-                            Thread.SetData(Thread.GetNamedDataSlot("CurrentCacheInstance"), t);
-                        }
-                        return t;
-                    }
-                    catch
-                    { 
-                        var t = new CacheSystem();
-                        Thread.SetData(Thread.GetNamedDataSlot("CurrentCacheInstance"), t);
-                        return t;
-                    }
-                }
+                return _cookieId;
             }
+            set { Cache.SetItem<string>(CacheArea.Thread, "_cookieId",  value); }
         }
 
         public string SessionId
         {
             get
             {
+                var _sessionId = Cache.GetItem<string>(CacheArea.Thread, "_sessionId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null && context.Session != null)
                 {
@@ -83,217 +129,39 @@ namespace HttpObjectCaching
                 }
                 return _sessionId;
             }
-            set { _sessionId = value; }
+            set {Cache.SetItem<string>(CacheArea.Thread, "_sessionId",  value); }
         }
 
+        [Obsolete("ClearSession is deprecated, please use ClearCache(CacheArea.Session) instead.")]
         public void ClearSession()
         {
-            var sess = HttpRuntime.Cache["Session_" + SessionId] as NameValueCollection;
-            if (sess != null)
+            GetCacheArea(CacheArea.Session).ClearCache();
+        }
+        public void ClearAllCacheAreas()
+        {
+            foreach (var area in CacheAreas.Keys)
             {
-                HttpRuntime.Cache.Remove("Session_" + SessionId);
+                GetCacheArea(area).ClearCache();
             }
         }
-
-        public void ReportRemovedCallback(String key, object value,
-        CacheItemRemovedReason removedReason)
+        public void ClearCache(CacheArea area)
         {
-            
+            GetCacheArea(area).ClearCache();
         }
 
+        public Dictionary<string, object> GetDataDictionary(CacheArea area)
+        {
+            var nvl = GetCacheArea(area) as INameValueLister;
+            if (nvl != null)
+            {
+                return nvl.DataDictionary;
+            }
+            return null;
+        }
+        [Obsolete("Session is deprecated, please use GetDataDictionary(CacheArea.Session) instead.")]
         public Dictionary<string, object> Session
         {
-            get {
-                var sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
-                if (sess == null)
-                {
-                    lock (sessionCreateLock)
-                    {
-                        sess = HttpRuntime.Cache["Session_" + SessionId] as Dictionary<string, object>;
-                        if (sess == null)
-                        {
-                            sess = new Dictionary<string, object>();
-                            HttpRuntime.Cache.Insert("Session_" + SessionId, sess, null,
-                                System.Web.Caching.Cache.NoAbsoluteExpiration,
-                                new TimeSpan(0, 30, 0),
-                                CacheItemPriority.Default,
-                                this.ReportRemovedCallback);
-                        }
-                    }
-                }
-                return sess;
-            }
+            get { return GetDataDictionary(CacheArea.Session); }
         }
-
-
-
-        public tt GetFromThread<tt>(string name, Func<tt> createMethod = null)
-        {
-            try
-            {
-                var t = (tt)Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper()));
-                object comp = t;
-                object empty = default(tt);
-                if (comp == empty)
-                {
-                    if (createMethod != null)
-                    {
-                        t = createMethod();
-                        SetInThread(name, t);
-                    }
-                }
-                return t;
-            }
-            catch
-            {
-                
-            }
-            return default(tt);
-        }
-
-        public void SetInThread<tt>(string name, tt obj)
-        {
-            Thread.SetData(Thread.GetNamedDataSlot(name.ToUpper()), obj);
-        }
-
-
-        public tt GetFromApplication<tt>(string name, Func<tt> createMethod = null)
-        {
-            try
-            {
-                var t = (tt)HttpRuntime.Cache[name.ToUpper()];
-                object comp = t;
-                object empty = default(tt);
-                if (comp == empty)
-                {
-                    if (createMethod != null)
-                    {
-                        t = createMethod();
-                        SetInApplication(name, t);
-                    }
-                }
-                return t;
-            }
-            catch
-            {
-                
-            }
-            return default(tt);
-        }
-
-        public void SetInApplication<tt>(string name, tt obj)
-        {
-            if (obj != null)
-            {
-                HttpRuntime.Cache[name.ToUpper()] = obj;
-            }
-            else
-            {
-                HttpRuntime.Cache.Remove(name.ToUpper());
-            }
-        }
-
-
-        public tt GetFromRequest<tt>(string name, Func<tt> createMethod = null)
-        {
-            var context = HttpContext.Current;
-            if (context != null)
-            {
-                lock (requestSetLock)
-                {
-                    if (context.Items.Contains(name.ToUpper()))
-                    {
-                        var t = (tt) context.Items[name.ToUpper()];
-
-                        object comp = t;
-                        object empty = default(tt);
-                        if (comp == empty)
-                        {
-                            if (createMethod != null)
-                            {
-                                t = createMethod();
-                                SetInRequest(name, t);
-                            }
-                        }
-                        return t;
-                    }
-                    else
-                    {
-                        if (createMethod != null)
-                        {
-                            var t = createMethod();
-                            SetInRequest(name, t);
-                            return t;
-                        }
-                    }
-                }
-            }
-            else {
-                return GetFromThread<tt>(name.ToUpper());
-            }
-            return default(tt);
-        }
-
-        public void SetInRequest<tt>(string name, tt obj)
-        {
-            var context = HttpContext.Current;
-            if (context != null)
-            {
-                lock (requestSetLock)
-                {
-                    if (context.Items.Contains(name.ToUpper()))
-                    {
-                        context.Items.Remove(name.ToUpper());
-                    }
-                    context.Items.Add(name.ToUpper(), obj);
-                }
-            }
-            else
-            {
-                SetInThread(name, obj);
-            }
-        }
-
-        public tt GetFromSession<tt>(string name, Func<tt> createMethod = null)
-        {
-            if (Session.ContainsKey(name.ToUpper()))
-            {
-                var t = (tt)Session[name.ToUpper()];
-                object comp = t;
-                object empty = default(tt);
-                if (comp == empty)
-                {
-                    if (createMethod != null)
-                    {
-                        t = createMethod();
-                        SetInSession(name, t);
-                    }
-                }
-                return t;
-            }
-            else
-            {
-                if (createMethod != null)
-                {
-                    var t = createMethod();
-                    SetInSession(name, t);
-                    return t;
-                }
-            }
-            return default(tt);
-        }
-
-        public void SetInSession<tt>(string name, tt obj)
-        {
-            lock (sessionSetLock)
-            {
-                if (Session.ContainsKey(name.ToUpper()))
-                {
-                    Session.Remove(name.ToUpper());
-                }
-                Session.Add(name.ToUpper(), obj);
-            }
-        }
-
     }
 }

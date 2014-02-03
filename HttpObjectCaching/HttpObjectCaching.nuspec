@@ -16,11 +16,11 @@
     <tags></tags>
   </metadata>
   <files>
-    <file src="bin\Release\net40\HttpObjectCaching.dll" target="lib\net40\HttpObjectCaching.dll" />
+    <!--<file src="bin\Release\net40\HttpObjectCaching.dll" target="lib\net40\HttpObjectCaching.dll" />
     <file src="bin\Release\net40\HttpObjectCaching.pdb" target="lib\net40\HttpObjectCaching.pdb" />
     <file src="bin\Release\net40\HttpObjectCaching.xml" target="lib\net40\HttpObjectCaching.xml" />
     <file src="bin\Release\net45\HttpObjectCaching.dll" target="lib\net45\HttpObjectCaching.dll" />
     <file src="bin\Release\net45\HttpObjectCaching.pdb" target="lib\net45\HttpObjectCaching.pdb" />
-    <file src="bin\Release\net45\HttpObjectCaching.xml" target="lib\net45\HttpObjectCaching.xml" />
+    <file src="bin\Release\net45\HttpObjectCaching.xml" target="lib\net45\HttpObjectCaching.xml" />-->
   </files>
 </package>

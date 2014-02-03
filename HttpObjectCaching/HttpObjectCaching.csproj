@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HttpObjectCaching</RootNamespace>
     <AssemblyName>HttpObjectCaching</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -76,6 +76,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+    <Compile Include="CacheAreas\Caches\ApplicationCache.cs" />
+    <Compile Include="CacheAreas\Caches\CookieCache.cs" />
+    <Compile Include="CacheAreas\Caches\RequestCache.cs" />
+    <Compile Include="CacheAreas\Caches\SessionCache.cs" />
+    <Compile Include="CacheAreas\DictionaryCache.cs" />
+    <Compile Include="CacheAreas\ICacheArea.cs" />
+    <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
+    <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

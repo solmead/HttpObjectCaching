@@ -1,1 +1,1 @@
-"..\.nuget\nuget\" pack HttpObjectCaching.csproj -IncludeReferencedProjects
+"..\.nuget\nuget" pack HttpObjectCaching.csproj -IncludeReferencedProjects

@@ -4,15 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Runtime;
 using System.Web;
+using HttpObjectCaching.CacheAreas;
 
 namespace HttpObjectCaching
 {
     public enum CacheArea
     {
-        Global,
-        Session,
-        Request,
-        Thread
+        Other = 0,
+        Permanent = 1,
+        Global = 2,
+        Cookie = 3,
+        Session = 4,
+        Request = 5,
+        Thread = 6
+    }
+
+    public enum BaseCacheArea
+    {
+        Other = 0,
+        Permanent = 1,
+        Global = 2,
+        Request = 5,
+        Thread = 6
     }
     public static class Cache
     {
@@ -23,28 +36,50 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        {
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
+            if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
+            {
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+                return default(tt);
+            }
+            var ca = CacheSystem.Instance.GetCacheArea(area);
+            if (ca != null)
+            {
+                return ca.GetItem<tt>(name, createMethod, lSS);
+            }
+
+            if (createMethod != null)
+            {
+                return createMethod();
+            }
+            return default(tt);
+        }
+
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
         public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod)
         {
-            if (area == CacheArea.Thread)
-            {
-                return CacheSystem.Instance.GetFromThread<tt>(name, createMethod);
-            }
-            if (area == CacheArea.Request)
-            {
-                return CacheSystem.Instance.GetFromRequest<tt>(name, createMethod);
-            }
-            if (area == CacheArea.Session)
-            {
-                return CacheSystem.Instance.GetFromSession<tt>(name, createMethod);
-            }
-            if (area == CacheArea.Global)
-            {
-                return CacheSystem.Instance.GetFromApplication<tt>(name, createMethod);
-            }
-
-            return default(tt);
+            return GetItem<tt>(area, name, createMethod, 0);
         }
+
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
         /// </summary>
@@ -54,8 +89,22 @@ namespace HttpObjectCaching
         /// <returns></returns>
         public static tt GetItem<tt>(CacheArea area, string name)
         {
-            return GetItem<tt>(area, name, ()=> default(tt));
+            return GetItem<tt>(area, name, () => default(tt), 0);
         }
+
+        /// <summary>
+        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, double lifeSpanSeconds)
+        {
+            return GetItem<tt>(area, name, () => default(tt), lifeSpanSeconds);
+        }
+
         /// <summary>
         /// Pull an item from the cache
         /// </summary>
@@ -66,8 +115,23 @@ namespace HttpObjectCaching
         /// <returns></returns>
         public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue)
         {
-            return GetItem<tt>(area, name, () => defaultValue);
+            return GetItem<tt>(area, name, () => defaultValue, 0);
         }
+
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue, double lifeSpanSeconds)
+        {
+            return GetItem<tt>(area, name, () => defaultValue, lifeSpanSeconds);
+        }
+
         /// <summary>
         /// Puts an item into the cache
         /// </summary>
@@ -78,24 +142,32 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
 
-            if (area == CacheArea.Thread )
+            var ca = CacheSystem.Instance.GetCacheArea(area);
+            if (ca != null)
             {
-                CacheSystem.Instance.SetInThread<tt>(name, obj);
+                ca.SetItem<tt>(name, obj);
             }
-            if (area == CacheArea.Request)
+
+        }
+
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
+        /// <param name="lifeSpanSeconds"></param>
+        public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
+        {
+
+            var ca = CacheSystem.Instance.GetCacheArea(area);
+            if (ca != null)
             {
-                CacheSystem.Instance.SetInRequest<tt>(name, obj);
-            }
-            if (area == CacheArea.Session)
-            {
-                CacheSystem.Instance.SetInSession<tt>(name, obj);
-            }
-            if (area == CacheArea.Global)
-            {
-                CacheSystem.Instance.SetInApplication<tt>(name, obj);
+                ca.SetItem<tt>(name, obj, lifeSpanSeconds);
             }
             
-    }
+        }
 
     }
 }
