@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching.CacheAreas
 {
@@ -9,14 +10,35 @@ namespace HttpObjectCaching.CacheAreas
     {
         private object createLock = new object();
         private object setLock = new object();
-        public BaseCacheArea CacheTo { get; set; }
+        private ICacheArea _cache = null;
+
+        public ICacheArea CacheTo
+        {
+            get
+            {
+                if (_cache != null)
+                {
+                    return _cache;
+                }
+                return CacheSystem.Instance.GetCacheArea((CacheArea) CacheToType);
+            }
+        }
+
+        public BaseCacheArea CacheToType { get; set; }
         private Func<string> GetInstanceId = null;
         public double LifeSpanInSeconds { get; set; }
 
         public DictionaryCache(BaseCacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
         {
             LifeSpanInSeconds = lifeSpanInSeconds;
-            CacheTo = cacheTo;
+            CacheToType = cacheTo;
+            GetInstanceId = getInstanceId;
+        }
+
+        public DictionaryCache(ICacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
+        {
+            LifeSpanInSeconds = lifeSpanInSeconds;
+            _cache = cacheTo;
             GetInstanceId = getInstanceId;
         }
 
@@ -24,28 +46,31 @@ namespace HttpObjectCaching.CacheAreas
         public string Name { get; protected set; }
         public void ClearCache()
         {
-            Cache.SetItem<Dictionary<string, object>>((CacheArea) CacheTo, Name + "_" + GetInstanceId(), null);
+            CacheTo.SetItem<SerializableDictionary<string, object>>(Name + "_" + GetInstanceId(), null);
         }
 
-        public Dictionary<string, object> DataDictionary
+        public IDictionary<string, object> DataDictionary { get { return BaseDictionary; } }
+
+        private SerializableDictionary<string, object> BaseDictionary
         {
             get
             {
                 lock (createLock)
                 {
-                    return Cache.GetItem(CacheArea.Thread, Name + "_DataDictionary_" + GetInstanceId(), () => Cache.GetItem((CacheArea)CacheTo, Name + "_" + GetInstanceId(), () => new Dictionary<string, object>(), LifeSpanInSeconds));
+                    return Cache.GetItem(CacheArea.Thread, Name + "_DataDictionary_" + GetInstanceId(), () => CacheTo.GetItem<SerializableDictionary<string, object>>(Name + "_" + GetInstanceId(), () => new SerializableDictionary<string, object>(), LifeSpanInSeconds));
                 }
             }
-            private set
+             set
             {
-                Cache.SetItem((CacheArea)CacheTo, Name + "_" + GetInstanceId(), value, LifeSpanInSeconds);
+
+                CacheTo.SetItem<SerializableDictionary<string, object>>(Name + "_" + GetInstanceId(), value, LifeSpanInSeconds);
             }
         }
 
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var dd = DataDictionary;
+            var dd = BaseDictionary;
             if (dd.ContainsKey(name.ToUpper()))
             {
                 var t = (tt)dd[name.ToUpper()];
@@ -75,7 +100,7 @@ namespace HttpObjectCaching.CacheAreas
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var dd = DataDictionary;
+            var dd = BaseDictionary;
             lock (setLock)
             {
                 if (dd.ContainsKey(name.ToUpper()))
@@ -84,7 +109,7 @@ namespace HttpObjectCaching.CacheAreas
                 }
                 dd.Add(name.ToUpper(), obj);
             }
-            DataDictionary = dd;
+            BaseDictionary = dd;
         }
     }
 }

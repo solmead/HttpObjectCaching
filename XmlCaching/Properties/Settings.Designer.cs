@@ -31,5 +31,14 @@ namespace XmlCaching.Properties {
                 return ((string)(this["CacheFileLocation"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseOneFile {
+            get {
+                return ((bool)(this["UseOneFile"]));
+            }
+        }
     }
 }

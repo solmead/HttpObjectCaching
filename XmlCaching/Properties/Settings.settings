@@ -5,5 +5,8 @@
     <Setting Name="CacheFileLocation" Type="System.String" Scope="Application">
       <Value Profile="(Default)">~\App_Data\Cache</Value>
     </Setting>
+    <Setting Name="UseOneFile" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

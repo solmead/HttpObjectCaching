@@ -32,9 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HttpObjectCaching, Version=4.6.5147.27552, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="HttpObjectCaching, Version=4.6.5150.21977, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\HttpObjectCaching.4.6.5147.27552\lib\net40\HttpObjectCaching.dll</HintPath>
+      <HintPath>..\packages\HttpObjectCaching.4.6.5150.21977\lib\net40\HttpObjectCaching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,6 +55,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="XmlCache.cs" />
+    <Compile Include="XmlCacheBase.cs" />
+    <Compile Include="XmlCacheCombined.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

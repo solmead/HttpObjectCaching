@@ -85,6 +85,7 @@
     <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
+    <Compile Include="Helpers\SerializableDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
