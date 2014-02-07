@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using HttpObjectCaching;
 using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.Helpers;
 using XmlCaching.Helpers;
-using XmlCaching.Models;
 using XmlCaching.Properties;
+using FileMode = XmlCaching.Helpers.FileMode;
 
 namespace XmlCaching
 {
     public class XmlCacheBase : ICacheArea
     {
-
+        private object fileLock = new object(); 
 
         public XmlCacheBase()
         {
@@ -44,68 +46,137 @@ namespace XmlCaching
 
         private FileInfo getFile(string itemName)
         {
-            return new FileInfo(BaseDirectory.FullName + "/" + Name + "_" + itemName + ".xml");
+            return new FileInfo(BaseDirectory.FullName + "/" + Name + "-" + itemName + "." + Settings.Default.WriteMode.ToString());
         }
 
         private void saveToFile(CachedEntry item, FileInfo file)
         {
-            try
+            lock (fileLock)
             {
-                if (file.Exists)
+                var backupFile = new FileInfo(file.FullName + ".old");
+                var oldFile = new FileInfo(file.FullName);
+                if (backupFile.Exists)
                 {
-                    file.Delete();
+                    try
+                    {
+                        backupFile.Delete();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                if (oldFile.Exists)
+                {
+                    try
+                    {
+                        oldFile.MoveTo(backupFile.FullName);
+                        file.Refresh();
+                        backupFile.Refresh();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
                 if (!file.Directory.Exists)
                 {
-                    file.Directory.Create();
+                    try
+                    {
+                        file.Directory.Create();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
-                var xml = XmlSerializer.Serialize(item);
-                var fw = new StreamWriter(file.OpenWrite());
-                fw.Write(xml);
-                fw.Flush();
-                fw.Close();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                throw;
+                try
+                {
+                    var xml = "";
+                    if (Settings.Default.WriteMode == FileMode.Xml)
+                    {
+                        xml = XmlSerializer.Serialize(item);
+                    }
+                    else
+                    {
+                        xml = BinarySerializer.Serialize(item);
+                    }
+                    var fw = new StreamWriter(file.OpenWrite());
+                    fw.Write(xml);
+                    fw.Flush();
+                    fw.Close();
+                }
+                catch (Exception ex)
+                {
+                    if (backupFile.Exists)
+                    {
+                        backupFile.MoveTo(file.FullName);
+                    }
+                    Debug.WriteLine(ex.ToString());
+                    throw;
+                }
+                file.Refresh();
+                backupFile.Refresh();
+                if (backupFile.Exists && file.Exists)
+                {
+                    try
+                    {
+                        backupFile.Delete();
+                    }
+                    catch (Exception)
+                    {
+                        
+                    }
+                }
             }
         }
         private CachedEntry loadFromFile(FileInfo file)
         {
-            try
+            lock (fileLock)
             {
-                if (file.Exists)
+                try
                 {
-                    var xml = "";
-                    var fw = new StreamReader(file.OpenRead());
-                    xml = fw.ReadToEnd();
-                    fw.Close();
-                    if (!string.IsNullOrWhiteSpace(xml))
+                    if (file.Exists)
                     {
-                        var o = XmlSerializer.Deserialize<CachedEntry>(xml);
-                        return o;
+                        var xml = "";
+                        var fw = new StreamReader(file.OpenRead());
+                        xml = fw.ReadToEnd();
+                        fw.Close();
+                        if (!string.IsNullOrWhiteSpace(xml))
+                        {
+
+                            CachedEntry o = null;
+                            if (Settings.Default.WriteMode == FileMode.Xml)
+                            {
+                                o = XmlSerializer.Deserialize<CachedEntry>(xml);
+                            }
+                            else
+                            {
+                                o = BinarySerializer.Deserialize<CachedEntry>(xml);
+                            }
+                            return o;
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+                return null;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-            }
-            return null;
         }
 
         private void DeleteEntry(string name)
         {
-            var fi = getFile(name);
-            if (fi.Exists)
+            lock (fileLock)
             {
-                fi.Delete();
+                var fi = getFile(name);
+                if (fi.Exists)
+                {
+                    fi.Delete();
+                }
             }
         }
         private CachedEntry GetEntry(string name)
         {
-            var o = Cache.GetItem<CachedEntry>(CacheArea.Global,"xmlCache_" + name);
+            var o = Cache.GetItem<CachedEntry>(CacheArea.Global,"xmlCacheBase_Entry_" + name);
             if (o == null)
             {
                 o = loadFromFile(getFile(name));
@@ -118,7 +189,7 @@ namespace XmlCaching
                         Changed = DateTime.Now
                     };
                 }
-                Cache.SetItem(CacheArea.Global, "xmlCache_" + name, o);
+                Cache.SetItem(CacheArea.Global, "xmlCacheBase_Entry_" + name, o);
             }
             return o;
         }
@@ -126,7 +197,7 @@ namespace XmlCaching
         private void SetEntry(string name, CachedEntry item)
         {
             saveToFile(item, getFile(name));
-            Cache.SetItem(CacheArea.Global, "xmlCache_" + name, item);
+            Cache.SetItem(CacheArea.Global, "xmlCacheBase_Entry_" + name, item);
         }
 
         public DateTime? GetModifiedTime(string name)
@@ -144,14 +215,16 @@ namespace XmlCaching
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var o = Cache.GetItem<tt>(CacheArea.Global, name) as object;
+            var o = Cache.GetItem<tt>(CacheArea.Global,"xmlCacheBase_Item_" + name) as object;
             if (o != null)
             {
                 return (tt)o;
             }
             var xml = "";
             var itm = GetEntry(name);
-            if (itm == null || string.IsNullOrWhiteSpace(itm.Object) || (itm.TimeOut.HasValue && itm.TimeOut.Value<DateTime.Now)) 
+            //
+            object empty = default(tt);
+            if (itm == null || itm.Item == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
             {
                 if (createMethod != null)
                 {
@@ -162,29 +235,8 @@ namespace XmlCaching
             }
             else
             {
-
-                xml = itm.Object;
+                return (tt)itm.Item;
             }
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(xml))
-                {
-                    o = XmlSerializer.Deserialize<tt>(xml);
-                    Cache.SetItem<tt>(CacheArea.Global, name, (tt)o);
-                    return (tt)o;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-            }
-            
-            //if (createMethod != null)
-            //{
-            //    var t = createMethod();
-            //    SetItem(name, t, lifeSpanSeconds);
-            //    return t;
-            //}
             return default(tt);
         }
 
@@ -214,27 +266,10 @@ namespace XmlCaching
                     itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
                 }
                 itm.Changed = DateTime.Now;
-                try
-                {
-                    itm.Object = XmlSerializer.Serialize(obj);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.ToString());
-                    throw;
-                }
+                itm.Item = obj;
                 SetEntry(name, itm);
             }
-            Cache.SetItem<tt>(CacheArea.Global, name, obj);
-            //var lst =
-            //    (from ce in DataContext.Current.CachedEntries
-            //        where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
-            //        select ce).ToList();
-            //if (lst.Count > 0)
-            //{
-            //    DataContext.Current.CachedEntries.RemoveRange(lst); 
-            //}
-            //DataContext.Current.SaveChanges();
+            Cache.SetItem<tt>(CacheArea.Global, "xmlCacheBase_Item_" + name, obj);
         }
     }
 }

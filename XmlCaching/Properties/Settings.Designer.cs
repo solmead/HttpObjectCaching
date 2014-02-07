@@ -40,5 +40,14 @@ namespace XmlCaching.Properties {
                 return ((bool)(this["UseOneFile"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Xml")]
+        public global::XmlCaching.Helpers.FileMode WriteMode {
+            get {
+                return ((global::XmlCaching.Helpers.FileMode)(this["WriteMode"]));
+            }
+        }
     }
 }

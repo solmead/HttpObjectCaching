@@ -10,7 +10,10 @@
         <value>~\App_Data\Cache</value>
       </setting>
       <setting name="UseOneFile" serializeAs="String">
-        <value>False</value>
+        <value>True</value>
+      </setting>
+      <setting name="WriteMode" serializeAs="String">
+        <value>Binary</value>
       </setting>
     </XmlCaching.Properties.Settings>
   </applicationSettings>

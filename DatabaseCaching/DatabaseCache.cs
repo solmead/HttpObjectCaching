@@ -45,7 +45,7 @@ namespace DatabaseCaching
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var o = Cache.GetItem<tt>(CacheArea.Global, name) as object;
+            var o = Cache.GetItem<tt>(CacheArea.Global,"DbCache_Item_" + name) as object;
             if (o != null)
             {
                 return (tt)o;
@@ -127,7 +127,7 @@ namespace DatabaseCaching
                     throw;
                 }
             }
-            Cache.SetItem<tt>(CacheArea.Global, name, obj);
+            Cache.SetItem<tt>(CacheArea.Global, "DbCache_Item_" + name, obj);
             var lst =
                 (from ce in DataContext.Current.CachedEntries
                     where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
