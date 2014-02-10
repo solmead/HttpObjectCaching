@@ -51,41 +51,22 @@ namespace XmlCaching
 
         private void saveToFile(CachedEntry item, FileInfo file)
         {
+            var currentFile = new FileInfo(file.FullName);
+            var newFile = new FileInfo(file.FullName + ".new");
+            var backupFile = new FileInfo(file.FullName + ".backup");
             lock (fileLock)
             {
-                var backupFile = new FileInfo(file.FullName + ".old");
-                var oldFile = new FileInfo(file.FullName);
+                if (newFile.Exists)
+                {
+                    newFile.Delete();
+                }
                 if (backupFile.Exists)
                 {
-                    try
-                    {
-                        backupFile.Delete();
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    backupFile.Delete();
                 }
-                if (oldFile.Exists)
+                if (!newFile.Directory.Exists)
                 {
-                    try
-                    {
-                        oldFile.MoveTo(backupFile.FullName);
-                        file.Refresh();
-                        backupFile.Refresh();
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-                if (!file.Directory.Exists)
-                {
-                    try
-                    {
-                        file.Directory.Create();
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    newFile.Directory.Create();
                 }
                 try
                 {
@@ -98,31 +79,32 @@ namespace XmlCaching
                     {
                         xml = BinarySerializer.Serialize(item);
                     }
-                    var fw = new StreamWriter(file.OpenWrite());
+                    var fw = new StreamWriter(newFile.OpenWrite());
                     fw.Write(xml);
                     fw.Flush();
                     fw.Close();
                 }
                 catch (Exception ex)
                 {
-                    if (backupFile.Exists)
-                    {
-                        backupFile.MoveTo(file.FullName);
-                    }
                     Debug.WriteLine(ex.ToString());
                     throw;
                 }
+                newFile.Refresh();
                 file.Refresh();
                 backupFile.Refresh();
-                if (backupFile.Exists && file.Exists)
+                if (newFile.Exists)
                 {
-                    try
+                    if (currentFile.Exists)
+                    {
+                        currentFile.MoveTo(backupFile.FullName);
+                    }
+                    newFile.MoveTo(file.FullName);
+                    currentFile = new FileInfo(file.FullName);
+                    newFile = new FileInfo(file.FullName + ".new");
+                    backupFile = new FileInfo(file.FullName + ".backup");
+                    if (currentFile.Exists && backupFile.Exists)
                     {
                         backupFile.Delete();
-                    }
-                    catch (Exception)
-                    {
-                        
                     }
                 }
             }
