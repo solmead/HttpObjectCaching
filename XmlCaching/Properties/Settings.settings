@@ -11,5 +11,8 @@
     <Setting Name="WriteMode" Type="XmlCaching.Helpers.FileMode" Scope="Application">
       <Value Profile="(Default)">Xml</Value>
     </Setting>
+    <Setting Name="MaxFileSizeMB" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">150</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

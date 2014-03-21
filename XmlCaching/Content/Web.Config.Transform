@@ -15,6 +15,9 @@
       <setting name="WriteMode" serializeAs="String">
         <value>Binary</value>
       </setting>
+      <setting name="MaxFileSizeMB" serializeAs="String">
+        <value>150</value>
+      </setting>
     </XmlCaching.Properties.Settings>
   </applicationSettings>
 </configuration>

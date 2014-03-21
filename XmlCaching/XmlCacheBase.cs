@@ -46,7 +46,13 @@ namespace XmlCaching
 
         private FileInfo getFile(string itemName)
         {
-            return new FileInfo(BaseDirectory.FullName + "/" + Name + "-" + itemName + "." + Settings.Default.WriteMode.ToString());
+            var fi = new FileInfo(BaseDirectory.FullName + "/" + Name + "-" + itemName + "." + Settings.Default.WriteMode.ToString());
+            if (fi.Exists && fi.Length > Settings.Default.MaxFileSizeMB * 1024 * 1024)
+            {
+                fi.Delete();
+            }
+            fi.Refresh();
+            return fi;
         }
 
         private void saveToFile(CachedEntry item, FileInfo file)
