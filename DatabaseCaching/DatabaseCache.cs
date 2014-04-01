@@ -71,7 +71,7 @@ namespace DatabaseCaching
             {
                 if (!string.IsNullOrWhiteSpace(xml))
                 {
-                    o= XmlSerializer.Deserialize<tt>(xml);
+                    o= Serializer.Deserialize<tt>(xml);
                     Cache.SetItem<tt>(CacheArea.Global, name, (tt) o);
                     return (tt) o;
                 }
@@ -119,7 +119,7 @@ namespace DatabaseCaching
                 itm.Changed = DateTime.Now;
                 try
                 {
-                    itm.Object = XmlSerializer.Serialize(obj);
+                    itm.Object = Serializer.Serialize(obj);
                 }
                 catch (Exception ex)
                 {

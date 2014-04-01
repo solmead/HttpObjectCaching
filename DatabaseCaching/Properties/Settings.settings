@@ -8,5 +8,8 @@
     <Setting Name="MaxFileSizeMB" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">150</Value>
     </Setting>
+    <Setting Name="WriteMode" Type="DatabaseCaching.Helpers.FileMode" Scope="Application">
+      <Value Profile="(Default)">Xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

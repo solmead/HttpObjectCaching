@@ -76,15 +76,7 @@ namespace XmlCaching
                 }
                 try
                 {
-                    var xml = "";
-                    if (Settings.Default.WriteMode == FileMode.Xml)
-                    {
-                        xml = XmlSerializer.Serialize(item);
-                    }
-                    else
-                    {
-                        xml = BinarySerializer.Serialize(item);
-                    }
+                    var xml = Serializer.Serialize(item);
                     var fw = new StreamWriter(newFile.OpenWrite());
                     fw.Write(xml);
                     fw.Flush();
@@ -130,15 +122,7 @@ namespace XmlCaching
                         if (!string.IsNullOrWhiteSpace(xml))
                         {
 
-                            CachedEntry o = null;
-                            if (Settings.Default.WriteMode == FileMode.Xml)
-                            {
-                                o = XmlSerializer.Deserialize<CachedEntry>(xml);
-                            }
-                            else
-                            {
-                                o = BinarySerializer.Deserialize<CachedEntry>(xml);
-                            }
+                            var o = Serializer.Deserialize<CachedEntry>(xml);
                             return o;
                         }
                     }

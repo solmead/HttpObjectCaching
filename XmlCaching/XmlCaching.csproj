@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\Serializer.cs" />
     <Compile Include="Helpers\XmlSerializer.cs" />
     <Compile Include="Models\CachedEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

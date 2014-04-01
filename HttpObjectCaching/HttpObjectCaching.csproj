@@ -76,13 +76,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
-    <Compile Include="CacheAreas\Caches\ApplicationCache.cs" />
+    <Compile Include="CacheAreas\Caches\ApplicationBaseCache.cs" />
     <Compile Include="CacheAreas\Caches\CookieCache.cs" />
+    <Compile Include="CacheAreas\Caches\GlobalCache.cs" />
+    <Compile Include="CacheAreas\Caches\RequestBaseCache.cs" />
     <Compile Include="CacheAreas\Caches\RequestCache.cs" />
     <Compile Include="CacheAreas\Caches\SessionCache.cs" />
+    <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
     <Compile Include="CacheAreas\DictionaryCache.cs" />
     <Compile Include="CacheAreas\ICacheArea.cs" />
-    <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
+    <Compile Include="CacheAreas\Caches\ThreadBaseCache.cs" />
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />

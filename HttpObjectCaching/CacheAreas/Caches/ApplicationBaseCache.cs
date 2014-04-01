@@ -4,10 +4,10 @@ using System.Web.Caching;
 
 namespace HttpObjectCaching.CacheAreas.Caches
 {
-    public class ApplicationCache :  ICacheArea
+    public class ApplicationBaseCache :  ICacheArea
     {
         public CacheArea Area { get { return CacheArea.Global; } }
-        public string Name { get { return "DefaultGlobal"; } }
+        public string Name { get { return "BaseGlobal"; } }
         public void ClearCache()
         {
             throw new NotImplementedException();

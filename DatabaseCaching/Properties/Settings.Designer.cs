@@ -40,5 +40,14 @@ namespace DatabaseCaching.Properties {
                 return ((int)(this["MaxFileSizeMB"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Xml")]
+        public global::DatabaseCaching.Helpers.FileMode WriteMode {
+            get {
+                return ((global::DatabaseCaching.Helpers.FileMode)(this["WriteMode"]));
+            }
+        }
     }
 }

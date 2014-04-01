@@ -45,9 +45,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.SqlServerCompact.6.1.0\lib\net40\EntityFramework.SqlServerCompact.dll</HintPath>
     </Reference>
-    <Reference Include="HttpObjectCaching, Version=4.6.5151.26999, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="HttpObjectCaching, Version=4.6.5197.28061, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\HttpObjectCaching.4.6.5151.26999\lib\net40\HttpObjectCaching.dll</HintPath>
+      <HintPath>..\packages\HttpObjectCaching.4.6.5197.28061\lib\net40\HttpObjectCaching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -67,6 +67,12 @@
     <Compile Include="Context\ContextFactory.cs" />
     <Compile Include="Context\DataContext.cs" />
     <Compile Include="DatabaseCache.cs" />
+    <Compile Include="Helpers\BinarySerializer.cs" />
+    <Compile Include="Helpers\Extensions.cs">
+      <SubType>
+      </SubType>
+    </Compile>
+    <Compile Include="Helpers\Serializer.cs" />
     <Compile Include="Helpers\XmlSerializer.cs" />
     <Compile Include="Migrations\201401171601444_initial.cs" />
     <Compile Include="Migrations\201401171601444_initial.Designer.cs">
