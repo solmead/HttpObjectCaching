@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using DatabaseCaching.Context;
 using DatabaseCaching.Helpers;
 using DatabaseCaching.Models;
+using DatabaseCaching.Properties;
 using HttpObjectCaching;
 using HttpObjectCaching.CacheAreas;
 
@@ -13,6 +15,7 @@ namespace DatabaseCaching
 {
     public class DatabaseCache : ICacheArea
     {
+        private static object _lock = new object();
         public DatabaseCache()
         {
             DataContext.UpgradeDB();
@@ -22,36 +25,58 @@ namespace DatabaseCaching
         public string Name { get { return "DatabaseDefault"; } }
         public void ClearCache()
         {
-            var lst = (from ce in DataContext.Current.CachedEntries select ce).ToList();
-            if (lst.Count > 0)
+            lock (_lock)
             {
-                DataContext.Current.CachedEntries.RemoveRange(lst);
+                var lst = (from ce in DataContext.Current.CachedEntries select ce).ToList();
+                if (lst.Count > 0)
+                {
+                    DataContext.Current.CachedEntries.RemoveRange(lst);
+                }
+                DataContext.Current.SaveChanges();
             }
-            DataContext.Current.SaveChanges();
         }
 
         public DateTime? GetModifiedTime(string name)
         {
-            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?)ce.Changed).FirstOrDefault();
+            lock (_lock)
+            {
+                return
+                    (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?) ce.Changed)
+                        .FirstOrDefault();
+            }
         }
         public DateTime? GetCreatedTime(string name)
         {
-            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?)ce.Created).FirstOrDefault();
+            lock (_lock)
+            {
+                return
+                    (from ce in DataContext.Current.CachedEntries where ce.Name == name select (DateTime?) ce.Created)
+                        .FirstOrDefault();
+            }
         }
         public DateTime? GetTimeOut(string name)
         {
-            return (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce.TimeOut).FirstOrDefault();
+            lock (_lock)
+            {
+                return
+                    (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce.TimeOut)
+                        .FirstOrDefault();
+            }
         }
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var o = Cache.GetItem<tt>(CacheArea.Global,"DbCache_Item_" + name) as object;
+            var o = Cache.GetItem<tt>(CacheArea.Global, "DbCache_Item_" + name, Settings.Default.SecondsInMemory) as object;
             if (o != null)
             {
                 return (tt)o;
             }
 
-            var itm = (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce).FirstOrDefault();
+            CachedEntry itm;
+            lock (_lock)
+            {
+                itm = (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce).FirstOrDefault();
+            }
             string xml = "";
             if (itm == null || (itm.TimeOut.HasValue && itm.TimeOut.Value<DateTime.Now) )
             {
@@ -72,7 +97,7 @@ namespace DatabaseCaching
                 if (!string.IsNullOrWhiteSpace(xml))
                 {
                     o= Serializer.Deserialize<tt>(xml);
-                    Cache.SetItem<tt>(CacheArea.Global, name, (tt) o);
+                    Cache.SetItem<tt>(CacheArea.Global, name, (tt) o, Settings.Default.SecondsInMemory);
                     return (tt) o;
                 }
             }
@@ -91,52 +116,56 @@ namespace DatabaseCaching
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var itm = (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce).FirstOrDefault();
-            if (obj == null)
+            lock (_lock)
             {
-                if (itm != null)
+                var itm =
+                    (from ce in DataContext.Current.CachedEntries where ce.Name == name select ce).FirstOrDefault();
+                if (obj == null)
                 {
-                    DataContext.Current.CachedEntries.Remove(itm);
-                }
-            }
-            else
-            {
-                if (itm == null)
-                {
-                    itm = new CachedEntry()
+                    if (itm != null)
                     {
-                        Created = DateTime.Now,
-                        Name = name,
-                        Changed = DateTime.Now,
-                        Object = ""
-                    };
-                    DataContext.Current.CachedEntries.Add(itm);
+                        DataContext.Current.CachedEntries.Remove(itm);
+                    }
                 }
-                if (lifeSpanSeconds.HasValue)
+                else
                 {
-                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                    if (itm == null)
+                    {
+                        itm = new CachedEntry()
+                        {
+                            Created = DateTime.Now,
+                            Name = name,
+                            Changed = DateTime.Now,
+                            Object = ""
+                        };
+                        DataContext.Current.CachedEntries.Add(itm);
+                    }
+                    if (lifeSpanSeconds.HasValue)
+                    {
+                        itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                    }
+                    itm.Changed = DateTime.Now;
+                    try
+                    {
+                        itm.Object = Serializer.Serialize(obj);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.ToString());
+                        throw;
+                    }
                 }
-                itm.Changed = DateTime.Now;
-                try
+                Cache.SetItem<tt>(CacheArea.Global, "DbCache_Item_" + name, obj, Settings.Default.SecondsInMemory);
+                var lst =
+                    (from ce in DataContext.Current.CachedEntries
+                        where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
+                        select ce).ToList();
+                if (lst.Count > 0)
                 {
-                    itm.Object = Serializer.Serialize(obj);
+                    DataContext.Current.CachedEntries.RemoveRange(lst);
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.ToString());
-                    throw;
-                }
+                DataContext.Current.SaveChanges();
             }
-            Cache.SetItem<tt>(CacheArea.Global, "DbCache_Item_" + name, obj);
-            var lst =
-                (from ce in DataContext.Current.CachedEntries
-                    where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
-                    select ce).ToList();
-            if (lst.Count > 0)
-            {
-                DataContext.Current.CachedEntries.RemoveRange(lst); 
-            }
-            DataContext.Current.SaveChanges();
         }
     }
 }

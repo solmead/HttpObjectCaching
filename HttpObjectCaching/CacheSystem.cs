@@ -95,14 +95,29 @@ namespace HttpObjectCaching
                 var context = HttpContext.Current;
                 if (context != null)
                 {
-                    var cookie = context.Request.Cookies["cookieCache"];
+                    HttpCookie cookie = null;
+                    try
+                    {
+                        cookie = context.Request.Cookies["cookieCache"];
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                     if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
                     {
                         _cookieId = cookie.Value;
                     }
                     else
                     {
-                        context.Response.SetCookie(new HttpCookie("cookieCache",_cookieId));
+                        try
+                        {
+                            context.Response.SetCookie(new HttpCookie("cookieCache", _cookieId));
+                        }
+                        catch (Exception)
+                        {
+
+                        }
                     }
                 }
                 return _cookieId;

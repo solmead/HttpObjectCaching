@@ -49,5 +49,14 @@ namespace DatabaseCaching.Properties {
                 return ((global::DatabaseCaching.Helpers.FileMode)(this["WriteMode"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public double SecondsInMemory {
+            get {
+                return ((double)(this["SecondsInMemory"]));
+            }
+        }
     }
 }

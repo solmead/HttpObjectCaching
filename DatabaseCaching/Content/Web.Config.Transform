@@ -15,6 +15,9 @@
       <setting name="WriteMode" serializeAs="String">
         <value>Xml</value>
       </setting>
+      <setting name="SecondsInMemory" serializeAs="String">
+        <value>60</value>
+      </setting>
     </DatabaseCaching.Properties.Settings>
   </applicationSettings>
 </configuration>
