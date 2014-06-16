@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using HttpObjectCaching.CacheAreas.Caches;
+using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching.CacheAreas
 {
@@ -9,14 +12,37 @@ namespace HttpObjectCaching.CacheAreas
     {
         private object createLock = new object();
         private object setLock = new object();
-        public BaseCacheArea CacheTo { get; set; }
+        private ICacheArea _cache = null;
+
+        private ICacheArea baseThread = new ThreadBaseCache();
+
+        public ICacheArea CacheTo
+        {
+            get
+            {
+                if (_cache != null)
+                {
+                    return _cache;
+                }
+                return CacheSystem.Instance.GetCacheArea((CacheArea) CacheToType);
+            }
+        }
+
+        public BaseCacheArea CacheToType { get; set; }
         private Func<string> GetInstanceId = null;
         public double LifeSpanInSeconds { get; set; }
 
         public DictionaryCache(BaseCacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
         {
             LifeSpanInSeconds = lifeSpanInSeconds;
-            CacheTo = cacheTo;
+            CacheToType = cacheTo;
+            GetInstanceId = getInstanceId;
+        }
+
+        public DictionaryCache(ICacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
+        {
+            LifeSpanInSeconds = lifeSpanInSeconds;
+            _cache = cacheTo;
             GetInstanceId = getInstanceId;
         }
 
@@ -24,44 +50,52 @@ namespace HttpObjectCaching.CacheAreas
         public string Name { get; protected set; }
         public void ClearCache()
         {
-            Cache.SetItem<Dictionary<string, object>>((CacheArea) CacheTo, Name + "_" + GetInstanceId(), null);
+            BaseDictionary.Clear();
+            BaseDictionary = null;
         }
 
-        public Dictionary<string, object> DataDictionary
+        public IDictionary<string, object> DataDictionary
+        {
+            get
+            {
+                var dic = new Dictionary<string, object>();
+                foreach (var ce in BaseDictionary)
+                {
+                    if (!dic.ContainsKey(ce.Name.ToUpper()))
+                    {
+                        dic.Add(ce.Name.ToUpper(), ce.Item);
+                    }
+                }
+                return dic;
+            }
+        }
+
+        private SerializableList<CachedEntry> BaseDictionary
         {
             get
             {
                 lock (createLock)
                 {
-                    return Cache.GetItem(CacheArea.Thread, Name + "_DataDictionary_" + GetInstanceId(), () => Cache.GetItem((CacheArea)CacheTo, Name + "_" + GetInstanceId(), () => new Dictionary<string, object>(), LifeSpanInSeconds));
+                    return baseThread.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntry>(), LifeSpanInSeconds));
                 }
             }
-            private set
+             set
             {
-                Cache.SetItem((CacheArea)CacheTo, Name + "_" + GetInstanceId(), value, LifeSpanInSeconds);
+
+                CacheTo.SetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), value, LifeSpanInSeconds);
+                baseThread.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
+                    LifeSpanInSeconds);
             }
         }
 
 
+
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var dd = DataDictionary;
-            if (dd.ContainsKey(name.ToUpper()))
-            {
-                var t = (tt)dd[name.ToUpper()];
-                object comp = t;
-                object empty = default(tt);
-                if (comp == empty)
-                {
-                    if (createMethod != null)
-                    {
-                        t = createMethod();
-                        SetItem(name, t, lifeSpanSeconds);
-                    }
-                }
-                return t;
-            }
-            else
+            var dd = BaseDictionary;
+            object empty = default(tt);
+            var itm = dd.getByName(name.ToUpper());
+            if (itm == null || itm.Item == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
             {
                 if (createMethod != null)
                 {
@@ -70,21 +104,48 @@ namespace HttpObjectCaching.CacheAreas
                     return t;
                 }
             }
+            else
+            {
+                return (tt)itm.Item;
+            }
             return default(tt);
         }
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var dd = DataDictionary;
+            var dd = BaseDictionary;
             lock (setLock)
             {
-                if (dd.ContainsKey(name.ToUpper()))
+                var itm = dd.getByName(name.ToUpper());
+                if (itm == null)
                 {
-                    dd.Remove(name.ToUpper());
+                    itm = new CachedEntry()
+                    {
+                        Created = DateTime.Now,
+                        Name = name,
+                        Changed = DateTime.Now
+                    };
+                    dd.Add(itm);
                 }
-                dd.Add(name.ToUpper(), obj);
+                if (lifeSpanSeconds.HasValue)
+                {
+                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                }
+                itm.Changed = DateTime.Now;
+                itm.Item = obj;
+
+
+                var lst =
+                    (from ce in dd where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
+                if (lst.Count > 0)
+                {
+                    foreach (var dit in lst)
+                    {
+                        dd.Remove(dit);
+                    }
+                }
             }
-            DataDictionary = dd;
+            BaseDictionary = dd;
         }
     }
 }

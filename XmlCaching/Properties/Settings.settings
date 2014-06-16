@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="XmlCaching.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="CacheFileLocation" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">~\App_Data\Cache</Value>
+    </Setting>
+    <Setting Name="UseOneFile" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="WriteMode" Type="XmlCaching.Helpers.FileMode" Scope="Application">
+      <Value Profile="(Default)">Xml</Value>
+    </Setting>
+    <Setting Name="MaxFileSizeMB" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">150</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpObjectCaching", "HttpObjectCaching\HttpObjectCaching.csproj", "{F892DF2D-7A09-481B-B872-738B5AF15CB5}"
 EndProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D6CD63
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseCaching", "DatabaseCaching\DatabaseCaching.csproj", "{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCaching", "XmlCaching\XmlCaching.csproj", "{4C934A9F-65DF-4B5F-88F5-C0B25F698416}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,16 @@ Global
 		{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.3.5|Any CPU.ActiveCfg = Release|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.3.5|Any CPU.Build.0 = Release|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug 4.0|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug 4.0|Any CPU.Build.0 = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug 4.5|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug 4.5|Any CPU.Build.0 = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -83,8 +83,6 @@ namespace HttpObjectCaching
                         }
                     }
                 }
-                var cId = ctx.CookieId;
-                var sId = ctx.SessionId;
                 return ctx;
             }
         }
@@ -97,14 +95,29 @@ namespace HttpObjectCaching
                 var context = HttpContext.Current;
                 if (context != null)
                 {
-                    var cookie = context.Request.Cookies["cookieCache"];
+                    HttpCookie cookie = null;
+                    try
+                    {
+                        cookie = context.Request.Cookies["cookieCache"];
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                     if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
                     {
                         _cookieId = cookie.Value;
                     }
                     else
                     {
-                        context.Response.SetCookie(new HttpCookie("cookieCache",_cookieId));
+                        try
+                        {
+                            context.Response.SetCookie(new HttpCookie("cookieCache", _cookieId));
+                        }
+                        catch (Exception)
+                        {
+
+                        }
                     }
                 }
                 return _cookieId;
@@ -141,7 +154,14 @@ namespace HttpObjectCaching
         {
             foreach (var area in CacheAreas.Keys)
             {
-                GetCacheArea(area).ClearCache();
+                try
+                {
+                    GetCacheArea(area).ClearCache();
+                }
+                catch (NotImplementedException)
+                {
+                    
+                }
             }
         }
         public void ClearCache(CacheArea area)
@@ -149,7 +169,7 @@ namespace HttpObjectCaching
             GetCacheArea(area).ClearCache();
         }
 
-        public Dictionary<string, object> GetDataDictionary(CacheArea area)
+        public IDictionary<string, object> GetDataDictionary(CacheArea area)
         {
             var nvl = GetCacheArea(area) as INameValueLister;
             if (nvl != null)
@@ -159,7 +179,7 @@ namespace HttpObjectCaching
             return null;
         }
         [Obsolete("Session is deprecated, please use GetDataDictionary(CacheArea.Session) instead.")]
-        public Dictionary<string, object> Session
+        public IDictionary<string, object> Session
         {
             get { return GetDataDictionary(CacheArea.Session); }
         }
