@@ -16,7 +16,8 @@ namespace HttpObjectCaching
         Cookie = 3,
         Session = 4,
         Request = 5,
-        Thread = 6
+        Thread = 6,
+        None = 7
     }
 
     public enum BaseCacheArea
@@ -25,7 +26,8 @@ namespace HttpObjectCaching
         Permanent = 1,
         Global = 2,
         Request = 5,
-        Thread = 6
+        Thread = 6,
+        None = 7
     }
     public static class Cache
     {

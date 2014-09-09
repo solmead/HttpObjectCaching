@@ -14,7 +14,7 @@ namespace HttpObjectCaching.CacheAreas
         private object setLock = new object();
         private ICacheArea _cache = null;
 
-        private ICacheArea baseThread = new ThreadBaseCache();
+        private ICacheArea _baseTempCache = new RequestBaseCache();
 
         public ICacheArea CacheTo
         {
@@ -76,14 +76,14 @@ namespace HttpObjectCaching.CacheAreas
             {
                 lock (createLock)
                 {
-                    return baseThread.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntry>(), LifeSpanInSeconds));
+                    return _baseTempCache.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntry>(), LifeSpanInSeconds));
                 }
             }
              set
             {
 
                 CacheTo.SetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), value, LifeSpanInSeconds);
-                baseThread.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
+                _baseTempCache.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
                     LifeSpanInSeconds);
             }
         }
