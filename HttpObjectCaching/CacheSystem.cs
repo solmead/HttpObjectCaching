@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
 using HttpObjectCaching.CacheAreas.Caches;
 
@@ -91,7 +92,7 @@ namespace HttpObjectCaching
         {
             get
             {
-                var _cookieId = Cache.GetItem<string>(CacheArea.Thread, "_cookieId", () => Guid.NewGuid().ToString());
+                var _cookieId = Cache.GetItem<string>(CacheArea.Request, "_cookieId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null)
                 {
@@ -112,7 +113,21 @@ namespace HttpObjectCaching
                     {
                         try
                         {
-                            context.Response.SetCookie(new HttpCookie("cookieCache", _cookieId));
+                            cookie = new HttpCookie("cookieCache", _cookieId);
+                            cookie.HttpOnly = true;
+                            cookie.Path = FormsAuthentication.FormsCookiePath;
+                            cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
+
+                            // the browser will ignore the cookie if there are fewer than two dots
+                            // see cookie spec - http://curl.haxx.se/rfc/cookie_spec.html
+                            if (HttpContext.Current.Request.Url.Host.Split('.').Length > 2)
+                            {
+                                // by default the domain will be the host, so www.site.com will get site.com
+                                // this may be a problem if we have clientA.site.com and clientB.site.com
+                                // the following line will force the full domain name
+                                cookie.Domain = HttpContext.Current.Request.Url.Host;
+                            }
+                            context.Response.SetCookie(cookie);
                         }
                         catch (Exception)
                         {
@@ -122,14 +137,14 @@ namespace HttpObjectCaching
                 }
                 return _cookieId;
             }
-            set { Cache.SetItem<string>(CacheArea.Thread, "_cookieId",  value); }
+            set { Cache.SetItem<string>(CacheArea.Request, "_cookieId", value); }
         }
 
         public string SessionId
         {
             get
             {
-                var _sessionId = Cache.GetItem<string>(CacheArea.Thread, "_sessionId", () => Guid.NewGuid().ToString());
+                var _sessionId = Cache.GetItem<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null && context.Session != null)
                 {
@@ -142,7 +157,7 @@ namespace HttpObjectCaching
                 }
                 return _sessionId;
             }
-            set {Cache.SetItem<string>(CacheArea.Thread, "_sessionId",  value); }
+            set { Cache.SetItem<string>(CacheArea.Request, "_sessionId", value); }
         }
 
         [Obsolete("ClearSession is deprecated, please use ClearCache(CacheArea.Session) instead.")]

@@ -79,6 +79,7 @@
     <Compile Include="CacheAreas\Caches\ApplicationBaseCache.cs" />
     <Compile Include="CacheAreas\Caches\CookieCache.cs" />
     <Compile Include="CacheAreas\Caches\GlobalCache.cs" />
+    <Compile Include="CacheAreas\Caches\NoCache.cs" />
     <Compile Include="CacheAreas\Caches\RequestBaseCache.cs" />
     <Compile Include="CacheAreas\Caches\RequestCache.cs" />
     <Compile Include="CacheAreas\Caches\SessionCache.cs" />

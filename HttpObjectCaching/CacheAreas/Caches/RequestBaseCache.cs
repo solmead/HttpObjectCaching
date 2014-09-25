@@ -14,7 +14,7 @@ namespace HttpObjectCaching.CacheAreas.Caches
         public string Name { get { return "BaseRequest"; } }
         public void ClearCache()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)

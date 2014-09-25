@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
+﻿//using System;
+//using System.Threading;
 
 //namespace HttpObjectCaching.CacheAreas.Caches
 //{
-//    public class ThreadBaseCache : ICacheArea 
+//    public class ThreadBaseCache : ICacheArea
 //    {
 //        public CacheArea Area { get { return CacheArea.Thread; } }
 //        public string Name { get { return "BaseThread"; } }

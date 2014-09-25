@@ -18,6 +18,12 @@
       <setting name="SecondsInMemory" serializeAs="String">
         <value>60</value>
       </setting>
+      <setting name="BaseDBName" serializeAs="String">
+        <value>DbCache</value>
+      </setting>
+      <setting name="UseServerName" serializeAs="String">
+        <value>False</value>
+      </setting>
     </DatabaseCaching.Properties.Settings>
   </applicationSettings>
 </configuration>
