@@ -17,7 +17,7 @@ namespace HttpObjectCaching.Helpers
         }
         public void ReadXml(System.Xml.XmlReader reader)
         {
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+            var valueSerializer = new System.Xml.Serialization.XmlSerializer(typeof(TValue));
             bool wasEmpty = reader.IsEmptyElement;
             reader.Read();
             if (wasEmpty)
@@ -34,7 +34,7 @@ namespace HttpObjectCaching.Helpers
         }
         public void WriteXml(System.Xml.XmlWriter writer)
         {
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+            var valueSerializer = new System.Xml.Serialization.XmlSerializer(typeof(TValue));
             foreach (TValue value in this)
             {
                 writer.WriteStartElement("item");

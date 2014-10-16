@@ -18,6 +18,9 @@
       <setting name="MaxFileSizeMB" serializeAs="String">
         <value>150</value>
       </setting>
+      <setting name="SecondsInMemory" serializeAs="String">
+        <value>60</value>
+      </setting>
     </XmlCaching.Properties.Settings>
   </applicationSettings>
 </configuration>

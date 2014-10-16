@@ -14,7 +14,7 @@ namespace HttpObjectCaching.CacheAreas
         private object setLock = new object();
         private ICacheArea _cache = null;
 
-        private ICacheArea _baseTempCache = new RequestBaseCache();
+        private ICacheArea _baseTempCache = new ThreadBaseCache();
 
         public ICacheArea CacheTo
         {
@@ -63,28 +63,28 @@ namespace HttpObjectCaching.CacheAreas
                 {
                     if (!dic.ContainsKey(ce.Name.ToUpper()))
                     {
-                        dic.Add(ce.Name.ToUpper(), ce.Item);
+                        dic.Add(ce.Name.ToUpper(), ce.TheObject);
                     }
                 }
                 return dic;
             }
         }
 
-        private SerializableList<CachedEntry> BaseDictionary
+        private SerializableList<CachedEntryBase> BaseDictionary
         {
             get
             {
                 lock (createLock)
                 {
-                    return _baseTempCache.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntry>(), LifeSpanInSeconds));
+                    return _baseTempCache.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntryBase>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntryBase>(), LifeSpanInSeconds), 1);
                 }
             }
              set
             {
 
-                CacheTo.SetItem<SerializableList<CachedEntry>>(Name + "_DataDictionary_Base_" + GetInstanceId(), value, LifeSpanInSeconds);
+                CacheTo.SetItem<SerializableList<CachedEntryBase>>(Name + "_DataDictionary_Base_" + GetInstanceId(), value, LifeSpanInSeconds);
                 _baseTempCache.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
-                    LifeSpanInSeconds);
+                    1);
             }
         }
 
@@ -94,8 +94,8 @@ namespace HttpObjectCaching.CacheAreas
         {
             var dd = BaseDictionary;
             object empty = default(tt);
-            var itm = dd.getByName(name.ToUpper());
-            if (itm == null || itm.Item == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
+            var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+            if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
             {
                 if (createMethod != null)
                 {
@@ -116,10 +116,10 @@ namespace HttpObjectCaching.CacheAreas
             var dd = BaseDictionary;
             lock (setLock)
             {
-                var itm = dd.getByName(name.ToUpper());
+                var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
                 if (itm == null)
                 {
-                    itm = new CachedEntry()
+                    itm = new CachedEntry<tt>()
                     {
                         Created = DateTime.Now,
                         Name = name,

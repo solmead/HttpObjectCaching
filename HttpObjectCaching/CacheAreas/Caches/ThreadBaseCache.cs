@@ -18,10 +18,10 @@ namespace HttpObjectCaching.CacheAreas.Caches
         {
             object empty = default(tt);
             tt tObj = default(tt);
-            var entry = Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper())) as CachedEntry;
+            var entry = Thread.GetData(Thread.GetNamedDataSlot(name.ToUpper())) as CachedEntry<tt>;
             if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
             {
-                entry = new CachedEntry();
+                entry = new CachedEntry<tt>();
             }
             try
             {
@@ -45,7 +45,7 @@ namespace HttpObjectCaching.CacheAreas.Caches
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var entry = new CachedEntry()
+            var entry = new CachedEntry<tt>()
             {
                 Name = name,
                 Changed = DateTime.Now,
