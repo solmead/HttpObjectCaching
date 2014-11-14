@@ -48,6 +48,7 @@ namespace HttpObjectCaching.CacheAreas
 
         public CacheArea Area { get; protected set; }
         public string Name { get; protected set; }
+
         public void ClearCache()
         {
             BaseDictionary.Clear();
@@ -76,15 +77,22 @@ namespace HttpObjectCaching.CacheAreas
             {
                 lock (createLock)
                 {
-                    return _baseTempCache.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), () => CacheTo.GetItem<SerializableList<CachedEntryBase>>(Name + "_DataDictionary_Base_" + GetInstanceId(), () => new SerializableList<CachedEntryBase>(), LifeSpanInSeconds), 1);
+                    return _baseTempCache.GetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(),
+                        () =>
+                            CacheTo.GetItem<SerializableList<CachedEntryBase>>(
+                                Name + "_DataDictionary_Base_" + GetInstanceId(),
+                                () => new SerializableList<CachedEntryBase>(), LifeSpanInSeconds), 1);
                 }
             }
-             set
+            set
             {
-
-                CacheTo.SetItem<SerializableList<CachedEntryBase>>(Name + "_DataDictionary_Base_" + GetInstanceId(), value, LifeSpanInSeconds);
-                _baseTempCache.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
-                    1);
+                lock (createLock)
+                {
+                    CacheTo.SetItem<SerializableList<CachedEntryBase>>(Name + "_DataDictionary_Base_" + GetInstanceId(),
+                        value, LifeSpanInSeconds);
+                    _baseTempCache.SetItem(Name + "_DataDictionary_Thread_" + GetInstanceId(), value,
+                        1);
+                }
             }
         }
 
@@ -92,30 +100,39 @@ namespace HttpObjectCaching.CacheAreas
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var dd = BaseDictionary;
-            object empty = default(tt);
-            var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
+            lock (setLock)
             {
-                if (createMethod != null)
+                var dd = BaseDictionary;
+                object empty = default(tt);
+                var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+                if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
                 {
-                    var t = createMethod();
-                    SetItem(name, t, lifeSpanSeconds);
-                    return t;
+                    if (createMethod != null)
+                    {
+                        var t = createMethod();
+                        SetTheItem(name, t, lifeSpanSeconds);
+                        return t;
+                    }
                 }
+                else
+                {
+                    return (tt) itm.Item;
+                }
+                return default(tt);
             }
-            else
-            {
-                return (tt)itm.Item;
-            }
-            return default(tt);
         }
 
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var dd = BaseDictionary;
             lock (setLock)
             {
+                SetTheItem(name, obj, lifeSpanSeconds);
+            }
+        }
+
+        private void SetTheItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        {
+            var dd = BaseDictionary;
                 var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
                 if (itm == null)
                 {
@@ -144,8 +161,8 @@ namespace HttpObjectCaching.CacheAreas
                         dd.Remove(dit);
                     }
                 }
-            }
             BaseDictionary = dd;
         }
     }
 }
+

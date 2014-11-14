@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -38,11 +39,33 @@ namespace HttpObjectCaching
 
         private static IEnumerable<ICacheArea> GetCacheAreaList()
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    from t in assembly.GetTypes()
-                    where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
-                          t.GetConstructor(Type.EmptyTypes) != null
-                    select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+            var list = new List<ICacheArea>();
+            var assemblyList = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblyList)
+            {
+                try
+                {
+                    var typeList = assembly.GetTypes();
+                    var tlst = (from t in typeList
+                                where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+                                    t.GetConstructor(Type.EmptyTypes) != null
+                                select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+                    if (tlst.Any())
+                    {
+                        list.AddRange(tlst);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Issue with " + assembly.FullName);
+                }
+            }
+            //return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+            //        from t in assembly.GetTypes()
+            //        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+            //              t.GetConstructor(Type.EmptyTypes) != null
+            //        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+            return list;
         }
 
         public ICacheArea GetCacheArea(CacheArea area)

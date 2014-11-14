@@ -17,8 +17,8 @@ namespace HttpObjectCaching.Helpers
         }
         public void ReadXml(System.Xml.XmlReader reader)
         {
-            //var keySerializer = new System.Xml.Serialization.XmlSerializer(typeof(TKey));
-            //var valueSerializer = new System.Xml.Serialization.XmlSerializer(typeof(TValue));
+            var keySerializer = new System.Xml.Serialization.XmlSerializer(typeof(TKey));
+            var valueSerializer = new System.Xml.Serialization.XmlSerializer(typeof(TValue));
             bool wasEmpty = reader.IsEmptyElement;
             reader.Read();
             if (wasEmpty)
