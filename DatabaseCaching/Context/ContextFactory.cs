@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
-using DatabaseCaching.Properties;
+using SqlCeDatabaseCaching.Properties;
 
-namespace DatabaseCaching.Context
+namespace SqlCeDatabaseCaching.Context
 {
     // class ContextFactory : IDbContextFactory<DataContext>
     //{

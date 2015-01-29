@@ -1,0 +1,18 @@
+﻿<configuration>
+  <configSections>
+    <section name="HttpObjectCachingAreas" type="HttpObjectCaching.Core.Configuration.CacheRetrieverSection"/>
+  </configSections>
+  <HttpObjectCachingAreas>
+    <entries>
+      <add area="Other" class=""/>
+      <add area="Permanent" class=""/>
+      <add area="Distributed" class=""/>
+      <add area="Global" class="HttpObjectCaching.Caches.GlobalCache"/>
+      <add area="Cookie" class="HttpObjectCaching.Caches.CookieCache"/>
+      <add area="Session" class="HttpObjectCaching.Caches.SessionCache"/>
+      <add area="Request" class="HttpObjectCaching.Caches.RequestCache"/>
+      <add area="Thread" class="HttpObjectCaching.Caches.ThreadCache"/>
+      <add area="None" class="HttpObjectCaching.Caches.NoCache"/>
+    </entries>
+  </HttpObjectCachingAreas>
+</configuration>

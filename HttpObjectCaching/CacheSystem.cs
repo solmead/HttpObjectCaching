@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
-using System.Web.Caching;
 using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
-using HttpObjectCaching.CacheAreas.Caches;
+using HttpObjectCaching.Core.Configuration;
 
 namespace HttpObjectCaching
 {
@@ -21,6 +16,8 @@ namespace HttpObjectCaching
 
         //private string _sessionId = "";
         //private string _cookieId = "";
+        public static CacheRetrieverSection _Config = ConfigurationManager.GetSection("HttpObjectCachingAreas") as CacheRetrieverSection;
+
 
         public Dictionary<CacheArea, ICacheArea> CacheAreas { get; private set; }
 
@@ -30,43 +27,57 @@ namespace HttpObjectCaching
         {
             CacheEnabled = true;
 
-            var cList = (from c in GetCacheAreaList() where c.Name.Contains("Default") select c).ToList();
-            var keys = (from c in cList select c.Area).Distinct().ToList();
-            CacheAreas = keys
-                .Select(item => new { Key = item , Item = (from c in cList where c.Area==item select c).First() })
-                .ToDictionary(i => i.Key, i=>i.Item);
-        }
+            var cList = _Config.Entries;
 
-        private static IEnumerable<ICacheArea> GetCacheAreaList()
-        {
-            var list = new List<ICacheArea>();
-            var assemblyList = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblyList)
+            CacheAreas = new Dictionary<CacheArea, ICacheArea>();
+
+            foreach (CacheElement c in cList)
             {
-                try
+                if (!string.IsNullOrWhiteSpace(c.Class))
                 {
-                    var typeList = assembly.GetTypes();
-                    var tlst = (from t in typeList
-                                where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
-                                    t.GetConstructor(Type.EmptyTypes) != null
-                                select ((ICacheArea)Activator.CreateInstance(t))).ToList();
-                    if (tlst.Any())
+                    var obj = Activator.CreateInstance(Type.GetType(c.Class)) as ICacheArea;
+                    if (obj != null)
                     {
-                        list.AddRange(tlst);
+                        CacheAreas.Add(c.Area, obj);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Issue with " + assembly.FullName);
-                }
             }
-            //return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-            //        from t in assembly.GetTypes()
-            //        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
-            //              t.GetConstructor(Type.EmptyTypes) != null
-            //        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
-            return list;
+            //var cList = (from c in GetCacheAreaList() where c.Name.Contains("Default") select c).ToList();
+            //var keys = (from c in cList select c.Area).Distinct().ToList();
+            //CacheAreas = (from CacheElement c in cList select new { Key = c.Area, Item = (ICacheArea)Activator.CreateInstance(Type.GetType(c.Class)) })
+            //    .ToDictionary(i => i.Key, i=>i.Item);
         }
+
+        //private static IEnumerable<ICacheArea> GetCacheAreaList()
+        //{
+        //    var list = new List<ICacheArea>();
+        //    var assemblyList = AppDomain.CurrentDomain.GetAssemblies();
+        //    foreach (var assembly in assemblyList)
+        //    {
+        //        try
+        //        {
+        //            var typeList = assembly.GetTypes();
+        //            var tlst = (from t in typeList
+        //                        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+        //                            t.GetConstructor(Type.EmptyTypes) != null
+        //                        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+        //            if (tlst.Any())
+        //            {
+        //                list.AddRange(tlst);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Debug.WriteLine("Issue with " + assembly.FullName);
+        //        }
+        //    }
+        //    //return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+        //    //        from t in assembly.GetTypes()
+        //    //        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+        //    //              t.GetConstructor(Type.EmptyTypes) != null
+        //    //        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+        //    return list;
+        //}
 
         public ICacheArea GetCacheArea(CacheArea area)
         {

@@ -13,12 +13,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using DatabaseCaching.Migrations;
-using DatabaseCaching.Models;
-using DatabaseCaching.Properties;
+using SqlCeDatabaseCaching.Migrations;
+using SqlCeDatabaseCaching.Models;
+using SqlCeDatabaseCaching.Properties;
 using HttpObjectCaching;
+using SqlCeDatabaseCaching.Properties;
 
-namespace DatabaseCaching.Context
+namespace SqlCeDatabaseCaching.Context
 {
     class DataContext : DbContext
     {

@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using HttpObjectCaching;
 using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.Caches;
+using HttpObjectCaching.Core;
 
-namespace XmlCaching
+namespace HttpObjectCaching.Caches
 {
     public class XmlCacheCombined : DictionaryCache
     {

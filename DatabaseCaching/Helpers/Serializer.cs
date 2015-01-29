@@ -1,6 +1,6 @@
-﻿using DatabaseCaching.Properties;
+﻿using SqlCeDatabaseCaching.Properties;
 
-namespace DatabaseCaching.Helpers
+namespace SqlCeDatabaseCaching.Helpers
 {
     public class Serializer
     {

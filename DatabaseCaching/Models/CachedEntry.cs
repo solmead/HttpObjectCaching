@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 
-namespace DatabaseCaching.Models
+namespace SqlCeDatabaseCaching.Models
 {
     internal class CachedEntry
     {

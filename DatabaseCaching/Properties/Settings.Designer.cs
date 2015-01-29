@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DatabaseCaching.Properties {
+namespace SqlCeDatabaseCaching.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -34,7 +34,7 @@ namespace DatabaseCaching.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("150")]
+        [global::System.Configuration.DefaultSettingValueAttribute("152")]
         public int MaxFileSizeMB {
             get {
                 return ((int)(this["MaxFileSizeMB"]));
@@ -44,9 +44,10 @@ namespace DatabaseCaching.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Xml")]
-        public global::DatabaseCaching.Helpers.FileMode WriteMode {
+        public global::SqlCeDatabaseCaching.Helpers.FileMode WriteMode
+        {
             get {
-                return ((global::DatabaseCaching.Helpers.FileMode)(this["WriteMode"]));
+                return ((global::SqlCeDatabaseCaching.Helpers.FileMode)(this["WriteMode"]));
             }
         }
         

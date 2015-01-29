@@ -1,0 +1,20 @@
+﻿<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <configSections xdt:Transform="InsertIfMissing">
+    <sectionGroup name="applicationSettings" type="System.Configuration.ApplicationSettingsGroup, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"  xdt:Transform="InsertIfMissing">
+
+      <section name="AzureCaching.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+    </sectionGroup>
+  </configSections>
+  <applicationSettings xdt:Transform="InsertIfMissing">
+    <AzureCaching.Properties.Settings xdt:Transform="InsertIfMissing">
+      <setting name="DataCacheName" serializeAs="String">
+        <value>default</value>
+      </setting>
+    </AzureCaching.Properties.Settings>
+  </applicationSettings>
+  <HttpObjectCachingAreas>
+    <entries>
+      <add area="Distributed" class="HttpObjectCaching.Caches.AzureCache, AzureCaching" xdt:Transform="SetAttributes" xdt:Locator="Match(area)"/>
+    </entries>
+  </HttpObjectCachingAreas>
+</configuration>

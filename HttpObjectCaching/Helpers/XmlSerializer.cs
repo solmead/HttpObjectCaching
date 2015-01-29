@@ -8,10 +8,10 @@ namespace HttpObjectCaching.Helpers
     {
         public static string Serialize<T>(T item)
         {
-            MemoryStream memStream = new MemoryStream();
+            var memStream = new MemoryStream();
             using (XmlTextWriter textWriter = new XmlTextWriter(memStream, Encoding.Unicode))
             {
-                System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
                 serializer.Serialize(textWriter, item);
 
                 memStream = textWriter.BaseStream as MemoryStream;
@@ -27,9 +27,9 @@ namespace HttpObjectCaching.Helpers
             if (string.IsNullOrWhiteSpace(xmlString))
                 return default(T);
 
-            using (MemoryStream memStream = new MemoryStream(Encoding.Unicode.GetBytes(xmlString)))
+            using (var memStream = new MemoryStream(Encoding.Unicode.GetBytes(xmlString)))
             {
-                System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
                 return (T)serializer.Deserialize(memStream);
             }
         }
