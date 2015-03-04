@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using HttpObjectCaching.Helpers;
@@ -11,6 +12,25 @@ namespace HttpObjectCaching.Core.DataSources
     public class ApplicationDataSource : IDataSource
     {
         public CachedEntry<tt> GetItem<tt>(string name)
+        {
+            return AsyncHelper.RunSync(() => GetItemAsync<tt>(name));
+        }
+
+        public void SetItem<tt>(CachedEntry<tt> item)
+        {
+            AsyncHelper.RunSync(() => SetItemAsync<tt>(item));
+        }
+
+        public void DeleteItem(string name)
+        {
+            AsyncHelper.RunSync(() => DeleteItemAsync(name));
+        }
+
+        public void DeleteAll()
+        {
+            AsyncHelper.RunSync(DeleteAllAsync);
+        }
+        public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             try
             {
@@ -24,7 +44,7 @@ namespace HttpObjectCaching.Core.DataSources
             return default(CachedEntry<tt>);
         }
 
-        public void SetItem<tt>(CachedEntry<tt> item)
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
         {
             if (item == null)
             {
@@ -65,7 +85,7 @@ namespace HttpObjectCaching.Core.DataSources
             }
         }
 
-        public void DeleteItem(string name)
+        public async Task DeleteItemAsync(string name)
         {
             try
             {
@@ -77,7 +97,7 @@ namespace HttpObjectCaching.Core.DataSources
             }
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync()
         {
             //throw new NotImplementedException();
         }

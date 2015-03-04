@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AzureRedisCaching.Properties;
 using HttpObjectCaching;
 using HttpObjectCaching.Core;
@@ -24,11 +25,11 @@ namespace AzureRedisCaching.Models
         }
         private static IDatabase CacheDatabase { get { return Connection.GetDatabase(); } }
 
-        public CachedEntry<tt> GetItem<tt>(string name)
+        public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             try
             {
-                var t = CacheDatabase.StringGet(name.ToUpper());
+                var t = await CacheDatabase.StringGetAsync(name.ToUpper());
                 //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
                 if (!string.IsNullOrWhiteSpace(t))
                 {
@@ -42,7 +43,7 @@ namespace AzureRedisCaching.Models
             return default(CachedEntry<tt>);
         }
 
-        public void SetItem<tt>(CachedEntry<tt> item)
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
         {
             if (item == null)
             {
@@ -55,35 +56,41 @@ namespace AzureRedisCaching.Models
                 var s = Serializer.Serialize(item, false);
                 if (item.TimeOut.HasValue)
                 {
-                    CacheDatabase.StringSet(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
+                    await CacheDatabase.StringSetAsync(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
                     //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s,
                     //    item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds);
                 }
                 else
                 {
-                    CacheDatabase.StringSet(item.Name.ToUpper(), s);
+                    await CacheDatabase.StringSetAsync(item.Name.ToUpper(), s,
+                        new TimeSpan(0, Settings.Default.DefaultTimeoutMinutes, 0));
                     //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s);
                 }
             }
             else
             {
-                DeleteItem(item.Name);
+                await DeleteItemAsync(item.Name);
             }
         }
 
-        public void DeleteItem(string name)
+        public async Task DeleteItemAsync(string name)
         {
-            CacheDatabase.KeyDelete(name.ToUpper());
+            await CacheDatabase.KeyDeleteAsync(name.ToUpper());
             //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + name, null);
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync()
         {
-            //foreach (var ep in Connection.GetEndPoints())
-            //{
-            //    var server = Connection.GetServer(ep);
-            //    server.FlushAllDatabases();
-            //}
+            foreach (var ep in Connection.GetEndPoints())
+            {
+                var server =  Connection.GetServer(ep);
+                var keys = server.Keys();
+                foreach (var key in keys)
+                {
+                    Console.WriteLine("Removing Key {0} from cache", key.ToString());
+                    await CacheDatabase.KeyDeleteAsync(key);
+                }
+            }
         }
     }
 }

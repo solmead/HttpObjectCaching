@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using HttpObjectCaching.Core;
 using HttpObjectCaching.Helpers;
 using SqlCeDatabaseCaching.Context;
@@ -24,75 +26,94 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<tt> GetItem<tt>(string name)
         {
-            return Cache.GetItem<CachedEntry<tt>>(CacheArea.Global, "SqlCeDbCache_Item_" + name, () => GetItemFromDb<CachedEntry<tt>>(name), Settings.Default.SecondsInMemory);
+            return AsyncHelper.RunSync(() => GetItemAsync<tt>(name));
         }
 
         public void SetItem<tt>(CachedEntry<tt> item)
         {
-            SetItemToDb(item.Name, item, (item.TimeOut.HasValue ? (int?) item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds : null));
-            Cache.SetItem<CachedEntry<tt>>(CacheArea.Global, "SqlCeDbCache_Item_" + item.Name, item, Settings.Default.SecondsInMemory);
+            AsyncHelper.RunSync(() => SetItemAsync<tt>(item));
         }
 
         public void DeleteItem(string name)
         {
-            lock (_lock)
-            {
-                using (var database = new DataContext())
-                {
-                    var lst = (from ce in database.CachedEntries where ce.Name==name select ce).ToList();
-                    if (lst.Count > 0)
-                    {
-                        database.CachedEntries.RemoveRange(lst);
-                    }
-                    database.SaveChanges();
-                }
-            }
+            AsyncHelper.RunSync(() => DeleteItemAsync(name));
         }
 
         public void DeleteAll()
         {
-            lock (_lock)
-            {
+            AsyncHelper.RunSync(DeleteAllAsync);
+        }
+        public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
+        {
+            return await Cache.GetItemAsync<CachedEntry<tt>>(CacheArea.Global, "SqlCeDbCache_Item_" + name,async () => await GetItemFromDbAsync<CachedEntry<tt>>(name), Settings.Default.SecondsInMemory);
+        }
+
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
+        {
+            await SetItemToDbAsync(item.Name, item, (item.TimeOut.HasValue ? (int?) item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds : null));
+            await Cache.SetItemAsync<CachedEntry<tt>>(CacheArea.Global, "SqlCeDbCache_Item_" + item.Name, item, Settings.Default.SecondsInMemory);
+        }
+
+        public async Task DeleteItemAsync(string name)
+        {
+            //lock (_lock)
+            //{
                 using (var database = new DataContext())
                 {
-                    var lst = (from ce in database.CachedEntries select ce).ToList();
+                    var lst = await (from ce in database.CachedEntries where ce.Name==name select ce).ToListAsync();
                     if (lst.Count > 0)
                     {
                         database.CachedEntries.RemoveRange(lst);
                     }
-                    database.SaveChanges();
+                    await database.SaveChangesAsync();
                 }
-            }
+            //}
+        }
+
+        public async Task DeleteAllAsync()
+        {
+            //lock (_lock)
+            //{
+                using (var database = new DataContext())
+                {
+                    var lst = await (from ce in database.CachedEntries select ce).ToListAsync();
+                    if (lst.Count > 0)
+                    {
+                        database.CachedEntries.RemoveRange(lst);
+                    }
+                    await database.SaveChangesAsync();
+                }
+            //}
         }
 
 
-        private void CleanOutTimeOutValues()
+        private async Task CleanOutTimeOutValuesAsync()
         {
             using (var database = new DataContext())
             {
-                var lst =
+                var lst =await 
                     (from ce in database.CachedEntries
                      where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
-                     select ce).ToList();
+                     select ce).ToListAsync();
                 if (lst.Count > 0)
                 {
                     database.CachedEntries.RemoveRange(lst);
                 }
 
-                database.SaveChanges();
+                await database.SaveChangesAsync();
             }
         }
 
-        private void SetItemToDb<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        private async Task SetItemToDbAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            lock (_lock)
+            //lock (_lock)
             {
                 using (var database = new DataContext())
                 {
                     object nObj = default(tt);
                     object tObj = obj;
                     var itm =
-                        (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefault();
+                        await (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefaultAsync();
 
                     if (tObj == nObj)
                     {
@@ -134,21 +155,21 @@ namespace HttpObjectCaching.Core.DataSources
                     }
 
 
-                    database.SaveChanges();
+                    await database.SaveChangesAsync();
                 }
 
-                CleanOutTimeOutValues();
+                await CleanOutTimeOutValuesAsync();
             }
         }
-        private tt GetItemFromDb<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
+        private async Task<tt> GetItemFromDbAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
         {
 
             CachedEntry itm;
-            lock (_lock)
+            //lock (_lock)
             {
                 using (var database = new DataContext())
                 {
-                    itm = (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefault();
+                    itm = await (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefaultAsync();
                 }
             }
             if (itm != null && itm.TimeOut.HasValue && itm.TimeOut.Value >= DateTime.Now)
@@ -170,8 +191,8 @@ namespace HttpObjectCaching.Core.DataSources
 
             if (createMethod != null)
             {
-                var t = createMethod();
-                SetItemToDb(name, t, lifeSpanSeconds);
+                var t = await createMethod();
+                await SetItemToDbAsync(name, t, lifeSpanSeconds);
                 return t;
             }
             return default(tt);

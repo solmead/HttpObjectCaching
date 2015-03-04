@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using HttpObjectCaching.CacheAreas;
 
 namespace HttpObjectCaching.Caches
@@ -25,5 +26,25 @@ namespace HttpObjectCaching.Caches
         {
             
         }
+
+        public async Task ClearCacheAsync()
+        {
+            
+        }
+
+        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
+        {
+            if (createMethod != null)
+            {
+                return await createMethod();
+            }
+            return default(tt);
+        }
+
+        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        {
+            
+        }
+
     }
 }

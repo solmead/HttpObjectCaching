@@ -32,11 +32,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HttpObjectCaching">
-      <HintPath>..\packages\HttpObjectCaching.4.6.5500.25706\lib\net40\HttpObjectCaching.dll</HintPath>
+    <Reference Include="HttpObjectCaching, Version=5.0.5540.38470, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\HttpObjectCaching.5.0.5540.38470\lib\net45\HttpObjectCaching.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis">
       <HintPath>..\packages\StackExchange.Redis.1.0.394\lib\net45\StackExchange.Redis.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

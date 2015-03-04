@@ -30,24 +30,43 @@ namespace HttpObjectCaching.Core.DataSources
         }
         public DirectoryInfo BaseDirectory { get; set; }
 
-
         public CachedEntry<tt> GetItem<tt>(string name)
+        {
+            return AsyncHelper.RunSync(() => GetItemAsync<tt>(name));
+        }
+
+        public void SetItem<tt>(CachedEntry<tt> item)
+        {
+            AsyncHelper.RunSync(() => SetItemAsync<tt>(item));
+        }
+
+        public void DeleteItem(string name)
+        {
+            AsyncHelper.RunSync(() => DeleteItemAsync(name));
+        }
+
+        public void DeleteAll()
+        {
+            AsyncHelper.RunSync(DeleteAllAsync);
+        }
+
+        public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             return Cache.GetItem<CachedEntry<tt>>(CacheArea.Global, "XmlCache_Item_" + name, () => GetItemFromFile<CachedEntry<tt>>(name), Settings.Default.SecondsInMemory);
         }
 
-        public void SetItem<tt>(CachedEntry<tt> item)
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
         {
             SetItemToFile(item.Name, item, (item.TimeOut.HasValue ? (int?)item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds : null));
             Cache.SetItem<CachedEntry<tt>>(CacheArea.Global, "XmlCache_Item_" + item.Name, item, Settings.Default.SecondsInMemory);
         }
 
-        public void DeleteItem(string name)
+        public async Task DeleteItemAsync(string name)
         {
             
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync()
         {
             FileHandling.DeleteFiles(BaseDirectory, Name);
         }

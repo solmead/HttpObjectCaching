@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HttpObjectCaching.CacheAreas
 {
@@ -9,8 +10,11 @@ namespace HttpObjectCaching.CacheAreas
     {
         CacheArea Area { get; }
         string Name { get; }
-        void ClearCache();
-        tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null);
-        void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null);
+        //void ClearCache();
+        //tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null);
+        //void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null);
+        Task ClearCacheAsync();
+        Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null);
+        Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null);
     }
 }

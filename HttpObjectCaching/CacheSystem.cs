@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
 using HttpObjectCaching.Core.Configuration;
+using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching
 {
@@ -194,18 +195,13 @@ namespace HttpObjectCaching
             set { Cache.SetItem<string>(CacheArea.Request, "_sessionId", value); }
         }
 
-        [Obsolete("ClearSession is deprecated, please use ClearCache(CacheArea.Session) instead.")]
-        public void ClearSession()
-        {
-            GetCacheArea(CacheArea.Session).ClearCache();
-        }
         public void ClearAllCacheAreas()
         {
             foreach (var area in CacheAreas.Keys)
             {
                 try
                 {
-                    GetCacheArea(area).ClearCache();
+                    AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
                 }
                 catch (NotImplementedException)
                 {
@@ -215,7 +211,7 @@ namespace HttpObjectCaching
         }
         public void ClearCache(CacheArea area)
         {
-            GetCacheArea(area).ClearCache();
+            AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
         }
 
         public IDictionary<string, object> GetDataDictionary(CacheArea area)
@@ -226,11 +222,6 @@ namespace HttpObjectCaching
                 return nvl.DataDictionary;
             }
             return null;
-        }
-        [Obsolete("Session is deprecated, please use GetDataDictionary(CacheArea.Session) instead.")]
-        public IDictionary<string, object> Session
-        {
-            get { return GetDataDictionary(CacheArea.Session); }
         }
     }
 }

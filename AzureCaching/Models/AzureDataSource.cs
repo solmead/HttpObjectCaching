@@ -20,7 +20,29 @@ namespace AzureCaching.Models
             _cache = new Microsoft.ApplicationServer.Caching.DataCache(Settings.Default.DataCacheName);
         }
 
+
         public CachedEntry<tt> GetItem<tt>(string name)
+        {
+            return AsyncHelper.RunSync(() => GetItemAsync<tt>(name));
+        }
+
+        public void SetItem<tt>(CachedEntry<tt> item)
+        {
+            AsyncHelper.RunSync(() => SetItemAsync<tt>(item));
+        }
+
+        public void DeleteItem(string name)
+        {
+            AsyncHelper.RunSync(() => DeleteItemAsync(name));
+        }
+
+        public void DeleteAll()
+        {
+            AsyncHelper.RunSync(DeleteAllAsync);
+        }
+
+
+        public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             try
             {
@@ -34,7 +56,7 @@ namespace AzureCaching.Models
             return default(CachedEntry<tt>);
         }
 
-        public void SetItem<tt>(CachedEntry<tt> item)
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
         {
             if (item == null)
             {
@@ -55,16 +77,16 @@ namespace AzureCaching.Models
             }
             else
             {
-                DeleteItem(item.Name);
+                await DeleteItemAsync(item.Name);
             }
         }
 
-        public void DeleteItem(string name)
+        public async Task DeleteItemAsync(string name)
         {
             _cache.Remove(name.ToUpper());
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync()
         {
             _cache.Clear();
         }

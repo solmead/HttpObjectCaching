@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using HttpObjectCaching.CacheAreas;
 using HttpObjectCaching.Helpers;
 
@@ -19,16 +20,17 @@ namespace HttpObjectCaching.Core
 
         public virtual CacheArea Area { get; private set; }
         public virtual string Name { get; private set; }
-        public void ClearCache()
+        
+        public async Task ClearCacheAsync()
         {
-            _dataSource.DeleteAll();
+            await _dataSource.DeleteAllAsync();
         }
 
-        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
+        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
         {
             object empty = default(tt);
             tt tObj = default(tt);
-            var entry = LoadItem<tt>(name, lifeSpanSeconds);
+            var entry = await LoadItemAsync<tt>(name, lifeSpanSeconds);
             try
             {
                 tObj = (tt)(entry.Item);
@@ -42,17 +44,17 @@ namespace HttpObjectCaching.Core
             {
                 if (createMethod != null)
                 {
-                    tObj = createMethod();
+                    tObj = await createMethod();
                     entry.Item = tObj;
                 }
             }
-            SaveItem(entry);
+            await SaveItemAsync(entry);
             return tObj;
         }
 
-        private CachedEntry<tt> LoadItem<tt>(string name, double? lifeSpanSeconds = null)
+        private async Task<CachedEntry<tt>> LoadItemAsync<tt>(string name, double? lifeSpanSeconds = null)
         {
-            var entry = _dataSource.GetItem<tt>(name);
+            var entry = await _dataSource.GetItemAsync<tt>(name);
             if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
             {
                 entry = new CachedEntry<tt>()
@@ -68,20 +70,20 @@ namespace HttpObjectCaching.Core
             }
             return entry;
         }
-        private void SaveItem<tt>(CachedEntry<tt> entry)
+        private async Task SaveItemAsync<tt>(CachedEntry<tt> entry)
         {
-            _dataSource.SetItem(entry);
+            await _dataSource.SetItemAsync(entry);
         }
-        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var entry = LoadItem<tt>(name, lifeSpanSeconds);
+            var entry = await LoadItemAsync<tt>(name, lifeSpanSeconds);
             entry.Item = obj;
             entry.Changed = DateTime.Now;
             if (lifeSpanSeconds.HasValue)
             {
                 entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
             }
-            SaveItem(entry);
+            await SaveItemAsync(entry);
         }
     }
 }
