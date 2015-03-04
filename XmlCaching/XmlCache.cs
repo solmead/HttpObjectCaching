@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using HttpObjectCaching;
 using HttpObjectCaching.CacheAreas;
+using XmlCaching;
 using XmlCaching.Properties;
 
-namespace XmlCaching
+namespace HttpObjectCaching.Caches
 {
     public class XmlCache : ICacheArea, INameValueLister
     {

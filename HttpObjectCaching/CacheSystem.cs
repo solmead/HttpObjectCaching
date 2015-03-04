@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
-using System.Web.Caching;
+using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
-using HttpObjectCaching.CacheAreas.Caches;
+using HttpObjectCaching.Core.Configuration;
+using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching
 {
@@ -19,6 +17,8 @@ namespace HttpObjectCaching
 
         //private string _sessionId = "";
         //private string _cookieId = "";
+        public static CacheRetrieverSection _Config = ConfigurationManager.GetSection("HttpObjectCachingAreas") as CacheRetrieverSection;
+
 
         public Dictionary<CacheArea, ICacheArea> CacheAreas { get; private set; }
 
@@ -28,21 +28,57 @@ namespace HttpObjectCaching
         {
             CacheEnabled = true;
 
-            var cList = (from c in GetCacheAreaList() where c.Name.Contains("Default") select c).ToList();
-            var keys = (from c in cList select c.Area).Distinct().ToList();
-            CacheAreas = keys
-                .Select(item => new { Key = item , Item = (from c in cList where c.Area==item select c).First() })
-                .ToDictionary(i => i.Key, i=>i.Item);
+            var cList = _Config.Entries;
+
+            CacheAreas = new Dictionary<CacheArea, ICacheArea>();
+
+            foreach (CacheElement c in cList)
+            {
+                if (!string.IsNullOrWhiteSpace(c.Class))
+                {
+                    var obj = Activator.CreateInstance(Type.GetType(c.Class)) as ICacheArea;
+                    if (obj != null)
+                    {
+                        CacheAreas.Add(c.Area, obj);
+                    }
+                }
+            }
+            //var cList = (from c in GetCacheAreaList() where c.Name.Contains("Default") select c).ToList();
+            //var keys = (from c in cList select c.Area).Distinct().ToList();
+            //CacheAreas = (from CacheElement c in cList select new { Key = c.Area, Item = (ICacheArea)Activator.CreateInstance(Type.GetType(c.Class)) })
+            //    .ToDictionary(i => i.Key, i=>i.Item);
         }
 
-        private static IEnumerable<ICacheArea> GetCacheAreaList()
-        {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    from t in assembly.GetTypes()
-                    where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
-                          t.GetConstructor(Type.EmptyTypes) != null
-                    select ((ICacheArea)Activator.CreateInstance(t))).ToList();
-        }
+        //private static IEnumerable<ICacheArea> GetCacheAreaList()
+        //{
+        //    var list = new List<ICacheArea>();
+        //    var assemblyList = AppDomain.CurrentDomain.GetAssemblies();
+        //    foreach (var assembly in assemblyList)
+        //    {
+        //        try
+        //        {
+        //            var typeList = assembly.GetTypes();
+        //            var tlst = (from t in typeList
+        //                        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+        //                            t.GetConstructor(Type.EmptyTypes) != null
+        //                        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+        //            if (tlst.Any())
+        //            {
+        //                list.AddRange(tlst);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Debug.WriteLine("Issue with " + assembly.FullName);
+        //        }
+        //    }
+        //    //return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+        //    //        from t in assembly.GetTypes()
+        //    //        where t.GetInterfaces().Contains(typeof(ICacheArea)) &&
+        //    //              t.GetConstructor(Type.EmptyTypes) != null
+        //    //        select ((ICacheArea)Activator.CreateInstance(t))).ToList();
+        //    return list;
+        //}
 
         public ICacheArea GetCacheArea(CacheArea area)
         {
@@ -91,7 +127,7 @@ namespace HttpObjectCaching
         {
             get
             {
-                var _cookieId = Cache.GetItem<string>(CacheArea.Thread, "_cookieId", () => Guid.NewGuid().ToString());
+                var _cookieId = Cache.GetItem<string>(CacheArea.Request, "_cookieId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null)
                 {
@@ -112,7 +148,21 @@ namespace HttpObjectCaching
                     {
                         try
                         {
-                            context.Response.SetCookie(new HttpCookie("cookieCache", _cookieId));
+                            cookie = new HttpCookie("cookieCache", _cookieId);
+                            cookie.HttpOnly = true;
+                            cookie.Path = FormsAuthentication.FormsCookiePath;
+                            cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
+
+                            // the browser will ignore the cookie if there are fewer than two dots
+                            // see cookie spec - http://curl.haxx.se/rfc/cookie_spec.html
+                            if (HttpContext.Current.Request.Url.Host.Split('.').Length > 2)
+                            {
+                                // by default the domain will be the host, so www.site.com will get site.com
+                                // this may be a problem if we have clientA.site.com and clientB.site.com
+                                // the following line will force the full domain name
+                                cookie.Domain = HttpContext.Current.Request.Url.Host;
+                            }
+                            context.Response.SetCookie(cookie);
                         }
                         catch (Exception)
                         {
@@ -122,14 +172,14 @@ namespace HttpObjectCaching
                 }
                 return _cookieId;
             }
-            set { Cache.SetItem<string>(CacheArea.Thread, "_cookieId",  value); }
+            set { Cache.SetItem<string>(CacheArea.Request, "_cookieId", value); }
         }
 
         public string SessionId
         {
             get
             {
-                var _sessionId = Cache.GetItem<string>(CacheArea.Thread, "_sessionId", () => Guid.NewGuid().ToString());
+                var _sessionId = Cache.GetItem<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null && context.Session != null)
                 {
@@ -142,21 +192,16 @@ namespace HttpObjectCaching
                 }
                 return _sessionId;
             }
-            set {Cache.SetItem<string>(CacheArea.Thread, "_sessionId",  value); }
+            set { Cache.SetItem<string>(CacheArea.Request, "_sessionId", value); }
         }
 
-        [Obsolete("ClearSession is deprecated, please use ClearCache(CacheArea.Session) instead.")]
-        public void ClearSession()
-        {
-            GetCacheArea(CacheArea.Session).ClearCache();
-        }
         public void ClearAllCacheAreas()
         {
             foreach (var area in CacheAreas.Keys)
             {
                 try
                 {
-                    GetCacheArea(area).ClearCache();
+                    AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
                 }
                 catch (NotImplementedException)
                 {
@@ -166,7 +211,7 @@ namespace HttpObjectCaching
         }
         public void ClearCache(CacheArea area)
         {
-            GetCacheArea(area).ClearCache();
+            AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
         }
 
         public IDictionary<string, object> GetDataDictionary(CacheArea area)
@@ -177,11 +222,6 @@ namespace HttpObjectCaching
                 return nvl.DataDictionary;
             }
             return null;
-        }
-        [Obsolete("Session is deprecated, please use GetDataDictionary(CacheArea.Session) instead.")]
-        public IDictionary<string, object> Session
-        {
-            get { return GetDataDictionary(CacheArea.Session); }
         }
     }
 }

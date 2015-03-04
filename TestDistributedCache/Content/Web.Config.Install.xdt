@@ -1,0 +1,7 @@
+﻿<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <HttpObjectCachingAreas>
+    <entries>
+      <add area="Distributed" class="HttpObjectCaching.Caches.TestCache, TestDistributedCache" xdt:Transform="SetAttributes" xdt:Locator="Match(area)"/>
+    </entries>
+  </HttpObjectCachingAreas>
+</configuration>

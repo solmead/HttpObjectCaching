@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HttpObjectCaching</RootNamespace>
     <AssemblyName>HttpObjectCaching</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -32,40 +32,9 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '3.5|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\3.5\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 4.0|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\net40\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 4.5|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\net45\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -76,27 +45,50 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
-    <Compile Include="CacheAreas\Caches\ApplicationBaseCache.cs" />
-    <Compile Include="CacheAreas\Caches\CookieCache.cs" />
-    <Compile Include="CacheAreas\Caches\GlobalCache.cs" />
-    <Compile Include="CacheAreas\Caches\RequestBaseCache.cs" />
-    <Compile Include="CacheAreas\Caches\RequestCache.cs" />
-    <Compile Include="CacheAreas\Caches\SessionCache.cs" />
-    <Compile Include="CacheAreas\Caches\ThreadCache.cs" />
-    <Compile Include="CacheAreas\DictionaryCache.cs" />
+    <Compile Include="Core\Configuration\CacheElement.cs" />
+    <Compile Include="Core\Configuration\CacheElementCollection.cs" />
+    <Compile Include="Core\Configuration\CacheRetrieverSection.cs" />
+    <Compile Include="Core\DataSources\ApplicationDataSource.cs" />
+    <Compile Include="Caches\CookieCache.cs" />
+    <Compile Include="Caches\GlobalCache.cs" />
+    <Compile Include="Caches\NoCache.cs" />
+    <Compile Include="Caches\RequestCache.cs" />
+    <Compile Include="Caches\SessionCache.cs" />
+    <Compile Include="Caches\ThreadCache.cs" />
+    <Compile Include="Core\DataCache.cs" />
+    <Compile Include="Core\DataSources\LocalDataSource.cs" />
+    <Compile Include="Core\DataSources\RequestDataSource.cs" />
+    <Compile Include="Core\DataSources\ThreadDataSource.cs" />
+    <Compile Include="Core\DictionaryCache.cs" />
     <Compile Include="CacheAreas\ICacheArea.cs" />
-    <Compile Include="CacheAreas\Caches\ThreadBaseCache.cs" />
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
+    <Compile Include="Core\IDataSource.cs" />
+    <Compile Include="Helpers\AsyncHelper.cs" />
+    <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\SerializableDictionary.cs" />
     <Compile Include="Helpers\SerializableList.cs" />
+    <Compile Include="Helpers\Serializer.cs" />
+    <Compile Include="Helpers\XmlSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Content\Web.Config.Transform" />
     <None Include="HttpObjectCaching.nuspec" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
   </Target>

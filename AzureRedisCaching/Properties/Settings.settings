@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="AzureRedisCaching.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="HostName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">[MyCacheNameHere].redis.cache.windows.net</Value>
+    </Setting>
+    <Setting Name="AllowNonSSL" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CacheKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">[CacheKeyHere]</Value>
+    </Setting>
+    <Setting Name="DefaultTimeoutMinutes" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">480</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

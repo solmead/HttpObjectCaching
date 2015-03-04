@@ -13,16 +13,17 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using DatabaseCaching.Migrations;
-using DatabaseCaching.Models;
-using DatabaseCaching.Properties;
+using SqlCeDatabaseCaching.Migrations;
+using SqlCeDatabaseCaching.Models;
+using SqlCeDatabaseCaching.Properties;
 using HttpObjectCaching;
+using SqlCeDatabaseCaching.Properties;
 
-namespace DatabaseCaching.Context
+namespace SqlCeDatabaseCaching.Context
 {
     class DataContext : DbContext
     {
-        private static string dbfile = Settings.Default.DBDirectory + "DbCache.sdf";
+        private static string dbfile = Settings.Default.DBDirectory + Settings.Default.BaseDBName + (Settings.Default.UseServerName ? "_" + Environment.MachineName : "") + ".sdf";
         private static FileInfo fi = new FileInfo(System.Web.Hosting.HostingEnvironment.MapPath(dbfile));
         private static string cecs = "Data Source=" + fi.FullName;
         private static string cs = "Provider=System.Data.SqlServerCe.4.0; " + cecs;
@@ -75,6 +76,7 @@ namespace DatabaseCaching.Context
         {
             get
             {
+
                 return Cache.GetItem<DataContext>(CacheArea.Request, "DbCachingDataContext", () => new DataContext());
             }
         }

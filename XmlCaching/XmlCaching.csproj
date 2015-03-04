@@ -32,9 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HttpObjectCaching, Version=4.6.5151.21071, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="HttpObjectCaching, Version=5.0.5539.42178, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\HttpObjectCaching.4.6.5151.21071\lib\net40\HttpObjectCaching.dll</HintPath>
+      <HintPath>..\packages\HttpObjectCaching.5.0.5539.42178\lib\net45\HttpObjectCaching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,11 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\Extensions.cs" />
-    <Compile Include="Helpers\Serializer.cs" />
-    <Compile Include="Helpers\XmlSerializer.cs" />
+    <Compile Include="Helpers\FileHandling.cs" />
     <Compile Include="Models\CachedEntry.cs" />
+    <Compile Include="Models\XmlDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -63,7 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Content\Web.Config.Transform" />
+    <None Include="Content\Web.Config.Install.xdt">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="PackNuget.bat" />
     <None Include="Properties\Settings.settings">
