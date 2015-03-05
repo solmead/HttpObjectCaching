@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
@@ -123,11 +124,9 @@ namespace HttpObjectCaching
             }
         }
 
-        public string CookieId
+        public static async Task<string> CookieId()
         {
-            get
-            {
-                var _cookieId = Cache.GetItem<string>(CacheArea.Request, "_cookieId", () => Guid.NewGuid().ToString());
+                var _cookieId = await Cache.GetItemAsync<string>(CacheArea.Request, "_cookieId",  () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null)
                 {
@@ -152,14 +151,8 @@ namespace HttpObjectCaching
                             cookie.HttpOnly = true;
                             cookie.Path = FormsAuthentication.FormsCookiePath;
                             cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
-
-                            // the browser will ignore the cookie if there are fewer than two dots
-                            // see cookie spec - http://curl.haxx.se/rfc/cookie_spec.html
                             if (HttpContext.Current.Request.Url.Host.Split('.').Length > 2)
                             {
-                                // by default the domain will be the host, so www.site.com will get site.com
-                                // this may be a problem if we have clientA.site.com and clientB.site.com
-                                // the following line will force the full domain name
                                 cookie.Domain = HttpContext.Current.Request.Url.Host;
                             }
                             context.Response.SetCookie(cookie);
@@ -172,36 +165,39 @@ namespace HttpObjectCaching
                 }
                 return _cookieId;
             }
-            set { Cache.SetItem<string>(CacheArea.Request, "_cookieId", value); }
+        public static async Task CookieIdSet(string value) { 
+            await Cache.SetItemAsync<string>(CacheArea.Request, "_cookieId", value); 
         }
 
-        public string SessionId
+        public static async Task<string> SessionId()
         {
-            get
+            var _sessionId = await Cache.GetItemAsync<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
+            var context = HttpContext.Current;
+            if (context != null && context.Session != null)
             {
-                var _sessionId = Cache.GetItem<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
-                var context = HttpContext.Current;
-                if (context != null && context.Session != null)
-                {
-                    _sessionId = context.Session.SessionID;
-                    context.Session["__MySessionLock"] = "112233";
-                }
-                if (string.IsNullOrWhiteSpace(_sessionId))
-                {
-                    _sessionId = Guid.NewGuid().ToString();
-                }
-                return _sessionId;
+                _sessionId = context.Session.SessionID;
+                context.Session["__MySessionLock"] = "112233";
             }
-            set { Cache.SetItem<string>(CacheArea.Request, "_sessionId", value); }
+            if (string.IsNullOrWhiteSpace(_sessionId))
+            {
+                _sessionId = Guid.NewGuid().ToString();
+            }
+            return _sessionId;
         }
 
-        public void ClearAllCacheAreas()
+        public static async Task SessionIdSet(string value)
+        {
+            await Cache.SetItemAsync<string>(CacheArea.Request, "_sessionId", value);
+        }
+        
+
+        public async Task ClearAllCacheAreas()
         {
             foreach (var area in CacheAreas.Keys)
             {
                 try
                 {
-                    AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
+                    await GetCacheArea(area).ClearCacheAsync();
                 }
                 catch (NotImplementedException)
                 {
@@ -209,17 +205,17 @@ namespace HttpObjectCaching
                 }
             }
         }
-        public void ClearCache(CacheArea area)
+        public async Task ClearCache(CacheArea area)
         {
-            AsyncHelper.RunSync(() => GetCacheArea(area).ClearCacheAsync());
+            await GetCacheArea(area).ClearCacheAsync();
         }
 
-        public IDictionary<string, object> GetDataDictionary(CacheArea area)
+        public async Task<IDictionary<string, object>> GetDataDictionary(CacheArea area)
         {
             var nvl = GetCacheArea(area) as INameValueLister;
             if (nvl != null)
             {
-                return nvl.DataDictionary;
+                return await nvl.DataDictionaryGet();
             }
             return null;
         }

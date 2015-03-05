@@ -31,17 +31,17 @@ namespace HttpObjectCaching.Core
         }
 
         public BaseCacheArea CacheToType { get; set; }
-        private Func<string> GetInstanceId = null;
+        private Func<Task<string>> GetInstanceId = null;
         public double LifeSpanInSeconds { get; set; }
 
-        public DictionaryCache(BaseCacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
+        public DictionaryCache(BaseCacheArea cacheTo, Func<Task<string>> getInstanceId, double lifeSpanInSeconds = 30*60)
         {
             LifeSpanInSeconds = lifeSpanInSeconds;
             CacheToType = cacheTo;
             GetInstanceId = getInstanceId;
         }
 
-        public DictionaryCache(ICacheArea cacheTo, Func<string> getInstanceId, double lifeSpanInSeconds = 30*60)
+        public DictionaryCache(ICacheArea cacheTo, Func<Task<string>> getInstanceId, double lifeSpanInSeconds = 30*60)
         {
             LifeSpanInSeconds = lifeSpanInSeconds;
             _cache = cacheTo;
@@ -52,13 +52,13 @@ namespace HttpObjectCaching.Core
         public string Name { get; protected set; }
 
 
-        public IDictionary<string, object> DataDictionary
-        {
-            get
-            {
-                return AsyncHelper.RunSync(DataDictionaryGet);
-            }
-        }
+        //public IDictionary<string, object> DataDictionary
+        //{
+        //    get
+        //    {
+        //        return AsyncHelper.RunSync(DataDictionaryGet);
+        //    }
+        //}
 
         public async Task<IDictionary<string, object>> DataDictionaryGet()
         {
@@ -82,7 +82,7 @@ namespace HttpObjectCaching.Core
                     async () =>
                         await CacheTo.GetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(
                             Name + "_DataDictionary_Base_" + GetInstanceId(),
-                            async () => await AsyncHelper.RunAsync(() => new ConcurrentDictionary<string, CachedEntryBase>()), LifeSpanInSeconds), 1);
+                            async () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds), 1);
             //}
         }
 

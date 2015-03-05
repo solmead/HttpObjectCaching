@@ -33,7 +33,7 @@ namespace AzureRedisCaching.Models
                 //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
                 if (!string.IsNullOrWhiteSpace(t))
                 {
-                    return Serializer.Deserialize<CachedEntry<tt>>(t);
+                    return BinarySerializer.Deserialize<CachedEntry<tt>>(t);
                 }
             }
             catch
@@ -53,7 +53,7 @@ namespace AzureRedisCaching.Models
             object empty = default(tt);
             if (comp != empty)
             {
-                var s = Serializer.Serialize(item, false);
+                var s = BinarySerializer.Serialize(item);
                 if (item.TimeOut.HasValue)
                 {
                     await CacheDatabase.StringSetAsync(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
