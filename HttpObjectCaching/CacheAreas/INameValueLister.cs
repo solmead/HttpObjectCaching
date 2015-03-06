@@ -8,7 +8,7 @@ namespace HttpObjectCaching.CacheAreas
 {
     public interface INameValueLister
     {
-        IDictionary<string, object> DataDictionary { get;  }
+        //IDictionary<string, object> DataDictionary { get;  }
         Task<IDictionary<string, object>> DataDictionaryGet();
     }
 }

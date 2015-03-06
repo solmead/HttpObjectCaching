@@ -11,25 +11,6 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class ApplicationDataSource : IDataSource
     {
-        public CachedEntry<tt> GetItem<tt>(string name)
-        {
-            return AsyncHelper.RunSync(() => GetItemAsync<tt>(name));
-        }
-
-        public void SetItem<tt>(CachedEntry<tt> item)
-        {
-            AsyncHelper.RunSync(() => SetItemAsync<tt>(item));
-        }
-
-        public void DeleteItem(string name)
-        {
-            AsyncHelper.RunSync(() => DeleteItemAsync(name));
-        }
-
-        public void DeleteAll()
-        {
-            AsyncHelper.RunSync(DeleteAllAsync);
-        }
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             try
