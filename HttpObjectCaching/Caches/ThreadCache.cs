@@ -6,7 +6,7 @@
 //    public class ThreadCache : DictionaryCache
 //    {
 //        public ThreadCache()
-//            : base(new DataCache(new ThreadDataSource()), () => "thread", 1)
+//            : base(new DataCache(new ThreadDataSource()),async () => "thread", 1)
 //        {
 //            Area = CacheArea.Thread;
 //            Name = "DefaultThread";
