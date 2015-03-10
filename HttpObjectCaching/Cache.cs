@@ -222,28 +222,36 @@ namespace HttpObjectCaching
         /// <returns></returns>
         public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
         {
-            double? lSS = lifeSpanSeconds;
-            if (lSS == 0)
+            try
             {
-                lSS = null;
-            }
-            if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
-            {
+
+                double? lSS = lifeSpanSeconds;
+                if (lSS == 0)
+                {
+                    lSS = null;
+                }
+                if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
+                {
+                    if (createMethod != null)
+                    {
+                        return await createMethod();
+                    }
+                    return default(tt);
+                }
+                var ca = CacheSystem.Instance.GetCacheArea(area);
+                if (ca != null)
+                {
+                    return await ca.GetItemAsync<tt>(name, createMethod, lSS);
+                }
+
                 if (createMethod != null)
                 {
                     return await createMethod();
                 }
-                return default(tt);
             }
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
+            catch (Exception ex)
             {
-                return await ca.GetItemAsync<tt>(name, createMethod, lSS);
-            }
-
-            if (createMethod != null)
-            {
-                return await createMethod();
+                throw new Exception("Error:" + ex.Message +" retrieving cache item [" + name + "] on cache [" + area.ToString() + "]", ex);
             }
             return default(tt);
         }

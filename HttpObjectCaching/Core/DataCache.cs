@@ -46,9 +46,9 @@ namespace HttpObjectCaching.Core
                 {
                     tObj = await createMethod();
                     entry.Item = tObj;
+                    await SaveItemAsync(entry);
                 }
             }
-            await SaveItemAsync(entry);
             return tObj;
         }
 
