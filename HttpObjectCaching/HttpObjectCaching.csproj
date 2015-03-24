@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+    <Compile Include="CacheEx.cs" />
     <Compile Include="Core\Configuration\CacheElement.cs" />
     <Compile Include="Core\Configuration\CacheElementCollection.cs" />
     <Compile Include="Core\Configuration\CacheRetrieverSection.cs" />
