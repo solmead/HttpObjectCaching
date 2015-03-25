@@ -66,7 +66,6 @@
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Core\IDataSource.cs" />
-    <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />
     <Compile Include="Helpers\Extensions.cs" />
