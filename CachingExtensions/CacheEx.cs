@@ -10,12 +10,12 @@ namespace HttpObjectCaching
 {
     public static class CacheEx
     {
-        private static TResult RunSync<TResult>(Func<Task<TResult>> func)
+        public static TResult RunSync<TResult>(Func<Task<TResult>> func)
         {
             return Nito.AsyncEx.AsyncContext.Run(func);
         }
 
-        private static void RunSync(Func<Task> func)
+        public static void RunSync(Func<Task> func)
         {
             Nito.AsyncEx.AsyncContext.Run(func);
         }
