@@ -16,11 +16,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlCeDatabaseCaching", "Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCaching", "XmlCaching\XmlCaching.csproj", "{4C934A9F-65DF-4B5F-88F5-C0B25F698416}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCaching", "AzureCaching\AzureCaching.csproj", "{D7EEF9A3-D40F-476B-9E6F-3961A702F031}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDistributedCache", "TestDistributedCache\TestDistributedCache.csproj", "{1F99E261-74A7-486B-B08E-DF7FB8DEB49A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRedisCaching", "AzureRedisCaching\AzureRedisCaching.csproj", "{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CachingSyncExtensions", "CachingExtensions\CachingSyncExtensions.csproj", "{2FF1662C-E829-4E88-8819-3A4F766FDB90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,18 +38,14 @@ Global
 		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C934A9F-65DF-4B5F-88F5-C0B25F698416}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7EEF9A3-D40F-476B-9E6F-3961A702F031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7EEF9A3-D40F-476B-9E6F-3961A702F031}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7EEF9A3-D40F-476B-9E6F-3961A702F031}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7EEF9A3-D40F-476B-9E6F-3961A702F031}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F99E261-74A7-486B-B08E-DF7FB8DEB49A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F99E261-74A7-486B-B08E-DF7FB8DEB49A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F99E261-74A7-486B-B08E-DF7FB8DEB49A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F99E261-74A7-486B-B08E-DF7FB8DEB49A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,1 +1,0 @@
-"..\.nuget\nuget" pack AzureCaching.csproj -IncludeReferencedProjects
