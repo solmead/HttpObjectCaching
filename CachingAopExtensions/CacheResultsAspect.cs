@@ -38,7 +38,7 @@ namespace CachingAopExtensions
                     retType = retType.GetGenericArguments()[0];
                 }
 
-                object cachedValue = CacheEx.GetItem(CacheArea, name, retType, null, LifeSpanSeconds);
+                object cachedValue = Cache.GetItem(CacheArea, name, retType, null, LifeSpanSeconds);
 
                 if (cachedValue != null)
                 {
@@ -74,7 +74,7 @@ namespace CachingAopExtensions
                         task.ContinueWith(
                             t =>
                             {
-                                CacheEx.SetItem(CacheArea, name, retType, t.Result, LifeSpanSeconds);
+                                Cache.SetItem(CacheArea, name, retType, t.Result, LifeSpanSeconds);
                                 //MemoryCache.Default[args.Method.Name] = t.Result;
                                 return t.Result;
                             });
@@ -82,7 +82,7 @@ namespace CachingAopExtensions
                 else
                 {
 
-                    CacheEx.SetItem(CacheArea, name, retType, args.ReturnValue, LifeSpanSeconds); 
+                    Cache.SetItem(CacheArea, name, retType, args.ReturnValue, LifeSpanSeconds); 
                 }
 
 

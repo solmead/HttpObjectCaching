@@ -17,6 +17,38 @@ namespace HttpObjectCaching.Core.DataSources
 
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
+            return GetItem<tt>(name);
+        }
+
+        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
+        {
+            SetItem(item);
+        }
+
+        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        {
+            return GetItem(name, type);
+        }
+
+        public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        {
+            SetItem(type, item);
+        }
+
+        public async Task DeleteItemAsync(string name)
+        {
+            DeleteItem(name);
+        }
+
+        public async Task DeleteAllAsync()
+        {
+            DeleteAll();
+        }
+
+
+
+        public CachedEntry<tt> GetItem<tt>(string name)
+        {
             CachedEntryBase itm2;
             CachedEntry<tt> itm;
             _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
@@ -24,14 +56,14 @@ namespace HttpObjectCaching.Core.DataSources
             return itm;
         }
 
-        public async Task SetItemAsync<tt>(CachedEntry<tt> item)
+        public void SetItem<tt>(CachedEntry<tt> item)
         {
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
         }
 
-        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        public CachedEntry<object> GetItem(string name, Type type)
         {
             CachedEntryBase itm2;
             CachedEntry<object> itm;
@@ -40,20 +72,20 @@ namespace HttpObjectCaching.Core.DataSources
             return itm;
         }
 
-        public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        public void SetItem(Type type, CachedEntry<object> item)
         {
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
         }
 
-        public async Task DeleteItemAsync(string name)
+        public void DeleteItem(string name)
         {
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(name.ToUpper(), out itm2);
         }
 
-        public async Task DeleteAllAsync()
+        public void DeleteAll()
         {
             //throw new NotImplementedException();
         }

@@ -52,10 +52,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CachingExtensions\CachingSyncExtensions.csproj">
-      <Project>{2ff1662c-e829-4e88-8819-3a4f766fdb90}</Project>
-      <Name>CachingSyncExtensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HttpObjectCaching\HttpObjectCaching.csproj">
       <Project>{f892df2d-7a09-481b-b872-738b5af15cb5}</Project>
       <Name>HttpObjectCaching</Name>

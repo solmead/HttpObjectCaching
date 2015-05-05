@@ -10,15 +10,15 @@ namespace HttpObjectCaching
 {
     public static class CacheEx
     {
-        public static TResult RunSync<TResult>(Func<Task<TResult>> func)
-        {
-            return Nito.AsyncEx.AsyncContext.Run(func);
-        }
+        //public static TResult RunSync<TResult>(Func<Task<TResult>> func)
+        //{
+        //    return Nito.AsyncEx.AsyncContext.Run(func);
+        //}
 
-        public static void RunSync(Func<Task> func)
-        {
-            Nito.AsyncEx.AsyncContext.Run(func);
-        }
+        //public static void RunSync(Func<Task> func)
+        //{
+        //    Nito.AsyncEx.AsyncContext.Run(func);
+        //}
 
 
         /// <summary>
@@ -33,11 +33,11 @@ namespace HttpObjectCaching
         //[Obsolete("Use Async Version")]
         public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
         {
-            return RunSync(() => Cache.GetItemAsync<tt>(area, name, async () => createMethod(), lifeSpanSeconds));
+            return Cache.GetItem<tt>(area, name,  createMethod, lifeSpanSeconds);
         }
         public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
         {
-            return RunSync(() => Cache.GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds));
+            return Cache.GetItem(area, name, type, createMethod, lifeSpanSeconds);
         }
 
         /// <summary>
@@ -141,11 +141,11 @@ namespace HttpObjectCaching
         //[Obsolete("Use Async Version")]
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
-            RunSync(() => Cache.SetItemAsync<tt>(area, name, obj));
+            Cache.SetItem<tt>(area, name, obj);
         }
         public static void SetItem(CacheArea area, string name, Type type, object obj)
         {
-            RunSync(() => Cache.SetItemAsync(area, name, type, obj));
+            Cache.SetItem(area, name, type, obj);
         }
 
         /// <summary>
@@ -159,11 +159,11 @@ namespace HttpObjectCaching
         //[Obsolete("Use Async Version")]
         public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
-            RunSync(() => Cache.SetItemAsync<tt>(area, name, obj, lifeSpanSeconds));
+            Cache.SetItem<tt>(area, name, obj, lifeSpanSeconds);
         }
         public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
         {
-            RunSync(() => Cache.SetItemAsync(area, name, type, obj, lifeSpanSeconds));
+            Cache.SetItem(area, name, type, obj, lifeSpanSeconds);
         }
 
 

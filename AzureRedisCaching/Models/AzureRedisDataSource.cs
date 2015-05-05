@@ -140,5 +140,125 @@ namespace AzureRedisCaching.Models
                 }
             }
         }
+
+
+
+
+        
+        public CachedEntry<tt> GetItem<tt>(string name)
+        {
+            try
+            {
+                var t =  CacheDatabase.StringGet(name.ToUpper());
+                //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    return BinarySerializer.Deserialize<CachedEntry<tt>>(t);
+                }
+            }
+            catch
+            {
+                //throw;
+            }
+            return default(CachedEntry<tt>);
+        }
+
+        public void SetItem<tt>(CachedEntry<tt> item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException();
+            }
+            object comp = item.Item;
+            object empty = default(tt);
+            if (comp != empty)
+            {
+                var s = BinarySerializer.Serialize(item);
+                if (item.TimeOut.HasValue)
+                {
+                     CacheDatabase.StringSet(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s,
+                    //    item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds);
+                }
+                else
+                {
+                     CacheDatabase.StringSet(item.Name.ToUpper(), s,
+                        new TimeSpan(0, Settings.Default.DefaultTimeoutMinutes, 0));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s);
+                }
+            }
+            else
+            {
+                 DeleteItem(item.Name);
+            }
+        }
+
+        public CachedEntry<object> GetItem(string name, Type type)
+        {
+            try
+            {
+                var t =  CacheDatabase.StringGet(name.ToUpper());
+                //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    return BinarySerializer.Deserialize(t, type) as CachedEntry<object>;
+                }
+            }
+            catch
+            {
+                //throw;
+            }
+            return null;
+        }
+
+        public void SetItem(Type type, CachedEntry<object> item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException();
+            }
+            object comp = item.Item;
+            object empty = null;
+            if (comp != empty)
+            {
+                var s = BinarySerializer.Serialize(item, type);
+                if (item.TimeOut.HasValue)
+                {
+                     CacheDatabase.StringSet(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s,
+                    //    item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds);
+                }
+                else
+                {
+                     CacheDatabase.StringSet(item.Name.ToUpper(), s,
+                        new TimeSpan(0, Settings.Default.DefaultTimeoutMinutes, 0));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s);
+                }
+            }
+            else
+            {
+                 DeleteItem(item.Name);
+            }
+        }
+
+        public void DeleteItem(string name)
+        {
+             CacheDatabase.KeyDelete(name.ToUpper());
+            //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + name, null);
+        }
+
+        public void DeleteAll()
+        {
+            foreach (var ep in Connection.GetEndPoints())
+            {
+                var server =  Connection.GetServer(ep);
+                var keys = server.Keys();
+                foreach (var key in keys)
+                {
+                    Console.WriteLine("Removing Key {0} from cache", key.ToString());
+                     CacheDatabase.KeyDelete(key);
+                }
+            }
+        }
     }
 }

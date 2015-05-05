@@ -33,7 +33,7 @@ namespace CachingAopExtensions
                     retType = retType.GetGenericArguments()[0];
                 }
 
-                args.ReturnValue = CacheEx.GetItem(CacheArea, name, retType, ()=>
+                args.ReturnValue = Cache.GetItem(CacheArea, name, retType, ()=>
                 {
                     args.Proceed();
                     return args.ReturnValue;

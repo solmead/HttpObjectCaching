@@ -10,9 +10,16 @@ namespace HttpObjectCaching.CacheAreas
     {
         CacheArea Area { get; }
         string Name { get; }
-        //void ClearCache();
-        //tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null);
-        //void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null);
+
+
+        void ClearCache();
+        tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null);
+        void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null);
+        object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null);
+        void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null);
+
+
+
         Task ClearCacheAsync();
         Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null);
         Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null);
