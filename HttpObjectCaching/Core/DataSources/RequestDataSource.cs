@@ -44,6 +44,39 @@ namespace HttpObjectCaching.Core.DataSources
             }
         }
 
+        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        {
+            var context = HttpContext.Current;
+            if (context != null)
+            {
+                //lock (requestSetLock)
+                {
+                    if (context.Items.Contains(name.ToUpper()))
+                    {
+                        var t = (CachedEntry<object>)context.Items[name.ToUpper()];
+                        return t;
+                    }
+                }
+            }
+            return default(CachedEntry<object>);
+        }
+
+        public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        {
+            var context = HttpContext.Current;
+            if (context != null)
+            {
+                //lock (requestSetLock)
+                {
+                    if (context.Items.Contains(item.Name.ToUpper()))
+                    {
+                        context.Items.Remove(item.Name.ToUpper());
+                    }
+                    context.Items.Add(item.Name.ToUpper(), item);
+                }
+            }
+        }
+
         public async Task DeleteItemAsync(string name)
         {
             var context = HttpContext.Current;

@@ -15,6 +15,8 @@ namespace HttpObjectCaching.Core
         //void DeleteAll();
         Task<CachedEntry<tt>> GetItemAsync<tt>(string name);
         Task SetItemAsync<tt>(CachedEntry<tt> item);
+        Task<CachedEntry<object>> GetItemAsync(string name, Type type);
+        Task SetItemAsync(Type type, CachedEntry<object> item);
         Task DeleteItemAsync(string name);
         Task DeleteAllAsync();
     }

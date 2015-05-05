@@ -73,6 +73,54 @@ namespace AzureRedisCaching.Models
             }
         }
 
+        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        {
+            try
+            {
+                var t = await CacheDatabase.StringGetAsync(name.ToUpper());
+                //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    return BinarySerializer.Deserialize(t, type) as CachedEntry<object>;
+                }
+            }
+            catch
+            {
+                //throw;
+            }
+            return null;
+        }
+
+        public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException();
+            }
+            object comp = item.Item;
+            object empty = null;
+            if (comp != empty)
+            {
+                var s = BinarySerializer.Serialize(item, type);
+                if (item.TimeOut.HasValue)
+                {
+                    await CacheDatabase.StringSetAsync(item.Name.ToUpper(), s, item.TimeOut.Value.Subtract(DateTime.Now));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s,
+                    //    item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds);
+                }
+                else
+                {
+                    await CacheDatabase.StringSetAsync(item.Name.ToUpper(), s,
+                        new TimeSpan(0, Settings.Default.DefaultTimeoutMinutes, 0));
+                    //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + item.Name, s);
+                }
+            }
+            else
+            {
+                await DeleteItemAsync(item.Name);
+            }
+        }
+
         public async Task DeleteItemAsync(string name)
         {
             await CacheDatabase.KeyDeleteAsync(name.ToUpper());

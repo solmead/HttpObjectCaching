@@ -31,6 +31,22 @@ namespace HttpObjectCaching.Core.DataSources
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
         }
 
+        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        {
+            CachedEntryBase itm2;
+            CachedEntry<object> itm;
+            _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
+            itm = itm2 as CachedEntry<object>;
+            return itm;
+        }
+
+        public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        {
+            CachedEntryBase itm2;
+            _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
+            _baseDictionary.TryAdd(item.Name.ToUpper(), item);
+        }
+
         public async Task DeleteItemAsync(string name)
         {
             CachedEntryBase itm2;

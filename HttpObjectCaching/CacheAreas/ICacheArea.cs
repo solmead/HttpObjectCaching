@@ -16,5 +16,7 @@ namespace HttpObjectCaching.CacheAreas
         Task ClearCacheAsync();
         Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null);
         Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null);
+        Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null);
+        Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null);
     }
 }

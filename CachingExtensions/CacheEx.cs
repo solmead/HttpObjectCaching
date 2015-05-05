@@ -35,6 +35,10 @@ namespace HttpObjectCaching
         {
             return RunSync(() => Cache.GetItemAsync<tt>(area, name, async () => createMethod(), lifeSpanSeconds));
         }
+        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
+        {
+            return RunSync(() => Cache.GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds));
+        }
 
         /// <summary>
         /// Pull an item from the cache
@@ -50,6 +54,10 @@ namespace HttpObjectCaching
         {
             return GetItem<tt>(area, name, createMethod, 0);
         }
+        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod)
+        {
+            return GetItem(area, name, type, createMethod, 0);
+        }
 
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -62,6 +70,10 @@ namespace HttpObjectCaching
         public static tt GetItem<tt>(CacheArea area, string name)
         {
             return GetItem<tt>(area, name, () => default(tt), 0);
+        }
+        public static object GetItem(CacheArea area, string name, Type type)
+        {
+            return GetItem(area, name, type, () => null, 0);
         }
 
         /// <summary>
@@ -77,6 +89,10 @@ namespace HttpObjectCaching
         {
             return GetItem<tt>(area, name, () => default(tt), lifeSpanSeconds);
         }
+        public static object GetItem(CacheArea area, string name, Type type, double lifeSpanSeconds)
+        {
+            return GetItem(area, name, type, () => null, lifeSpanSeconds);
+        }
 
         /// <summary>
         /// Pull an item from the cache
@@ -90,6 +106,10 @@ namespace HttpObjectCaching
         public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue)
         {
             return GetItem<tt>(area, name, () => defaultValue, 0);
+        }
+        public static object GetItem(CacheArea area, string name, Type type, object defaultValue)
+        {
+            return GetItem(area, name, type, () => defaultValue, 0);
         }
 
         /// <summary>
@@ -106,6 +126,10 @@ namespace HttpObjectCaching
         {
             return GetItem<tt>(area, name, () => defaultValue, lifeSpanSeconds);
         }
+        public static object GetItem(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds)
+        {
+            return GetItem(area, name, type, () => defaultValue, lifeSpanSeconds);
+        }
 
         /// <summary>
         /// Puts an item into the cache
@@ -118,6 +142,10 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
             RunSync(() => Cache.SetItemAsync<tt>(area, name, obj));
+        }
+        public static void SetItem(CacheArea area, string name, Type type, object obj)
+        {
+            RunSync(() => Cache.SetItemAsync(area, name, type, obj));
         }
 
         /// <summary>
@@ -132,6 +160,10 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
             RunSync(() => Cache.SetItemAsync<tt>(area, name, obj, lifeSpanSeconds));
+        }
+        public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
+        {
+            RunSync(() => Cache.SetItemAsync(area, name, type, obj, lifeSpanSeconds));
         }
 
 
