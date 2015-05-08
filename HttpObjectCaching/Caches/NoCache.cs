@@ -27,6 +27,21 @@ namespace HttpObjectCaching.Caches
             
         }
 
+        public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
+        {
+
+            if (createMethod != null)
+            {
+                return createMethod();
+            }
+            return null;
+        }
+
+        public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        {
+            
+        }
+
         public async Task ClearCacheAsync()
         {
             
@@ -46,5 +61,18 @@ namespace HttpObjectCaching.Caches
             
         }
 
+        public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        {
+            if (createMethod != null)
+            {
+                return await createMethod();
+            }
+            return null;
+        }
+
+        public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        {
+            
+        }
     }
 }

@@ -58,7 +58,6 @@
     </Compile>
     <Compile Include="XmlCache.cs" />
     <Compile Include="XmlCacheBase.cs" />
-    <Compile Include="XmlCacheCombined.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
