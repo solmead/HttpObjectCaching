@@ -28,12 +28,12 @@ namespace CachingAopExtensions
             if (mthInfo != null)
             {
                 var retType = mthInfo.ReflectedType;
-                if (retType.IsGenericType && typeof (Task).IsAssignableFrom(retType))
+                if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
                 {
                     retType = retType.GetGenericArguments()[0];
                 }
 
-                args.ReturnValue = Cache.GetItem(CacheArea, name, retType, ()=>
+                args.ReturnValue = Cache.GetItem(CacheArea, name, retType, () =>
                 {
                     args.Proceed();
                     return args.ReturnValue;
