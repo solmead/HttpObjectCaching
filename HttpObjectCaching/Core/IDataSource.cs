@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls.WebParts;
 using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching.Core
@@ -22,5 +23,18 @@ namespace HttpObjectCaching.Core
         Task SetItemAsync(Type type, CachedEntry<object> item);
         Task DeleteItemAsync(string name);
         Task DeleteAllAsync();
+
+
+
+        List<tt> GetList<tt>(string name);
+        void AddToList<tt>(string name, tt item);
+        void ClearList<tt>(string name);
+        void RemoveFromList<tt>(string name, tt item);
+        void RemoveFromListAt<tt>(string name, int index);
+        void InsertIntoList<tt>(string name, int index, tt item);
+        void SetInList<tt>(string name, int index, tt item);
+        void CopyToList<tt>(string name, tt[] array, int arrayIndex);
+
+
     }
 }

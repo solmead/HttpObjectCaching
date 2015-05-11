@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HttpObjectCaching.Core;
 
 namespace HttpObjectCaching.CacheAreas
 {
@@ -10,6 +11,8 @@ namespace HttpObjectCaching.CacheAreas
     {
         CacheArea Area { get; }
         string Name { get; }
+
+        IDataSource DataSource { get; }
 
 
         void ClearCache();

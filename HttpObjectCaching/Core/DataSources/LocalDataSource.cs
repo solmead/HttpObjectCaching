@@ -89,5 +89,71 @@ namespace HttpObjectCaching.Core.DataSources
         {
             //throw new NotImplementedException();
         }
+
+
+
+        private CachedEntry<tt> LoadItem<tt>(string name, double? lifeSpanSeconds = null)
+        {
+            var entry = GetItem<tt>(name);
+            if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
+            {
+                entry = new CachedEntry<tt>()
+                {
+                    Name = name,
+                    Changed = DateTime.Now,
+                    Created = DateTime.Now
+                };
+                if (lifeSpanSeconds.HasValue)
+                {
+                    entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                }
+            }
+            return entry;
+        }
+        public List<tt> GetList<tt>(string name)
+        {
+            var lstEntry = LoadItem<List<tt>>(name);
+            if (lstEntry.Item == null)
+            {
+                lstEntry.Item = new List<tt>();
+                SetItem(lstEntry);
+            }
+            return lstEntry.Item;
+        }
+
+        public void AddToList<tt>(string name, tt item)
+        {
+            GetList<tt>(name).Add(item);
+        }
+
+        public void ClearList<tt>(string name)
+        {
+            GetList<tt>(name).Clear();
+        }
+
+        public void RemoveFromList<tt>(string name, tt item)
+        {
+            GetList<tt>(name).Remove(item);
+        }
+
+        public void RemoveFromListAt<tt>(string name, int index)
+        {
+            GetList<tt>(name).RemoveAt(index);
+        }
+
+        public void InsertIntoList<tt>(string name, int index, tt item)
+        {
+            GetList<tt>(name).Insert(index, item);
+        }
+
+        public void SetInList<tt>(string name, int index, tt item)
+        {
+            GetList<tt>(name)[index] = item;
+        }
+
+        public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
+        {
+            GetList<tt>(name).CopyTo(array, arrayIndex);
+        }
     }
 }
