@@ -9,28 +9,28 @@ using Generic = System.Collections.Generic;
 
 namespace HttpObjectCaching.Core.Collections
 {
-    public class List<TT> : IList<TT>
+    public class ListOnCache<TT> : IList<TT>
     {
         private readonly IDataSource _dataSource = null;
 
         public string Name { get; private set; }
-        public double LifeSpanInSeconds { get; set; }
+        //public double LifeSpanInSeconds { get; set; }
         public IDataSource DataSource { get { return _dataSource; } }
 
-        public List(string name, CacheArea cache, double lifeSpanInSeconds)
+        public ListOnCache(string name, CacheArea cache)
         {
             Name = name;
             _dataSource = CacheSystem.Instance.GetCacheArea(cache).DataSource;
-            LifeSpanInSeconds = lifeSpanInSeconds;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
         }
 
-        public Generic.List<TT> BaseList
+        private Generic.List<TT> BaseList
         {
             get { return _dataSource.GetList<TT>(Name); }
         }
 
 
-        public Generic.List<TT> LocalList
+        private Generic.List<TT> LocalList
         {
             get
             {
