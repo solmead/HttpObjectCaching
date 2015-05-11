@@ -29,7 +29,7 @@ namespace HttpObjectCaching.Core
                 return CacheSystem.Instance.GetCacheArea((CacheArea) CacheToType);
             }
         }
-
+        public IDataSource DataSource { get { return CacheTo.DataSource; } }
         public BaseCacheArea CacheToType { get; set; }
         private Func<string> GetInstanceId = null;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.Core;
 
 namespace HttpObjectCaching.Caches
 {
@@ -8,6 +9,8 @@ namespace HttpObjectCaching.Caches
     {
         public CacheArea Area { get { return CacheArea.None; } }
         public string Name { get { return "DefaultNone"; } }
+        public IDataSource DataSource { get; private set; }
+
         public void ClearCache()
         {
             

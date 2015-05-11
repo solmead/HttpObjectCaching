@@ -1,120 +1,130 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Reflection;
-//using System.Runtime.CompilerServices;
-//using System.Text;
-//using System.Threading.Tasks;
-//using HttpObjectCaching;
-//using PostSharp.Aspects;
-//using PostSharp.Aspects.Advices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+using CachingAopExtensions.Naming;
+using HttpObjectCaching;
+using PostSharp.Aspects;
+using PostSharp.Aspects.Advices;
 
-//namespace CachingAopExtensions
-//{
-//    [Serializable]
-//    public class CacheResultsAspect : OnMethodBoundaryAspect
-//    {
-//        public CacheArea CacheArea { get; set; }
-//        public string BaseName { get; set; }
-//        public double LifeSpanSeconds { get; set; }
+namespace CachingAopExtensions
+{
+    [Serializable]
+    public class CachingAspect : OnMethodBoundaryAspect
+    {
+        public CacheArea CacheArea { get; set; }
+        public string BaseName { get; set; }
+        public double LifeSpanSeconds { get; set; }
+        public string Name { get; set; }
+        public ICacheEntryNamer Namer { get; set; }
 
-//        public CacheResultsAspect()
-//        {
-//            ApplyToStateMachine = false;
-//        }
+        public CachingAspect()
+        {
+            ApplyToStateMachine = false;
+        }
 
-//        public override void OnEntry(MethodExecutionArgs args)
-//        {
-//            var name = BaseName + "_" + args.Method.Module.Name + "_" + args.Method.Name;
-//            for (int i = 0; i < args.Arguments.Count; i++)
-//            {
-//                name = name + "_" + args.Arguments[i];
-//            }
-//            var mthInfo = args.Method as MethodInfo;
-//            if (mthInfo != null)
-//            {
-//                var retType = mthInfo.ReturnType;
-//                if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
-//                {
-//                    retType = retType.GetGenericArguments()[0];
-//                }
+        public override void OnEntry(MethodExecutionArgs args)
+        {
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                Namer = new StringNamer(Name);
+            }
+            if (Namer == null)
+            {
+                Namer = new BaseNamer();
+            }
+            var name = Namer.GetName(BaseName, args);
+            var mthInfo = args.Method as MethodInfo;
+            if (mthInfo != null)
+            {
+                var retType = mthInfo.ReturnType;
+                if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
+                {
+                    retType = retType.GetGenericArguments()[0];
+                }
 
-//                object cachedValue = Cache.GetItem(CacheArea, name, retType, null, LifeSpanSeconds);
+                object cachedValue = Cache.GetItem(CacheArea, name, retType, null, LifeSpanSeconds);
 
-//                if (cachedValue != null)
-//                {
-//                    retType = mthInfo.ReturnType;
-//                    if (retType.IsGenericType && typeof (Task).IsAssignableFrom(retType))
-//                    {
-//                        args.ReturnValue = FromResult((dynamic) cachedValue);
-//                    }
-//                    else
-//                    {
-//                        args.ReturnValue = cachedValue;
-//                    }
-
-
-//                    args.FlowBehavior = FlowBehavior.Return;
-//                }
-
-//            }
-
-
-
-
-            
-//        }
-
-//        public override void OnSuccess(MethodExecutionArgs args)
-//        {
-//            var name = BaseName + "_" + args.Method.Module.Name + "_" + args.Method.Name;
-//            for (int i = 0; i < args.Arguments.Count; i++)
-//            {
-//                name = name + "_" + args.Arguments[i];
-//            }
-
-//            var mthInfo = args.Method as MethodInfo;
-//            if (mthInfo != null)
-//            {
-//                var retType = mthInfo.ReturnType;
-//                if (retType.IsGenericType && typeof (Task).IsAssignableFrom(retType))
-//                {
-//                    retType = retType.GetGenericArguments()[0];
-//                    //var task = (Task)args.ReturnValue;
-//                    var task = args.ReturnValue;
-//                    args.ReturnValue = SetContinuation((dynamic) task, name, retType);
-//                    //task.ContinueWith(
-//                    //    t =>
-//                    //    {
-
-//                    //        Cache.SetItem(CacheArea, name, retType , t.Result, LifeSpanSeconds);
-//                    //        //MemoryCache.Default[args.Method.Name] = t.Result;
-//                    //        return t.Result;
-//                    //    });
-//                }
-//                else
-//                {
-
-//                    Cache.SetItem(CacheArea, name, retType,args.ReturnValue, LifeSpanSeconds); 
-//                }
+                if (cachedValue != null)
+                {
+                    retType = mthInfo.ReturnType;
+                    if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
+                    {
+                        args.ReturnValue = FromResult((dynamic)cachedValue);
+                    }
+                    else
+                    {
+                        args.ReturnValue = cachedValue;
+                    }
 
 
-//            }
-//        }
+                    args.FlowBehavior = FlowBehavior.Return;
+                }
 
-//        Task<TResult> FromResult<TResult>(TResult data)
-//        {
-//            return Task.FromResult(data);
-//        }
+            }
 
-//        Task<TResult> SetContinuation<TResult>(Task<TResult> task, string name, Type retType)
-//        {
-//            return task.ContinueWith(
-//                t =>
-//                {
-//                    Cache.SetItem(CacheArea, name, retType, t.Result, LifeSpanSeconds);
-//                    return t.Result;
-//                });
-//        }
-//    }
-//}
+
+
+
+
+        }
+
+        public override void OnSuccess(MethodExecutionArgs args)
+        {
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                Namer = new StringNamer(Name);
+            }
+            if (Namer == null)
+            {
+                Namer = new BaseNamer();
+            }
+            var name = Namer.GetName(BaseName, args);
+            var mthInfo = args.Method as MethodInfo;
+            if (mthInfo != null)
+            {
+                var retType = mthInfo.ReturnType;
+                if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
+                {
+                    retType = retType.GetGenericArguments()[0];
+                    //var task = (Task)args.ReturnValue;
+                    var task = args.ReturnValue;
+                    args.ReturnValue = SetContinuation((dynamic)task, name, retType);
+                    //task.ContinueWith(
+                    //    t =>
+                    //    {
+
+                    //        Cache.SetItem(CacheArea, name, retType , t.Result, LifeSpanSeconds);
+                    //        //MemoryCache.Default[args.Method.Name] = t.Result;
+                    //        return t.Result;
+                    //    });
+                }
+                else
+                {
+
+                    Cache.SetItem(CacheArea, name, retType, args.ReturnValue, LifeSpanSeconds);
+                }
+
+
+            }
+        }
+
+        Task<TResult> FromResult<TResult>(TResult data)
+        {
+            return Task.FromResult(data);
+        }
+
+        Task<TResult> SetContinuation<TResult>(Task<TResult> task, string name, Type retType)
+        {
+            return task.ContinueWith(
+                t =>
+                {
+                    Cache.SetItem(CacheArea, name, retType, t.Result, LifeSpanSeconds);
+                    return t.Result;
+                });
+        }
+    }
+}

@@ -17,6 +17,7 @@ namespace HttpObjectCaching.Core
             _dataSource = dataSource;
         }
 
+        public IDataSource DataSource { get { return _dataSource; } }
 
         public virtual CacheArea Area { get; private set; }
         public virtual string Name { get; private set; }

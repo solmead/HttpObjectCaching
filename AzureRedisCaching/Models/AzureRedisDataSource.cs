@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AzureRedisCaching.Properties;
 using HttpObjectCaching;
 using HttpObjectCaching.Core;
 using HttpObjectCaching.Helpers;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace AzureRedisCaching.Models
@@ -29,6 +32,7 @@ namespace AzureRedisCaching.Models
         {
             try
             {
+                
                 var t = await CacheDatabase.StringGetAsync(name.ToUpper());
                 //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
                 if (!string.IsNullOrWhiteSpace(t))
@@ -259,6 +263,66 @@ namespace AzureRedisCaching.Models
                      CacheDatabase.KeyDelete(key);
                 }
             }
+        }
+
+        private string GetStringOfItem<tt>(tt item)
+        {
+            return JsonConvert.SerializeObject(item);
+        }
+        private tt GetItemOfString<tt>(string val)
+        {
+            return JsonConvert.DeserializeObject<tt>(val);
+        }
+
+        public List<tt> GetList<tt>(string name)
+        {
+            var lst = CacheDatabase.ListRange(name).ToList();
+            return (from i in lst select GetItemOfString<tt>(i.ToString())).ToList();
+        }
+
+        public void AddToList<tt>(string name, tt item)
+        {
+            string v = GetStringOfItem<tt>(item);
+            CacheDatabase.ListRightPush(name, v);
+        }
+
+        public void ClearList<tt>(string name)
+        {
+            CacheDatabase.ListTrim(name,0,0);
+            CacheDatabase.ListLeftPop(name);
+        }
+
+        public void RemoveFromList<tt>(string name, tt item)
+        {
+            string v = GetStringOfItem<tt>(item);
+            CacheDatabase.ListRemove(name, v);
+        }
+
+        public void RemoveFromListAt<tt>(string name, int index)
+        {
+            var v = CacheDatabase.ListGetByIndex(name, index);
+            CacheDatabase.ListRemove(name, v);
+        }
+
+        public void InsertIntoList<tt>(string name, int index, tt item)
+        {
+            var vPivot = CacheDatabase.ListGetByIndex(name, index);
+            string v = GetStringOfItem<tt>(item);
+            CacheDatabase.ListInsertAfter(name, vPivot, v);
+        }
+
+        public void SetInList<tt>(string name, int index, tt item)
+        {
+            string v = GetStringOfItem<tt>(item);
+            CacheDatabase.ListSetByIndex(name, index, v);
+        }
+
+        public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
+        {
+            var lst = (from a in array select GetStringOfItem<tt>(a)).ToList();
+            lst.Reverse();
+            var vPivot = CacheDatabase.ListGetByIndex(name, arrayIndex);
+            lst.ForEach((v) => CacheDatabase.ListInsertAfter(name, vPivot, v));
         }
     }
 }

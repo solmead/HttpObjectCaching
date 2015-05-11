@@ -13,7 +13,7 @@ namespace TestCacheMVC.Controllers
     {
         public async Task<ActionResult> Index()
         {
-            var test =  TestClass.DoSomething2();
+            var test = await TestClass.DoSomething();
             Debug.WriteLine(test);
             test.Add(1974);
             return View();
@@ -23,7 +23,7 @@ namespace TestCacheMVC.Controllers
         {
             ViewBag.Message = "Your application description page.";
 
-            var test =  TestClass.DoSomething2();
+            var test =  await TestClass.DoSomething();
             Debug.WriteLine(test);
             return View();
         }
