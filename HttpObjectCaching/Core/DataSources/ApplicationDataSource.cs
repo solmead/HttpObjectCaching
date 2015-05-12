@@ -11,6 +11,9 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class ApplicationDataSource : IDataSource
     {
+
+        public BaseCacheArea Area { get {return BaseCacheArea.Global;} }
+
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             return GetItem<tt>(name);
@@ -41,7 +44,7 @@ namespace HttpObjectCaching.Core.DataSources
             DeleteAll();
         }
 
-        
+
 
         public CachedEntry<tt> GetItem<tt>(string name)
         {

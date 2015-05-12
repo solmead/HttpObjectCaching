@@ -10,6 +10,7 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class RequestDataSource : IDataSource
     {
+        public BaseCacheArea Area { get { return BaseCacheArea.Request; } }
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             return GetItem<tt>(name);

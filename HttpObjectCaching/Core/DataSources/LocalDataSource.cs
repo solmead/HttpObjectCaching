@@ -13,6 +13,7 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class LocalDataSource : IDataSource
     {
+        public BaseCacheArea Area { get { return BaseCacheArea.Other; } }
         private ConcurrentDictionary<string, CachedEntryBase> _baseDictionary = new ConcurrentDictionary<string, CachedEntryBase>();
 
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)

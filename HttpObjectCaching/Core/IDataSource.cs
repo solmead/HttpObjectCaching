@@ -10,6 +10,9 @@ namespace HttpObjectCaching.Core
 {
     public interface IDataSource
     {
+        BaseCacheArea Area { get; }
+
+
         CachedEntry<tt> GetItem<tt>(string name);
         void SetItem<tt>(CachedEntry<tt> item);
         CachedEntry<object> GetItem(string name, Type type);

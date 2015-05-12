@@ -14,6 +14,7 @@ namespace AzureRedisCaching.Models
     public class AzureRedisDataSource : IDataSource
     {
 
+        public BaseCacheArea Area { get { return BaseCacheArea.Distributed; } }
         private static Lazy<ConnectionMultiplexer> lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
         {
             return ConnectionMultiplexer.Connect(Settings.Default.HostName + ",abortConnect=false,ssl=" + !Settings.Default.AllowNonSSL + ",password=" + Settings.Default.CacheKey);
