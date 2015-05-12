@@ -12,11 +12,11 @@ namespace HttpObjectCaching.Core
 {
     public abstract class DictionaryCache : ICacheArea, INameValueLister
     {
-        private object createLock = new object();
-        private object setLock = new object();
+        //private object createLock = new object();
+        //private object setLock = new object();
         private ICacheArea _cache = null;
 
-        private ICacheArea _baseTempCache = new NoCache();
+        //private ICacheArea _baseTempCache = new NoCache();
 
         public ICacheArea CacheTo
         {
@@ -91,50 +91,24 @@ namespace HttpObjectCaching.Core
 
         private ConcurrentDictionary<string, CachedEntryBase> BaseDictionaryGet()
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" + GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" + GetInstanceId();
-            //lock (createLock)
-            //{
-            return _baseTempCache.GetItem(curnametemp,
-                     () =>
-                         CacheTo.GetItem<ConcurrentDictionary<string, CachedEntryBase>>(
-                            curname,
-                             () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds), 1);
-            //}
+            return CacheTo.GetItem(curname, () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds);
         }
         private async Task<ConcurrentDictionary<string, CachedEntryBase>> BaseDictionaryGetAsync()
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
-            var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-            return await _baseTempCache.GetItemAsync(curnametemp,
-                    async () =>
-                        await CacheTo.GetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(
-                            curname,
-                            async () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds), 1);
-            //}
+            var curname = Name + "_DataDictionary_Base_" + GetInstanceId();
+            return await CacheTo.GetItemAsync(curname,async () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds);
         }
 
         private async Task BaseDictionarySetAsync(ConcurrentDictionary<string, CachedEntryBase> value)
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-            await CacheTo.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curnametemp, value, LifeSpanInSeconds);
-            await _baseTempCache.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, 1);
-            //}
+            await CacheTo.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, LifeSpanInSeconds);
         }
         private void BaseDictionarySet(ConcurrentDictionary<string, CachedEntryBase> value)
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-             CacheTo.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curnametemp, value, LifeSpanInSeconds);
-             _baseTempCache.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, 1);
-            //}
+            CacheTo.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, LifeSpanInSeconds);
         }
 
 

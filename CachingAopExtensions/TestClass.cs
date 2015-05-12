@@ -9,14 +9,16 @@ namespace CachingAopExtensions
 {
     public class TestClass
     {
-        [CachingAspect(CacheArea=CacheArea.Global, LifeSpanSeconds=600)]
+        [CachingAspect(CacheArea = CacheArea.Request, AspectPriority = 1)]
+        [CachingAspect(CacheArea = CacheArea.Global, LifeSpanSeconds = 600, AspectPriority = 2)]
         public static async Task<List<int>> DoSomething(int a = 0, string b = "test")
         {
             return new List<int>() {5,4,3,2,1};
         }
 
 
-        [CachingAspect(CacheArea = CacheArea.Global, LifeSpanSeconds = 600)]
+        [CachingAspect(CacheArea = CacheArea.Request, AspectPriority = 1)]
+        [CachingAspect(CacheArea = CacheArea.Global, LifeSpanSeconds = 600, AspectPriority = 2)]
         public static List<int> DoSomething2(int a = 0, string b = "test")
         {
             return new List<int>() {6,7,8,9,10};

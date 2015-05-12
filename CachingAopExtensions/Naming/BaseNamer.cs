@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Script.Serialization;
 using PostSharp.Aspects;
 
@@ -18,8 +19,14 @@ namespace CachingAopExtensions.Naming
             }
 
             var concatArguments = Serialize(dic);
+            var mthInfo = args.Method as MethodInfo;
             //var concatArguments = string.Join("_", serializedArguments);
-            var name = baseName + "_" + args.Method.Module.Name + "_" + args.Method.Name + "_" + concatArguments;
+            var name = args.Method.Name + "" + concatArguments;
+            if (mthInfo != null && mthInfo.DeclaringType !=null)
+            {
+                name = mthInfo.DeclaringType.FullName + "." + name;
+            }
+            name = baseName + "_" + name;
             //var name = baseName + "_" + args.Method.Module.Name + "_" + GetCacheKey(args);
             
 

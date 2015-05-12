@@ -19,8 +19,8 @@ namespace HttpObjectCaching.Core
 
         public IDataSource DataSource { get { return _dataSource; } }
 
-        public virtual CacheArea Area { get; private set; }
-        public virtual string Name { get; private set; }
+        public virtual CacheArea Area { get; protected set; }
+        public virtual string Name { get; protected set; }
         public void ClearCache()
         {
              _dataSource.DeleteAll();

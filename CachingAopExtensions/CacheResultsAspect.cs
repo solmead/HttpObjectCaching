@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -46,14 +47,16 @@ namespace CachingAopExtensions
                     retType = retType.GetGenericArguments()[0];
                 }
 
-                object cachedValue = Cache.GetItem(CacheArea, name, retType, null, LifeSpanSeconds);
+                object cachedValue = Cache.GetItem(CacheArea, name, retType,lifeSpanSeconds: LifeSpanSeconds);
 
                 if (cachedValue != null)
                 {
+                    Debug.WriteLine("CachingAspect:" + CacheArea.ToString() + " [" + name + "] - Has Value [" +
+                                    cachedValue.ToString() + "]");
                     retType = mthInfo.ReturnType;
-                    if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
+                    if (retType.IsGenericType && typeof (Task).IsAssignableFrom(retType))
                     {
-                        args.ReturnValue = FromResult((dynamic)cachedValue);
+                        args.ReturnValue = FromResult((dynamic) cachedValue);
                     }
                     else
                     {
@@ -62,6 +65,10 @@ namespace CachingAopExtensions
 
 
                     args.FlowBehavior = FlowBehavior.Return;
+                }
+                else
+                {
+                    Debug.WriteLine("CachingAspect:" + CacheArea.ToString() + " [" + name + "] - is null");
                 }
 
             }
@@ -105,6 +112,8 @@ namespace CachingAopExtensions
                 else
                 {
 
+                    Debug.WriteLine("CachingAspect:" + CacheArea.ToString() + " [" + name + "] - Storing Value [" +
+                                    args.ReturnValue.ToString() + "] for " + LifeSpanSeconds);
                     Cache.SetItem(CacheArea, name, retType, args.ReturnValue, LifeSpanSeconds);
                 }
 
@@ -119,12 +128,15 @@ namespace CachingAopExtensions
 
         Task<TResult> SetContinuation<TResult>(Task<TResult> task, string name, Type retType)
         {
+            var syncContext = TaskScheduler.FromCurrentSynchronizationContext();
             return task.ContinueWith(
                 t =>
                 {
+                    Debug.WriteLine("CachingAspect:" + CacheArea.ToString() + " [" + name + "] - Storing Value [" +
+                                    t.Result.ToString() + "] for " + LifeSpanSeconds);
                     Cache.SetItem(CacheArea, name, retType, t.Result, LifeSpanSeconds);
                     return t.Result;
-                });
+                }, syncContext);
         }
     }
 }

@@ -329,13 +329,7 @@ namespace HttpObjectCaching
         /// <param name="obj">Object to store in cache location</param>
         public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj)
         {
-
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                await ca.SetItemAsync<tt>(name, obj);
-            }
-
+            await SetItemAsync(area, name, obj, 0);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -346,13 +340,7 @@ namespace HttpObjectCaching
         /// <param name="obj">Object to store in cache location</param>
         public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj)
         {
-
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                await ca.SetItemAsync(name, type, obj);
-            }
-
+            await SetItemAsync(area, name, type, obj, 0);
         }
 
         /// <summary>
@@ -366,10 +354,15 @@ namespace HttpObjectCaching
         public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
 
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = CacheSystem.Instance.GetCacheArea(area);
             if (ca != null)
             {
-                await ca.SetItemAsync<tt>(name, obj, lifeSpanSeconds);
+                await ca.SetItemAsync<tt>(name, obj, lSS );
             }
 
         }
@@ -384,10 +377,15 @@ namespace HttpObjectCaching
         public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
         {
 
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = CacheSystem.Instance.GetCacheArea(area);
             if (ca != null)
             {
-                await ca.SetItemAsync(name, type, obj, lifeSpanSeconds);
+                await ca.SetItemAsync(name, type, obj, lSS);
             }
 
         }
@@ -500,8 +498,7 @@ namespace HttpObjectCaching
         /// <param name="obj">Object to store in cache location</param>
         public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj)
         {
-            var ca = new DataCache(area);
-            await ca.SetItemAsync<tt>(name, obj);
+            await SetItemAsync(area, name, obj, 0);
         }
 
         /// <summary>
@@ -514,8 +511,14 @@ namespace HttpObjectCaching
         /// <param name="lifeSpanSeconds"></param>
         public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
         {
+
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = new DataCache(area);
-            await ca.SetItemAsync<tt>(name, obj, lifeSpanSeconds);
+            await ca.SetItemAsync<tt>(name, obj, lSS);
         }
 
 
@@ -770,12 +773,7 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj)
         {
 
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                 ca.SetItem<tt>(name, obj);
-            }
-
+            SetItem(area, name, obj, 0);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -787,11 +785,7 @@ namespace HttpObjectCaching
         public static void SetItem(CacheArea area, string name, Type type, object obj)
         {
 
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                 ca.SetItem(name, type, obj);
-            }
+            SetItem(area, name, type, obj,0);
 
         }
 
@@ -806,10 +800,15 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
 
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = CacheSystem.Instance.GetCacheArea(area);
             if (ca != null)
             {
-                 ca.SetItem<tt>(name, obj, lifeSpanSeconds);
+                 ca.SetItem<tt>(name, obj, lSS);
             }
 
         }
@@ -824,10 +823,15 @@ namespace HttpObjectCaching
         public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
         {
 
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = CacheSystem.Instance.GetCacheArea(area);
             if (ca != null)
             {
-                ca.SetItem(name, type, obj, lifeSpanSeconds);
+                ca.SetItem(name, type, obj, lSS);
             }
 
         }
@@ -940,8 +944,7 @@ namespace HttpObjectCaching
         /// <param name="obj">Object to store in cache location</param>
         public static void SetItem<tt>(IDataSource area, string name, tt obj)
         {
-            var ca = new DataCache(area);
-             ca.SetItem<tt>(name, obj);
+            SetItem<tt>(area, name, obj, 0);
         }
 
         /// <summary>
@@ -954,8 +957,13 @@ namespace HttpObjectCaching
         /// <param name="lifeSpanSeconds"></param>
         public static void SetItem<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
         {
+            double? lSS = lifeSpanSeconds;
+            if (lSS == 0)
+            {
+                lSS = null;
+            }
             var ca = new DataCache(area);
-             ca.SetItem<tt>(name, obj, lifeSpanSeconds);
+             ca.SetItem<tt>(name, obj, lSS);
         }
     }
 }
