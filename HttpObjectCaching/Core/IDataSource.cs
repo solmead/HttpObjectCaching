@@ -36,7 +36,7 @@ namespace HttpObjectCaching.Core
         void RemoveFromListAt<tt>(string name, int index);
         void InsertIntoList<tt>(string name, int index, tt item);
         void SetInList<tt>(string name, int index, tt item);
-        void CopyToList<tt>(string name, tt[] array, int arrayIndex);
+        //void CopyToList<tt>(string name, tt[] array, int arrayIndex);
 
 
     }

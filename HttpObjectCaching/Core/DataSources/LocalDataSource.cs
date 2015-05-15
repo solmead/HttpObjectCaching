@@ -15,6 +15,16 @@ namespace HttpObjectCaching.Core.DataSources
     {
         public BaseCacheArea Area { get { return BaseCacheArea.Other; } }
         private ConcurrentDictionary<string, CachedEntryBase> _baseDictionary = new ConcurrentDictionary<string, CachedEntryBase>();
+        public int? DefaultTimeOut { get; set; }
+        public LocalDataSource()
+        {
+            
+        }
+        public LocalDataSource(int? defaultTimeOut)
+        {
+            DefaultTimeOut= defaultTimeOut;
+        }
+
 
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
@@ -54,11 +64,19 @@ namespace HttpObjectCaching.Core.DataSources
             CachedEntry<tt> itm;
             _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
             itm = itm2 as CachedEntry<tt>;
+            if (itm != null && !itm.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                itm.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             return itm;
         }
 
         public void SetItem<tt>(CachedEntry<tt> item)
         {
+            if (!item.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                item.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
@@ -70,11 +88,19 @@ namespace HttpObjectCaching.Core.DataSources
             CachedEntry<object> itm;
             _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
             itm = itm2 as CachedEntry<object>;
+            if (itm != null && !itm.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                itm.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             return itm;
         }
 
         public void SetItem(Type type, CachedEntry<object> item)
         {
+            if (!item.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                item.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);

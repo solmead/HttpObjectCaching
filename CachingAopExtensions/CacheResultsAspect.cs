@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CachingAopExtensions.Naming;
 using HttpObjectCaching;
+using HttpObjectCaching.Core;
 using PostSharp.Aspects;
 using PostSharp.Aspects.Advices;
 
@@ -21,6 +22,7 @@ namespace CachingAopExtensions
         public double LifeSpanSeconds { get; set; }
         public string Name { get; set; }
         public ICacheEntryNamer Namer { get; set; }
+        //public IDataSource DataSource { get; set; }
 
         public CachingAspect()
         {

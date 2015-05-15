@@ -23,6 +23,18 @@ namespace HttpObjectCaching.Core.Collections
             _dataSource = CacheSystem.Instance.GetCacheArea(cache).DataSource;
             //LifeSpanInSeconds = lifeSpanInSeconds;
         }
+        public ListOnCache(string name, ICacheArea cache)
+        {
+            Name = name;
+            _dataSource = cache.DataSource;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
+        }
+        public ListOnCache(string name, IDataSource cache)
+        {
+            Name = name;
+            _dataSource = cache;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
+        }
 
         private Generic.List<TT> BaseList
         {
@@ -34,9 +46,9 @@ namespace HttpObjectCaching.Core.Collections
         {
             get
             {
-                return Cache.GetItem<System.Collections.Generic.List<TT>>(CacheArea.Request,
+                return Cache.GetItem<Generic.List<TT>>(CacheArea.Request,
                     Name + "_localList",
-                    BaseList);
+                    ()=>BaseList);
             }
         }
 
@@ -71,7 +83,6 @@ namespace HttpObjectCaching.Core.Collections
 
         public void CopyTo(TT[] array, int arrayIndex)
         {
-            _dataSource.CopyToList(Name, array, arrayIndex);
             LocalList.CopyTo(array, arrayIndex);
         }
 

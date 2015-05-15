@@ -20,9 +20,11 @@ namespace HttpObjectCaching
         Global = 3,
         Cookie = 4,
         Session = 5,
-        Request = 6,
+        Temp = 6,
+        Request = 7,
+        //Local = 8,
         //Thread = 7,
-        None = 8
+        None = 9
     }
     public enum BaseCacheArea
     {
@@ -30,9 +32,11 @@ namespace HttpObjectCaching
         Permanent = 1,
         Distributed = 2,
         Global = 3,
-        Request = 6,
+        Temp = 6,
+        Request = 7,
+        //Local = 8,
         //Thread = 7,
-        None = 8
+        None = 9
     }
     public static class Cache
     {
@@ -46,35 +50,48 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(ICacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
         {
-            double? lSS = lifeSpanSeconds;
-            if (lSS == 0)
+            try
             {
-                lSS = null;
-            }
-            if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
-            {
+
+                double? lSS = lifeSpanSeconds;
+                if (lSS == 0)
+                {
+                    lSS = null;
+                }
+                if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
+                {
+                    if (createMethod != null)
+                    {
+                        return await createMethod();
+                    }
+                    return default(tt);
+                }
+                if (area != null)
+                {
+                    if (area.Area < CacheArea.Temp)
+                    {
+                        return await GetItemAsync(CacheArea.Temp, name + "_Request_TempCache", async () =>
+                        {
+                            return await area.GetItemAsync<tt>(name, createMethod, lSS);
+                        });
+                    }
+                    else
+                    {
+                        return await area.GetItemAsync<tt>(name, createMethod, lSS);
+                    }
+                }
                 if (createMethod != null)
                 {
                     return await createMethod();
                 }
-                return default(tt);
             }
-            var ca = new DataCache(area);
-
-            if (area.Area > BaseCacheArea.Request)
+            catch (Exception ex)
             {
-                return await GetItemAsync(CacheArea.Request, name + "_Request", async () =>
-                {
-                    return await ca.GetItemAsync<tt>(name, createMethod, lSS);
-                });
+                throw new Exception("Error:" + ex.Message + " retrieving cache item [" + name + "] on cache [" + area.ToString() + "]", ex);
             }
-            else
-            {
-                return await ca.GetItemAsync<tt>(name, createMethod, lSS);
-            }
-
+            return default(tt);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -85,10 +102,11 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        public static tt GetItem<tt>(ICacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
         {
             try
             {
+
                 double? lSS = lifeSpanSeconds;
                 if (lSS == 0)
                 {
@@ -98,33 +116,37 @@ namespace HttpObjectCaching
                 {
                     if (createMethod != null)
                     {
-                        return createMethod();
+                        return  createMethod();
                     }
                     return default(tt);
                 }
-                var ca = new DataCache(area);
-                //return ca.GetItem<tt>(name, createMethod, lSS);
 
-                if (area.Area > BaseCacheArea.Request)
+                if (area != null)
                 {
-                    return  GetItem(CacheArea.Request, name + "_Request", () =>
+                    if (area.Area < CacheArea.Temp)
                     {
-                        return ca.GetItem<tt>(name, createMethod, lSS);
-                    });
+                        return GetItem(CacheArea.Temp, name + "_Request_TempCache", () =>
+                        {
+                            return  area.GetItem<tt>(name, createMethod, lSS);
+                        });
+                    }
+                    else
+                    {
+                        return  area.GetItem<tt>(name, createMethod, lSS);
+                    }
                 }
-                else
+                if (createMethod != null)
                 {
-                    return ca.GetItem<tt>(name, createMethod, lSS);
+                    return  createMethod();
                 }
-
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "Error:" + ex.Message + " retrieving cache item [" + name + "] on cache [" + area.ToString() + "]",
-                    ex);
+                throw new Exception("Error:" + ex.Message + " retrieving cache item [" + name + "] on cache [" + area.ToString() + "]", ex);
             }
+            return default(tt);
         }
+
         /// <summary>
         /// Puts an item into the cache
         /// </summary>
@@ -133,18 +155,17 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        public static async Task SetItemAsync<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
             double? lSS = lifeSpanSeconds;
             if (lSS == 0)
             {
                 lSS = null;
             }
-            var ca = new DataCache(area);
-            await ca.SetItemAsync<tt>(name, obj, lSS);
-            if (area.Area > BaseCacheArea.Request)
+            await area.SetItemAsync<tt>(name, obj, lSS);
+            if (area.Area < CacheArea.Temp)
             {
-                await SetItemAsync(CacheArea.Request, name + "_Request", obj);
+                await SetItemAsync(CacheArea.Temp, name + "_Request_TempCache", obj);
             }
 
 
@@ -157,20 +178,20 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static void SetItem<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        public static void SetItem<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
             double? lSS = lifeSpanSeconds;
             if (lSS == 0)
             {
                 lSS = null;
             }
-            var ca = new DataCache(area);
-            ca.SetItem<tt>(name, obj, lSS);
-            if (area.Area > BaseCacheArea.Request)
+            area.SetItem<tt>(name, obj, lSS);
+            if (area.Area < CacheArea.Temp)
             {
-                SetItem(CacheArea.Request, name + "_Request", obj);
+                SetItem(CacheArea.Temp, name + "_Request_TempCache", obj);
             }
         }
+
 
         #region OverloadAreaSelect
 
@@ -183,14 +204,24 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
         {
-            var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                return await GetItemAsync(ca.DataSource, name, createMethod, lifeSpanSeconds);
-            }
-            return null;
+            var ca = new DataCache(area);
+            return await GetItemAsync<tt>(ca, name, createMethod, lifeSpanSeconds);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        {
+            var ca = new DataCache(area);
+            return GetItem<tt>(ca, name, createMethod, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -204,11 +235,7 @@ namespace HttpObjectCaching
         public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                return await GetItemAsync(ca.DataSource, name, createMethod, lifeSpanSeconds);
-            }
-            return default(tt);
+            return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -222,11 +249,21 @@ namespace HttpObjectCaching
         public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                return GetItem(ca.DataSource, name, createMethod, lifeSpanSeconds);
-            }
-            return default(tt);
+            return GetItem(ca, name, createMethod, lifeSpanSeconds);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds)
+        {
+            var ca = CacheSystem.Instance.GetCacheArea(area);
+            return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -240,11 +277,34 @@ namespace HttpObjectCaching
         public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                return GetItem(ca.DataSource, name, createMethod, lifeSpanSeconds);
-            }
-            return null;
+            return GetItem(ca, name, createMethod, lifeSpanSeconds);
+        }
+
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
+        /// <param name="lifeSpanSeconds"></param>
+        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        {
+            var ca = new DataCache(area);
+            await SetItemAsync<tt>(ca, name, obj, lifeSpanSeconds);
+        }
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
+        /// <param name="lifeSpanSeconds"></param>
+        public static void SetItem<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        {
+            var ca = new DataCache(area);
+            SetItem<tt>(ca, name, obj, lifeSpanSeconds);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -257,10 +317,7 @@ namespace HttpObjectCaching
         public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                await SetItemAsync(ca.DataSource, name, obj, lifeSpanSeconds);
-            }
+            await SetItemAsync(ca, name, obj, lifeSpanSeconds);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -273,10 +330,7 @@ namespace HttpObjectCaching
         public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                await SetItemAsync(ca.DataSource, name, obj, lifeSpanSeconds);
-            }
+            await SetItemAsync(ca, name, obj, lifeSpanSeconds);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -289,10 +343,7 @@ namespace HttpObjectCaching
         public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                SetItem(ca.DataSource, name, obj, lifeSpanSeconds);
-            }
+            SetItem(ca, name, obj, lifeSpanSeconds);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -305,10 +356,7 @@ namespace HttpObjectCaching
         public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            if (ca != null)
-            {
-                SetItem(ca.DataSource, name, obj, lifeSpanSeconds);
-            }
+            SetItem(ca, name, obj, lifeSpanSeconds);
         }
 
 
@@ -353,7 +401,7 @@ namespace HttpObjectCaching
         /// <returns></returns>
         public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<tt> createMethod)
         {
-            return await GetItemAsync<tt>(area, name, async ()=> createMethod(), 0);
+            return await GetItemAsync<tt>(area, name, async () => createMethod(), 0);
         }
         /// <summary>
         /// Pull an item from the cache

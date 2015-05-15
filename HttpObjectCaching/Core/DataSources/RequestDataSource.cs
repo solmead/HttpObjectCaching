@@ -46,14 +46,15 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
-                {
                     if (context.Items.Contains(name.ToUpper()))
                     {
-                        var t = (CachedEntry<tt>)context.Items[name.ToUpper()];
+                        var t = (CachedEntry<tt>) context.Items[name.ToUpper()];
                         return t;
                     }
-                }
+            }
+            else
+            {
+                //return Cache.GetItem<CachedEntry<tt>>(CacheArea.Local, name, default(CachedEntry<tt>));
             }
             return default(CachedEntry<tt>);
         }
@@ -72,6 +73,10 @@ namespace HttpObjectCaching.Core.DataSources
                     context.Items.Add(item.Name.ToUpper(), item);
                 }
             }
+            else
+            {
+                //Cache.SetItem(CacheArea.Local, item.Name, item);
+            }
         }
 
         public CachedEntry<object> GetItem(string name, Type type)
@@ -79,14 +84,15 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
-                {
                     if (context.Items.Contains(name.ToUpper()))
                     {
                         var t = (CachedEntry<object>)context.Items[name.ToUpper()];
                         return t;
                     }
-                }
+            }
+            else
+            {
+                //return Cache.GetItem<CachedEntry<object>>(CacheArea.Local, name, default(CachedEntry<object>));
             }
             return default(CachedEntry<object>);
         }
@@ -104,6 +110,10 @@ namespace HttpObjectCaching.Core.DataSources
                     }
                     context.Items.Add(item.Name.ToUpper(), item);
                 }
+            }
+            else
+            {
+                //Cache.SetItem(CacheArea.Local, item.Name, item);
             }
         }
 
