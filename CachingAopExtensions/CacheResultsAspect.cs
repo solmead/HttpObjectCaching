@@ -11,16 +11,18 @@ using HttpObjectCaching;
 using HttpObjectCaching.Core;
 using PostSharp.Aspects;
 using PostSharp.Aspects.Advices;
+using PostSharp.Extensibility;
 
 namespace CachingAopExtensions
 {
     [Serializable]
+    [MulticastAttributeUsage(MulticastTargets.Method, PersistMetaData = true)]
     public class CachingAspect : OnMethodBoundaryAspect
     {
         public CacheArea CacheArea { get; set; }
         public string BaseName { get; set; }
         public double LifeSpanSeconds { get; set; }
-        public string Name { get; set; }
+        private string Name { get; set; }
         private ICacheEntryNamer _namer;
         public ICacheEntryNamer Namer
         {
@@ -32,7 +34,7 @@ namespace CachingAopExtensions
                     {
                         _namer = new StringNamer(Name);
                     }
-                    if (Namer == null)
+                    if (_namer == null)
                     {
                         _namer = new BaseNamer();
                     }

@@ -16,21 +16,24 @@ namespace TestCacheMVC.Controllers
         public ListOnCache<int> BaseList = new ListOnCache<int>("BaseList", CacheArea.Distributed);
         public async Task<ActionResult> Index()
         {
-            BaseList.Add(DateTime.Now.Minute);
-            string joined = string.Join(",", BaseList.ToArray());
-            Debug.WriteLine(joined);
+            //BaseList.Add(DateTime.Now.Minute);
+            //string joined = string.Join(",", BaseList.ToArray());
+            //Debug.WriteLine(joined);
             //var rq = Cache.GetItem<string>(CacheArea.Request, "Test",(string) null);
             //Cache.SetItem<string>(CacheArea.Request, "Test", "Chris");
             //var rq2 = Cache.GetItem<string>(CacheArea.Request, "Test", (string)null);
 
 
 
-            //var test =  await TestClass.DoSomething();
-            //Debug.WriteLine(test);
-            //test.Add(1974);
+            var test = TestClass.DoSomething2();
+            Debug.WriteLine(test);
+            test.Add(1974);
+            //
+            CacheAOP.SetItem<int, string, List<int>>(TestClass.DoSomething2, null, new List<int>() { 5, 4, 3, 2, 1 });
+            CacheAOP.SetItem(TestClass.DoSomething3, new List<int>() { 5, 4, 3, 2, 1 });
             //Cache.SetItem<string>(CacheArea.Request, "Test", "Powell");
-            //test =  await TestClass.DoSomething();
-            //test.Add(2015);
+            test = TestClass.DoSomething3();
+            test.Add(2015);
             //var rq3 = Cache.GetItem<string>(CacheArea.Request, "Test", (string)null);
             return View();
         }

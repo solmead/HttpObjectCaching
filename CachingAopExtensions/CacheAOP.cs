@@ -14,28 +14,72 @@ namespace HttpObjectCaching
     {
 
 
-        public static void SetItem<tt>(Delegate function, tt obj, List<object> args)
+        public static void SetItem<t1, t2, t3, t4, tResult>(Func<t1, t2, t3, t4, tResult> method, List<object> args, tResult obj)
         {
-            SetItem(function, obj, 0, args);
+            SetItem(method.Method, args, obj, 0);
+        }
+        public static void SetItem<t1, t2, t3, tResult>(Func<t1, t2, t3, tResult> method, List<object> args, tResult obj)
+        {
+            SetItem(method.Method, args, obj, 0);
+        }
+        public static void SetItem<t1, t2, tResult>(Func<t1, t2, tResult> method, List<object> args, tResult obj)
+        {
+            SetItem(method.Method, args, obj, 0);
+        }
+        public static void SetItem<t1, tResult>(Func<t1, tResult> method, List<object> args, tResult obj)
+        {
+            SetItem(method.Method, args, obj, 0);
+        }
+        public static void SetItem<tResult>(Func<tResult> method, tResult obj)
+        {
+            SetItem(method.Method, null, obj, 0);
+        }
+        public static void SetItem<t1, t2, t3, t4, tResult>(Func<t1, t2, t3, t4, tResult> method, List<object> args, tResult obj, double lifeSpanSeconds)
+        {
+            SetItem(method.Method, args, obj, lifeSpanSeconds);
+        }
+        public static void SetItem<t1, t2, t3, tResult>(Func<t1, t2, t3, tResult> method, List<object> args, tResult obj, double lifeSpanSeconds)
+        {
+            SetItem(method.Method, args, obj, lifeSpanSeconds);
+        }
+        public static void SetItem<t1, t2, tResult>(Func<t1, t2, tResult> method, List<object> args, tResult obj, double lifeSpanSeconds)
+        {
+            SetItem(method.Method, args, obj, lifeSpanSeconds);
+        }
+        public static void SetItem<t1, tResult>(Func<t1, tResult> method, List<object> args, tResult obj, double lifeSpanSeconds)
+        {
+            SetItem(method.Method, args, obj, lifeSpanSeconds);
+        }
+        public static void SetItem<tResult>(Func<tResult> method, tResult obj, double lifeSpanSeconds)
+        {
+            SetItem(method.Method, null, obj, lifeSpanSeconds);
+        }
+        public static void SetItem<tt>(MethodInfo method, List<object> args, tt obj)
+        {
+            SetItem(method, args, obj, 0);
         }
 
-        public static void SetItem<tt>(Delegate function, tt obj, double lifeSpanSeconds, List<object> args)
+        public static void SetItem<tt>(MethodInfo method, List<object> args, tt obj, double lifeSpanSeconds)
         {
-            var mi = function.Method;
+            var mi = method;
             var ca = GetAttribute(mi);
             var param = mi.GetParameters();
             var dic = new Dictionary<string, object>();
             foreach (var p in param)
             {
                 object v = null;
-                if (args.Count < p.Position)
+                if (args!=null && args.Count < p.Position)
                 {
                     v = args[p.Position];
+                }
+                else if (p.HasDefaultValue)
+                {
+                    v = p.DefaultValue;
                 }
                 dic.Add(p.Name, v);
             }
 
-            Cache.SetItem<tt>(ca.CacheArea, ca.Namer.GetName(ca.BaseName, mi, dic), obj, lifeSpanSeconds);
+            Cache.SetItem<object>(ca.CacheArea, ca.Namer.GetName(ca.BaseName, mi, dic), obj, lifeSpanSeconds);
         }
 
 
