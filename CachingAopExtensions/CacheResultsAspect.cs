@@ -21,7 +21,26 @@ namespace CachingAopExtensions
         public string BaseName { get; set; }
         public double LifeSpanSeconds { get; set; }
         public string Name { get; set; }
-        public ICacheEntryNamer Namer { get; set; }
+        private ICacheEntryNamer _namer;
+        public ICacheEntryNamer Namer
+        {
+            get
+            {
+                if (_namer == null)
+                {
+                    if (!string.IsNullOrWhiteSpace(Name))
+                    {
+                        _namer = new StringNamer(Name);
+                    }
+                    if (Namer == null)
+                    {
+                        _namer = new BaseNamer();
+                    }
+                }
+                return _namer;
+            }
+        }
+
         //public IDataSource DataSource { get; set; }
 
         public CachingAspect()
@@ -31,14 +50,6 @@ namespace CachingAopExtensions
 
         public override void OnEntry(MethodExecutionArgs args)
         {
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                Namer = new StringNamer(Name);
-            }
-            if (Namer == null)
-            {
-                Namer = new BaseNamer();
-            }
             var name = Namer.GetName(BaseName, args);
             var mthInfo = args.Method as MethodInfo;
             if (mthInfo != null)
@@ -83,14 +94,6 @@ namespace CachingAopExtensions
 
         public override void OnSuccess(MethodExecutionArgs args)
         {
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                Namer = new StringNamer(Name);
-            }
-            if (Namer == null)
-            {
-                Namer = new BaseNamer();
-            }
             var name = Namer.GetName(BaseName, args);
             var mthInfo = args.Method as MethodInfo;
             if (mthInfo != null)
