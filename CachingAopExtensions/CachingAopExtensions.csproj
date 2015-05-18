@@ -51,6 +51,7 @@
     <Compile Include="CacheAOP.cs" />
     <Compile Include="CacheResultsAspect.cs" />
     <Compile Include="CachingAspect.cs" />
+    <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Naming\BaseNamer.cs" />
     <Compile Include="Naming\ICacheEntryNamer.cs" />
     <Compile Include="Naming\StringNamer.cs" />
