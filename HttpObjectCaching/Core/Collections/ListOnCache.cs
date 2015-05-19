@@ -15,22 +15,31 @@ namespace HttpObjectCaching.Core.Collections
 
         public string Name { get; private set; }
         //public double LifeSpanInSeconds { get; set; }
+        public CacheArea TempCacheArea { get; set; }
+        public double TempCacheTime { get; set; }
+
         public IDataSource DataSource { get { return _dataSource; } }
 
-        public ListOnCache(string name, CacheArea cache)
+        public ListOnCache(string name, CacheArea cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
         {
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
             Name = name;
             _dataSource = CacheSystem.Instance.GetCacheArea(cache).DataSource;
             //LifeSpanInSeconds = lifeSpanInSeconds;
         }
-        public ListOnCache(string name, ICacheArea cache)
+        public ListOnCache(string name, ICacheArea cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
         {
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
             Name = name;
             _dataSource = cache.DataSource;
             //LifeSpanInSeconds = lifeSpanInSeconds;
         }
-        public ListOnCache(string name, IDataSource cache)
+        public ListOnCache(string name, IDataSource cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
         {
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
             Name = name;
             _dataSource = cache;
             //LifeSpanInSeconds = lifeSpanInSeconds;
@@ -46,9 +55,9 @@ namespace HttpObjectCaching.Core.Collections
         {
             get
             {
-                return Cache.GetItem<Generic.List<TT>>(CacheArea.Request,
+                return Cache.GetItem<Generic.List<TT>>(TempCacheArea,
                     Name + "_localList",
-                    ()=>BaseList);
+                    () => BaseList, TempCacheTime);
             }
         }
 
