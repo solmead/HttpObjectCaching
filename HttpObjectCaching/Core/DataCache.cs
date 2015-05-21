@@ -118,42 +118,42 @@ namespace HttpObjectCaching.Core
             }
             return entry;
         }
-        private CachedEntry<object> LoadItem(string name, Type type, double? lifeSpanSeconds = null)
-        {
-            var entry = _dataSource.GetItem(name, type);
-            if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
-            {
-                entry = new CachedEntry<object>()
-                {
-                    Name = name,
-                    Changed = DateTime.Now,
-                    Created = DateTime.Now
-                };
-                if (lifeSpanSeconds.HasValue)
-                {
-                    entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-                }
-            }
-            return entry;
-        }
-        private async Task<CachedEntry<object>> LoadItemAsync(string name, Type type, double? lifeSpanSeconds = null)
-        {
-            var entry = await _dataSource.GetItemAsync(name, type);
-            if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
-            {
-                entry = new CachedEntry<object>()
-                {
-                    Name = name,
-                    Changed = DateTime.Now,
-                    Created = DateTime.Now
-                };
-                if (lifeSpanSeconds.HasValue)
-                {
-                    entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-                }
-            }
-            return entry;
-        }
+        //private CachedEntry<object> LoadItem(string name, Type type, double? lifeSpanSeconds = null)
+        //{
+        //    var entry = _dataSource.GetItem(name, type);
+        //    if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
+        //    {
+        //        entry = new CachedEntry<object>()
+        //        {
+        //            Name = name,
+        //            Changed = DateTime.Now,
+        //            Created = DateTime.Now
+        //        };
+        //        if (lifeSpanSeconds.HasValue)
+        //        {
+        //            entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //        }
+        //    }
+        //    return entry;
+        //}
+        //private async Task<CachedEntry<object>> LoadItemAsync(string name, Type type, double? lifeSpanSeconds = null)
+        //{
+        //    var entry = await _dataSource.GetItemAsync(name, type);
+        //    if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
+        //    {
+        //        entry = new CachedEntry<object>()
+        //        {
+        //            Name = name,
+        //            Changed = DateTime.Now,
+        //            Created = DateTime.Now
+        //        };
+        //        if (lifeSpanSeconds.HasValue)
+        //        {
+        //            entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //        }
+        //    }
+        //    return entry;
+        //}
         private void SaveItem<tt>(CachedEntry<tt> entry)
         {
              _dataSource.SetItem(entry);
@@ -184,90 +184,90 @@ namespace HttpObjectCaching.Core
             }
             await SaveItemAsync(entry);
         }
-        public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
-        {
-            //object empty = default(tt);
-            object tObj = null;
-            CachedEntry<object> entry =  LoadItem(name, type, lifeSpanSeconds);
+        //public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    //object empty = default(tt);
+        //    object tObj = null;
+        //    CachedEntry<object> entry =  LoadItem(name, type, lifeSpanSeconds);
 
-            try
-            {
-                object itm = entry.Item;
-                if (type.IsInstanceOfType(itm))
-                {
-                    tObj = itm;
-                }
-            }
-            catch (Exception)
-            {
+        //    try
+        //    {
+        //        object itm = entry.Item;
+        //        if (type.IsInstanceOfType(itm))
+        //        {
+        //            tObj = itm;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
 
-            }
-            object comp = tObj;
-            if (comp == null)
-            {
-                if (createMethod != null)
-                {
-                    tObj =  createMethod();
-                    entry.Item = tObj;
-                    //await SaveItemAsync(entry);
-                     _dataSource.SetItem(type, entry);
-                }
-            }
-            return tObj;
-        }
-        public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
-        {
-            //object empty = default(tt);
-            object tObj = null;
-            CachedEntry<object> entry = await LoadItemAsync(name, type, lifeSpanSeconds);
+        //    }
+        //    object comp = tObj;
+        //    if (comp == null)
+        //    {
+        //        if (createMethod != null)
+        //        {
+        //            tObj =  createMethod();
+        //            entry.Item = tObj;
+        //            //await SaveItemAsync(entry);
+        //             _dataSource.SetItem(type, entry);
+        //        }
+        //    }
+        //    return tObj;
+        //}
+        //public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    //object empty = default(tt);
+        //    object tObj = null;
+        //    CachedEntry<object> entry = await LoadItemAsync(name, type, lifeSpanSeconds);
 
-            try
-            {
-                object itm = entry.Item;
-                if (type.IsInstanceOfType(itm))
-                {
-                    tObj = itm;
-                }
-            }
-            catch (Exception)
-            {
+        //    try
+        //    {
+        //        object itm = entry.Item;
+        //        if (type.IsInstanceOfType(itm))
+        //        {
+        //            tObj = itm;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
 
-            }
-            object comp = tObj;
-            if (comp == null)
-            {
-                if (createMethod != null)
-                {
-                    tObj = await createMethod();
-                    entry.Item = tObj;
-                    //await SaveItemAsync(entry);
-                    await _dataSource.SetItemAsync(type, entry);
-                }
-            }
-            return tObj;
-        }
+        //    }
+        //    object comp = tObj;
+        //    if (comp == null)
+        //    {
+        //        if (createMethod != null)
+        //        {
+        //            tObj = await createMethod();
+        //            entry.Item = tObj;
+        //            //await SaveItemAsync(entry);
+        //            await _dataSource.SetItemAsync(type, entry);
+        //        }
+        //    }
+        //    return tObj;
+        //}
 
-        public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
-        {
-            var entry =  LoadItem(name, type, lifeSpanSeconds);
-            entry.Item = obj;
-            entry.Changed = DateTime.Now;
-            if (lifeSpanSeconds.HasValue)
-            {
-                entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-            }
-             _dataSource.SetItem(type, entry);
-        }
-        public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
-        {
-            var entry = await LoadItemAsync(name, type, lifeSpanSeconds);
-            entry.Item = obj;
-            entry.Changed = DateTime.Now;
-            if (lifeSpanSeconds.HasValue)
-            {
-                entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-            }
-            await _dataSource.SetItemAsync(type, entry);
-        }
+        //public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        //{
+        //    var entry =  LoadItem(name, type, lifeSpanSeconds);
+        //    entry.Item = obj;
+        //    entry.Changed = DateTime.Now;
+        //    if (lifeSpanSeconds.HasValue)
+        //    {
+        //        entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //    }
+        //     _dataSource.SetItem(type, entry);
+        //}
+        //public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        //{
+        //    var entry = await LoadItemAsync(name, type, lifeSpanSeconds);
+        //    entry.Item = obj;
+        //    entry.Changed = DateTime.Now;
+        //    if (lifeSpanSeconds.HasValue)
+        //    {
+        //        entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //    }
+        //    await _dataSource.SetItemAsync(type, entry);
+        //}
     }
 }
