@@ -59,8 +59,13 @@ namespace HttpObjectCaching.Core.Collections
                     Name + "_localList",
                     () => BaseList, TempCacheTime);
             }
+            
         }
 
+        private void ClearLocalList()
+        {
+            Cache.SetItem<List<TT>>(TempCacheArea, Name + "_localList", null);
+        }
 
 
         public IEnumerator<TT> GetEnumerator()
@@ -98,7 +103,8 @@ namespace HttpObjectCaching.Core.Collections
         public bool Remove(TT item)
         {
             _dataSource.RemoveFromList(Name, item);
-            return LocalList.Remove(item);
+            ClearLocalList();
+            return true;
         }
 
         public int Count { get { return LocalList.Count; }  }
