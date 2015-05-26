@@ -275,6 +275,12 @@ namespace AzureRedisCaching.Models
             return JsonConvert.DeserializeObject<tt>(val);
         }
 
+        //private bool IsInList<tt>(tt item)
+        //{
+        //    string v = GetStringOfItem<tt>(item);
+        //    CacheDatabase.L
+        //}
+
         public List<tt> GetList<tt>(string name)
         {
             var lst = CacheDatabase.ListRange(name).ToList();
@@ -318,12 +324,12 @@ namespace AzureRedisCaching.Models
             CacheDatabase.ListSetByIndex(name, index, v);
         }
 
-        public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
-        {
-            var lst = (from a in array select GetStringOfItem<tt>(a)).ToList();
-            lst.Reverse();
-            var vPivot = CacheDatabase.ListGetByIndex(name, arrayIndex);
-            lst.ForEach((v) => CacheDatabase.ListInsertAfter(name, vPivot, v));
-        }
+        //public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
+        //{
+        //    var lst = (from a in array select GetStringOfItem<tt>(a)).ToList();
+        //    lst.Reverse();
+        //    var vPivot = CacheDatabase.ListGetByIndex(name, arrayIndex);
+        //    lst.ForEach((v) => CacheDatabase.ListInsertAfter(name, vPivot, v));
+        //}
     }
 }
