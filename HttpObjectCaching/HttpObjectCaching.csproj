@@ -69,12 +69,14 @@
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Core\IDataSource.cs" />
+    <Compile Include="Helpers\AsyncSemaphore.cs" />
     <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\SerializableDictionary.cs" />
     <Compile Include="Helpers\SerializableList.cs" />
     <Compile Include="Helpers\Serializer.cs" />
+    <Compile Include="Helpers\StringLock.cs" />
     <Compile Include="Helpers\XmlSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

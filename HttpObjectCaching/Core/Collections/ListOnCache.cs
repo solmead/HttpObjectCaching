@@ -47,7 +47,10 @@ namespace HttpObjectCaching.Core.Collections
 
         private Generic.List<TT> BaseList
         {
-            get { return _dataSource.GetList<TT>(Name); }
+            get
+            {
+                return _dataSource.GetList<TT>(Name);
+            }
         }
 
 
