@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,12 +46,15 @@ namespace HttpObjectCaching.Core.Collections
             //LifeSpanInSeconds = lifeSpanInSeconds;
         }
 
-        private Generic.List<TT> BaseList
+        private void WriteLine(string msg)
         {
-            get
-            {
+            Debug.WriteLine(DateTime.Now.ToLongTimeString() + " : " + DateTime.Now.Millisecond + " - " + msg); 
+        }
+
+        private Generic.List<TT> BaseList()
+        {
+            WriteLine("Refreshing cache list base list [" + Name + "]");
                 return _dataSource.GetList<TT>(Name);
-            }
         }
 
 
@@ -58,9 +62,8 @@ namespace HttpObjectCaching.Core.Collections
         {
             get
             {
-                return Cache.GetItem<Generic.List<TT>>(TempCacheArea,
-                    Name + "_localList",
-                    () => BaseList, TempCacheTime);
+                //WriteLine("Getting cache list local list [" + Name + "] - " + TempCacheArea.ToString() + ":" + TempCacheTime);
+                return Cache.GetItem<Generic.List<TT>>(TempCacheArea, Name + "_localList", BaseList, TempCacheTime);
             }
             
         }
@@ -105,8 +108,12 @@ namespace HttpObjectCaching.Core.Collections
 
         public bool Remove(TT item)
         {
-            _dataSource.RemoveFromList(Name, item);
-            ClearLocalList();
+            if (LocalList.Contains(item))
+            {
+                _dataSource.RemoveFromList(Name, item);
+                LocalList.Remove(item);
+            }
+            //ClearLocalList();
             return true;
         }
 

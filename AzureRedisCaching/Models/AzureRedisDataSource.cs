@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureRedisCaching.Properties;
@@ -281,38 +282,49 @@ namespace AzureRedisCaching.Models
         //    CacheDatabase.L
         //}
 
+        private void WriteLine(string msg)
+        {
+            Debug.WriteLine(DateTime.Now.ToLongTimeString() + " : " + DateTime.Now.Millisecond + " - " + msg);
+        }
         public List<tt> GetList<tt>(string name)
         {
+            WriteLine("AzureRedis GetList:" + name);
+
             var lst = CacheDatabase.ListRange(name).ToList();
             return (from i in lst select GetItemOfString<tt>(i.ToString())).ToList();
         }
 
         public void AddToList<tt>(string name, tt item)
         {
+            WriteLine("AzureRedis AddToList:" + name + " [" + item.ToString() + "]");
             string v = GetStringOfItem<tt>(item);
             CacheDatabase.ListRightPush(name, v);
         }
 
         public void ClearList<tt>(string name)
         {
+            WriteLine("AzureRedis ClearList:" + name);
             CacheDatabase.ListTrim(name,0,0);
             CacheDatabase.ListLeftPop(name);
         }
 
         public void RemoveFromList<tt>(string name, tt item)
         {
+            WriteLine("AzureRedis RemoveFromList:" + name + " [" + item.ToString() + "]");
             string v = GetStringOfItem<tt>(item);
             CacheDatabase.ListRemove(name, v);
         }
 
         public void RemoveFromListAt<tt>(string name, int index)
         {
+            WriteLine("AzureRedis RemoveFromListAt:" + name + " [" + index + "]");
             var v = CacheDatabase.ListGetByIndex(name, index);
             CacheDatabase.ListRemove(name, v);
         }
 
         public void InsertIntoList<tt>(string name, int index, tt item)
         {
+            WriteLine("AzureRedis Insert into List:" + name + " - " + index + " [" + item.ToString() + "]");
             var vPivot = CacheDatabase.ListGetByIndex(name, index);
             string v = GetStringOfItem<tt>(item);
             CacheDatabase.ListInsertAfter(name, vPivot, v);
@@ -320,16 +332,61 @@ namespace AzureRedisCaching.Models
 
         public void SetInList<tt>(string name, int index, tt item)
         {
+            WriteLine("AzureRedis SetInList:" + name + " - " + index + " [" + item.ToString() + "]");
             string v = GetStringOfItem<tt>(item);
             CacheDatabase.ListSetByIndex(name, index, v);
         }
 
-        //public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
-        //{
-        //    var lst = (from a in array select GetStringOfItem<tt>(a)).ToList();
-        //    lst.Reverse();
-        //    var vPivot = CacheDatabase.ListGetByIndex(name, arrayIndex);
-        //    lst.ForEach((v) => CacheDatabase.ListInsertAfter(name, vPivot, v));
-        //}
+        public async Task<List<tt>> GetListAsync<tt>(string name)
+        {
+            WriteLine("AzureRedis GetList:" + name);
+
+            var lst = (await CacheDatabase.ListRangeAsync(name)).ToList();
+            return (from i in lst select GetItemOfString<tt>(i.ToString())).ToList();
+        }
+
+        public async Task AddToListAsync<tt>(string name, tt item)
+        {
+            WriteLine("AzureRedis AddToList:" + name + " [" + item.ToString() + "]");
+            string v = GetStringOfItem<tt>(item);
+            await CacheDatabase.ListRightPushAsync(name, v);
+        }
+
+        public async Task ClearListAsync<tt>(string name)
+        {
+            WriteLine("AzureRedis ClearList:" + name);
+            await CacheDatabase.ListTrimAsync(name, 0, 0);
+            await CacheDatabase.ListLeftPopAsync(name);
+        }
+
+        public async Task RemoveFromListAsync<tt>(string name, tt item)
+        {
+            WriteLine("AzureRedis RemoveFromList:" + name + " [" + item.ToString() + "]");
+            string v = GetStringOfItem<tt>(item);
+            await CacheDatabase.ListRemoveAsync(name, v);
+        }
+
+        public async Task RemoveFromListAtAsync<tt>(string name, int index)
+        {
+            WriteLine("AzureRedis RemoveFromListAt:" + name + " [" + index + "]");
+            var v = await CacheDatabase.ListGetByIndexAsync(name, index);
+            await CacheDatabase.ListRemoveAsync(name, v);
+        }
+
+        public async Task InsertIntoListAsync<tt>(string name, int index, tt item)
+        {
+            WriteLine("AzureRedis Insert into List:" + name + " - " + index + " [" + item.ToString() + "]");
+            var vPivot = await CacheDatabase.ListGetByIndexAsync(name, index);
+            string v = GetStringOfItem<tt>(item);
+            await CacheDatabase.ListInsertAfterAsync(name, vPivot, v);
+        }
+
+        public async Task SetInListAsync<tt>(string name, int index, tt item)
+        {
+            WriteLine("AzureRedis SetInList:" + name + " - " + index + " [" + item.ToString() + "]");
+            string v = GetStringOfItem<tt>(item);
+            await CacheDatabase.ListSetByIndexAsync(name, index, v);
+        }
+
     }
 }

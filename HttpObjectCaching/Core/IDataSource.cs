@@ -36,8 +36,16 @@ namespace HttpObjectCaching.Core
         void RemoveFromListAt<tt>(string name, int index);
         void InsertIntoList<tt>(string name, int index, tt item);
         void SetInList<tt>(string name, int index, tt item);
-        //void CopyToList<tt>(string name, tt[] array, int arrayIndex);
 
+
+
+        Task<List<tt>> GetListAsync<tt>(string name);
+        Task AddToListAsync<tt>(string name, tt item);
+        Task ClearListAsync<tt>(string name);
+        Task RemoveFromListAsync<tt>(string name, tt item);
+        Task RemoveFromListAtAsync<tt>(string name, int index);
+        Task InsertIntoListAsync<tt>(string name, int index, tt item);
+        Task SetInListAsync<tt>(string name, int index, tt item);
 
     }
 }

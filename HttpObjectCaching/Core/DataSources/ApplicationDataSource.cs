@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -235,9 +236,44 @@ namespace HttpObjectCaching.Core.DataSources
             GetList<tt>(name)[index] = item;
         }
 
-        public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
+        public async Task<List<tt>> GetListAsync<tt>(string name)
         {
-            GetList<tt>(name).CopyTo(array, arrayIndex);
+            return GetList<tt>(name);
         }
+
+        public async Task AddToListAsync<tt>(string name, tt item)
+        {
+            AddToList<tt>(name, item);
+        }
+
+        public async Task ClearListAsync<tt>(string name)
+        {
+            ClearList<tt>(name);
+        }
+
+        public async Task RemoveFromListAsync<tt>(string name, tt item)
+        {
+            RemoveFromList(name, item);
+        }
+
+        public async Task RemoveFromListAtAsync<tt>(string name, int index)
+        {
+            RemoveFromListAt<tt>(name, index);
+        }
+
+        public async Task InsertIntoListAsync<tt>(string name, int index, tt item)
+        {
+            InsertIntoList<tt>(name, index, item);
+        }
+
+        public async Task SetInListAsync<tt>(string name, int index, tt item)
+        {
+            SetInList(name, index, item);
+        }
+
+        //public void CopyToList<tt>(string name, tt[] array, int arrayIndex)
+        //{
+        //    GetList<tt>(name).CopyTo(array, arrayIndex);
+        //}
     }
 }
