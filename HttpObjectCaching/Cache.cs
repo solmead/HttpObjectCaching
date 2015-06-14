@@ -70,6 +70,7 @@ namespace HttpObjectCaching
                 }
                 if (area != null)
                 {
+                    name = area.Name + "_" + name;
                     //if (area.Area < CacheArea.Temp)
                     //{
                     //    return await GetItemAsync(CacheArea.Temp, name + "_Request_TempCache", async () =>
@@ -123,6 +124,7 @@ namespace HttpObjectCaching
 
                 if (area != null)
                 {
+                    name = area.Name + "_" + name;
                     //if (area.Area < CacheArea.Temp)
                     //{
                     //    return GetItem(CacheArea.Temp, name + "_Request_TempCache", () =>
@@ -162,6 +164,7 @@ namespace HttpObjectCaching
             {
                 lSS = null;
             }
+            name = area.Name + "_" + name;
             await area.SetItemAsync<tt>(name, obj, lSS);
             //if (area.Area < CacheArea.Temp)
             //{
@@ -185,6 +188,7 @@ namespace HttpObjectCaching
             {
                 lSS = null;
             }
+            name = area.Name + "_" + name;
             area.SetItem<tt>(name, obj, lSS);
             //if (area.Area < CacheArea.Temp)
             //{

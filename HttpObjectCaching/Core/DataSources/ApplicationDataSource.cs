@@ -79,15 +79,25 @@ namespace HttpObjectCaching.Core.DataSources
                 {
 
                 }
-                if (item.TimeOut.HasValue)
+                if (item.TimeOut.HasValue && item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds>0)
                 {
                     var lifeSpanSeconds = item.TimeOut.Value.Subtract(DateTime.Now).TotalSeconds;
+                    
                     int totSeconds = (int)lifeSpanSeconds;
                     int ms = (int)((lifeSpanSeconds - (1.0 * totSeconds)) * 1000.0);
-                    HttpRuntime.Cache.Insert(item.Name.ToUpper(), item, null,
-                        System.Web.Caching.Cache.NoAbsoluteExpiration,
-                        new TimeSpan(0, 0, 0, totSeconds, ms),
-                        CacheItemPriority.Default, null);
+                    try
+                    {
+
+                        HttpRuntime.Cache.Insert(item.Name.ToUpper(), item, null,
+                            System.Web.Caching.Cache.NoAbsoluteExpiration,
+                            new TimeSpan(0, 0, 0, totSeconds, ms),
+                            CacheItemPriority.Default, null);
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                        throw;
+                    }
                 }
                 else
                 {
