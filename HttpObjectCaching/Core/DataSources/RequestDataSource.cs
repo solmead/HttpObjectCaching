@@ -10,6 +10,7 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class RequestDataSource : IDataSource
     {
+        public BaseCacheArea Area { get { return BaseCacheArea.Request; } }
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
             return GetItem<tt>(name);
@@ -45,14 +46,15 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
-                {
                     if (context.Items.Contains(name.ToUpper()))
                     {
-                        var t = (CachedEntry<tt>)context.Items[name.ToUpper()];
+                        var t = (CachedEntry<tt>) context.Items[name.ToUpper()];
                         return t;
                     }
-                }
+            }
+            else
+            {
+                //return Cache.GetItem<CachedEntry<tt>>(CacheArea.Local, name, default(CachedEntry<tt>));
             }
             return default(CachedEntry<tt>);
         }
@@ -71,6 +73,10 @@ namespace HttpObjectCaching.Core.DataSources
                     context.Items.Add(item.Name.ToUpper(), item);
                 }
             }
+            else
+            {
+                //Cache.SetItem(CacheArea.Local, item.Name, item);
+            }
         }
 
         public CachedEntry<object> GetItem(string name, Type type)
@@ -78,14 +84,15 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
-                {
                     if (context.Items.Contains(name.ToUpper()))
                     {
                         var t = (CachedEntry<object>)context.Items[name.ToUpper()];
                         return t;
                     }
-                }
+            }
+            else
+            {
+                //return Cache.GetItem<CachedEntry<object>>(CacheArea.Local, name, default(CachedEntry<object>));
             }
             return default(CachedEntry<object>);
         }
@@ -103,6 +110,10 @@ namespace HttpObjectCaching.Core.DataSources
                     }
                     context.Items.Add(item.Name.ToUpper(), item);
                 }
+            }
+            else
+            {
+                //Cache.SetItem(CacheArea.Local, item.Name, item);
             }
         }
 
@@ -194,5 +205,40 @@ namespace HttpObjectCaching.Core.DataSources
         {
             GetList<tt>(name).CopyTo(array, arrayIndex);
         }
+        public async Task<List<tt>> GetListAsync<tt>(string name)
+        {
+            return GetList<tt>(name);
+        }
+
+        public async Task AddToListAsync<tt>(string name, tt item)
+        {
+            AddToList<tt>(name, item);
+        }
+
+        public async Task ClearListAsync<tt>(string name)
+        {
+            ClearList<tt>(name);
+        }
+
+        public async Task RemoveFromListAsync<tt>(string name, tt item)
+        {
+            RemoveFromList(name, item);
+        }
+
+        public async Task RemoveFromListAtAsync<tt>(string name, int index)
+        {
+            RemoveFromListAt<tt>(name, index);
+        }
+
+        public async Task InsertIntoListAsync<tt>(string name, int index, tt item)
+        {
+            InsertIntoList<tt>(name, index, item);
+        }
+
+        public async Task SetInListAsync<tt>(string name, int index, tt item)
+        {
+            SetInList(name, index, item);
+        }
+
     }
 }

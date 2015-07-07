@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Security;
 using HttpObjectCaching.CacheAreas;
+using HttpObjectCaching.Core;
 using HttpObjectCaching.Core.Configuration;
+using HttpObjectCaching.Core.DataSources;
 using HttpObjectCaching.Helpers;
 
 namespace HttpObjectCaching
@@ -44,6 +46,10 @@ namespace HttpObjectCaching
                     }
                 }
             }
+            //if (!CacheAreas.ContainsKey(CacheArea.Local))
+            //{
+            //    CacheAreas.Add(CacheArea.Local, new DataCache(new LocalDataSource(1)));
+            //} 
         }
 
 
@@ -92,7 +98,7 @@ namespace HttpObjectCaching
 
         public static async Task<string> CookieIdAsync()
         {
-                var _cookieId = await Cache.GetItemAsync<string>(CacheArea.Request, "_cookieId",  () => Guid.NewGuid().ToString());
+                var _cookieId = await Cache.GetItemAsync<string>(CacheArea.Request, "_cookieId",async () => Guid.NewGuid().ToString());
                 var context = HttpContext.Current;
                 if (context != null)
                 {
@@ -182,7 +188,7 @@ namespace HttpObjectCaching
         }
         public static async Task<string> SessionIdAsync()
         {
-            var _sessionId = await Cache.GetItemAsync<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
+            var _sessionId = await Cache.GetItemAsync<string>(CacheArea.Request, "_sessionId",async () => Guid.NewGuid().ToString());
             var context = HttpContext.Current;
             if (context != null && context.Session != null)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,37 +10,68 @@ using Generic = System.Collections.Generic;
 
 namespace HttpObjectCaching.Core.Collections
 {
-    public class List<TT> : IList<TT>
+    public class ListOnCache<TT> : IList<TT>
     {
         private readonly IDataSource _dataSource = null;
 
         public string Name { get; private set; }
-        public double LifeSpanInSeconds { get; set; }
+        //public double LifeSpanInSeconds { get; set; }
+        public CacheArea TempCacheArea { get; set; }
+        public double TempCacheTime { get; set; }
+
         public IDataSource DataSource { get { return _dataSource; } }
 
-        public List(string name, CacheArea cache, double lifeSpanInSeconds)
+        public ListOnCache(string name, CacheArea cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
         {
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
             Name = name;
             _dataSource = CacheSystem.Instance.GetCacheArea(cache).DataSource;
-            LifeSpanInSeconds = lifeSpanInSeconds;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
         }
-
-        public Generic.List<TT> BaseList
+        public ListOnCache(string name, ICacheArea cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
         {
-            get { return _dataSource.GetList<TT>(Name); }
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
+            Name = name;
+            _dataSource = cache.DataSource;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
+        }
+        public ListOnCache(string name, IDataSource cache, CacheArea tempCacheArea = CacheArea.Temp, double tempCacheTime = 0)
+        {
+            TempCacheArea = tempCacheArea;
+            TempCacheTime = tempCacheTime;
+            Name = name;
+            _dataSource = cache;
+            //LifeSpanInSeconds = lifeSpanInSeconds;
+        }
+
+        private void WriteLine(string msg)
+        {
+            Debug.WriteLine(DateTime.Now.ToLongTimeString() + " : " + DateTime.Now.Millisecond + " - " + msg); 
+        }
+
+        private Generic.List<TT> BaseList()
+        {
+            WriteLine("Refreshing cache list base list [" + Name + "]");
+                return _dataSource.GetList<TT>(Name);
         }
 
 
-        public Generic.List<TT> LocalList
+        private Generic.List<TT> LocalList
         {
             get
             {
-                return Cache.GetItem<System.Collections.Generic.List<TT>>(CacheArea.Request,
-                    Name + "_localList",
-                    BaseList);
+                //WriteLine("Getting cache list local list [" + Name + "] - " + TempCacheArea.ToString() + ":" + TempCacheTime);
+                return Cache.GetItem<Generic.List<TT>>(TempCacheArea, Name + "_localList", BaseList, TempCacheTime);
             }
+            
         }
 
+        private void ClearLocalList()
+        {
+            Cache.SetItem<List<TT>>(TempCacheArea, Name + "_localList", null);
+        }
 
 
         public IEnumerator<TT> GetEnumerator()
@@ -71,14 +103,18 @@ namespace HttpObjectCaching.Core.Collections
 
         public void CopyTo(TT[] array, int arrayIndex)
         {
-            _dataSource.CopyToList(Name, array, arrayIndex);
             LocalList.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(TT item)
         {
-            _dataSource.RemoveFromList(Name, item);
-            return LocalList.Remove(item);
+            if (LocalList.Contains(item))
+            {
+                _dataSource.RemoveFromList(Name, item);
+                LocalList.Remove(item);
+            }
+            //ClearLocalList();
+            return true;
         }
 
         public int Count { get { return LocalList.Count; }  }

@@ -12,11 +12,11 @@ namespace HttpObjectCaching.Core
 {
     public abstract class DictionaryCache : ICacheArea, INameValueLister
     {
-        private object createLock = new object();
-        private object setLock = new object();
+        //private object createLock = new object();
+        //private object setLock = new object();
         private ICacheArea _cache = null;
 
-        private ICacheArea _baseTempCache = new NoCache();
+        //private ICacheArea _baseTempCache = new NoCache();
 
         public ICacheArea CacheTo
         {
@@ -91,50 +91,24 @@ namespace HttpObjectCaching.Core
 
         private ConcurrentDictionary<string, CachedEntryBase> BaseDictionaryGet()
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" + GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" + GetInstanceId();
-            //lock (createLock)
-            //{
-            return _baseTempCache.GetItem(curnametemp,
-                     () =>
-                         CacheTo.GetItem<ConcurrentDictionary<string, CachedEntryBase>>(
-                            curname,
-                             () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds), 1);
-            //}
+            return CacheTo.GetItem(curname, () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds);
         }
         private async Task<ConcurrentDictionary<string, CachedEntryBase>> BaseDictionaryGetAsync()
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
-            var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-            return await _baseTempCache.GetItemAsync(curnametemp,
-                    async () =>
-                        await CacheTo.GetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(
-                            curname,
-                            async () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds), 1);
-            //}
+            var curname = Name + "_DataDictionary_Base_" + GetInstanceId();
+            return await CacheTo.GetItemAsync(curname,async () => new ConcurrentDictionary<string, CachedEntryBase>(), LifeSpanInSeconds);
         }
 
         private async Task BaseDictionarySetAsync(ConcurrentDictionary<string, CachedEntryBase> value)
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-            await CacheTo.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curnametemp, value, LifeSpanInSeconds);
-            await _baseTempCache.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, 1);
-            //}
+            await CacheTo.SetItemAsync<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, LifeSpanInSeconds);
         }
         private void BaseDictionarySet(ConcurrentDictionary<string, CachedEntryBase> value)
         {
-            var curnametemp = Name + "_DataDictionary_Thread_" +  GetInstanceId();
             var curname = Name + "_DataDictionary_Base_" +  GetInstanceId();
-            //lock (createLock)
-            //{
-             CacheTo.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curnametemp, value, LifeSpanInSeconds);
-             _baseTempCache.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, 1);
-            //}
+            CacheTo.SetItem<ConcurrentDictionary<string, CachedEntryBase>>(curname, value, LifeSpanInSeconds);
         }
 
 
@@ -154,28 +128,33 @@ namespace HttpObjectCaching.Core
 
         public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
         {
-            var dd =  BaseDictionaryGet();
-            object empty = default(tt);
-            CachedEntryBase itm2;
-            CachedEntry<tt> itm;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<tt>;
-            //if (dd.TryGetValue())
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
-            {
-                if (createMethod != null)
+
+            //using (StringLock.Lock.AcquireLock(Name + "_DataDictionary_Base_" + name.ToUpper()))
+            //{
+
+                var dd = BaseDictionaryGet();
+                object empty = default(tt);
+                CachedEntryBase itm2;
+                CachedEntry<tt> itm;
+                dd.TryGetValue(name.ToUpper(), out itm2);
+                itm = itm2 as CachedEntry<tt>;
+                //if (dd.TryGetValue())
+                //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+                if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
                 {
-                    var t =  createMethod();
-                     SetItem(name, t, lifeSpanSeconds);
-                    return t;
+                    if (createMethod != null)
+                    {
+                        var t = createMethod();
+                        SetItem(name, t, lifeSpanSeconds);
+                        return t;
+                    }
                 }
-            }
-            else
-            {
-                return (tt)itm.Item;
-            }
-            return default(tt);
+                else
+                {
+                    return (tt) itm.Item;
+                }
+                return default(tt);
+            //}
         }
         public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
         {
@@ -204,49 +183,55 @@ namespace HttpObjectCaching.Core
         }
         public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
-            var dd =  BaseDictionaryGet();
-            CachedEntryBase itm2 = null;
-            CachedEntry<tt> itm = null;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<tt>;
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null)
-            {
-                itm = new CachedEntry<tt>()
-                {
-                    Created = DateTime.Now,
-                    Name = name,
-                    Changed = DateTime.Now
-                };
-                if (!dd.TryAdd(name.ToUpper(), itm))
-                {
-                    dd.TryGetValue(name.ToUpper(), out itm2);
-                    itm = itm2 as CachedEntry<tt>;
-                }
-            }
-            if (itm != null)
-            {
-                if (lifeSpanSeconds.HasValue)
-                {
-                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-                }
-                itm.Changed = DateTime.Now;
-                itm.Item = obj;
-            }
+            //using (StringLock.Lock.AcquireLock(Name + "_DataDictionary_Base_" + name.ToUpper()))
+            //{
 
-            var lst =
-                (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
-            if (lst.Count > 0)
-            {
-                foreach (var dit in lst)
+                var dd = BaseDictionaryGet();
+                CachedEntryBase itm2 = null;
+                CachedEntry<tt> itm = null;
+                dd.TryGetValue(name.ToUpper(), out itm2);
+                itm = itm2 as CachedEntry<tt>;
+                //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+                if (itm == null)
                 {
-                    dd.TryRemove(dit.Name.ToUpper(), out itm2);
+                    itm = new CachedEntry<tt>()
+                    {
+                        Created = DateTime.Now,
+                        Name = name,
+                        Changed = DateTime.Now
+                    };
+                    if (!dd.TryAdd(name.ToUpper(), itm))
+                    {
+                        dd.TryGetValue(name.ToUpper(), out itm2);
+                        itm = itm2 as CachedEntry<tt>;
+                    }
                 }
-            }
-             BaseDictionarySet(dd);
+                if (itm != null)
+                {
+                    if (lifeSpanSeconds.HasValue)
+                    {
+                        itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                    }
+                    itm.Changed = DateTime.Now;
+                    itm.Item = obj;
+                }
+
+                var lst =
+                    (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList
+                        ();
+                if (lst.Count > 0)
+                {
+                    foreach (var dit in lst)
+                    {
+                        dd.TryRemove(dit.Name.ToUpper(), out itm2);
+                    }
+                }
+                BaseDictionarySet(dd);
+            //}
         }
         public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
         {
+
             var dd = await BaseDictionaryGetAsync();
             CachedEntryBase itm2 = null;
             CachedEntry<tt> itm = null;
@@ -278,7 +263,8 @@ namespace HttpObjectCaching.Core
             }
 
             var lst =
-                (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
+                (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList
+                    ();
             if (lst.Count > 0)
             {
                 foreach (var dit in lst)
@@ -289,147 +275,147 @@ namespace HttpObjectCaching.Core
             await BaseDictionarySetAsync(dd);
         }
 
-        public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
-        {
-            var dd = await BaseDictionaryGetAsync();
-            object empty = null;
-            CachedEntryBase itm2;
-            CachedEntry<object> itm;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<object>;
-            //if (dd.TryGetValue())
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
-            {
-                if (createMethod != null)
-                {
-                    var t = await createMethod();
-                    await SetItemAsync(name, t, lifeSpanSeconds);
-                    return t;
-                }
-            }
-            else
-            {
-                return itm.Item;
-            }
-            return null;
-        }
+        //public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    var dd = await BaseDictionaryGetAsync();
+        //    object empty = null;
+        //    CachedEntryBase itm2;
+        //    CachedEntry<object> itm;
+        //    dd.TryGetValue(name.ToUpper(), out itm2);
+        //    itm = itm2 as CachedEntry<object>;
+        //    //if (dd.TryGetValue())
+        //    //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+        //    if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
+        //    {
+        //        if (createMethod != null)
+        //        {
+        //            var t = await createMethod();
+        //            await SetItemAsync(name, t, lifeSpanSeconds);
+        //            return t;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return itm.Item;
+        //    }
+        //    return null;
+        //}
 
-        public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
-        {
-            var dd = await BaseDictionaryGetAsync();
-            CachedEntryBase itm2 = null;
-            CachedEntry<object> itm = null;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<object>;
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null)
-            {
-                itm = new CachedEntry<object>()
-                {
-                    Created = DateTime.Now,
-                    Name = name,
-                    Changed = DateTime.Now
-                };
-                if (!dd.TryAdd(name.ToUpper(), itm))
-                {
-                    dd.TryGetValue(name.ToUpper(), out itm2);
-                    itm = itm2 as CachedEntry<object>;
-                }
-            }
-            if (itm != null)
-            {
-                if (lifeSpanSeconds.HasValue)
-                {
-                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-                }
-                itm.Changed = DateTime.Now;
-                itm.Item = obj;
-            }
+        //public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        //{
+        //    var dd = await BaseDictionaryGetAsync();
+        //    CachedEntryBase itm2 = null;
+        //    CachedEntry<object> itm = null;
+        //    dd.TryGetValue(name.ToUpper(), out itm2);
+        //    itm = itm2 as CachedEntry<object>;
+        //    //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+        //    if (itm == null)
+        //    {
+        //        itm = new CachedEntry<object>()
+        //        {
+        //            Created = DateTime.Now,
+        //            Name = name,
+        //            Changed = DateTime.Now
+        //        };
+        //        if (!dd.TryAdd(name.ToUpper(), itm))
+        //        {
+        //            dd.TryGetValue(name.ToUpper(), out itm2);
+        //            itm = itm2 as CachedEntry<object>;
+        //        }
+        //    }
+        //    if (itm != null)
+        //    {
+        //        if (lifeSpanSeconds.HasValue)
+        //        {
+        //            itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //        }
+        //        itm.Changed = DateTime.Now;
+        //        itm.Item = obj;
+        //    }
 
-            var lst =
-                (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
-            if (lst.Count > 0)
-            {
-                foreach (var dit in lst)
-                {
-                    dd.TryRemove(dit.Name.ToUpper(), out itm2);
-                }
-            }
-            await BaseDictionarySetAsync(dd);
-        }
+        //    var lst =
+        //        (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
+        //    if (lst.Count > 0)
+        //    {
+        //        foreach (var dit in lst)
+        //        {
+        //            dd.TryRemove(dit.Name.ToUpper(), out itm2);
+        //        }
+        //    }
+        //    await BaseDictionarySetAsync(dd);
+        //}
 
 
 
-        public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
-        {
-            var dd =  BaseDictionaryGet();
-            object empty = null;
-            CachedEntryBase itm2;
-            CachedEntry<object> itm;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<object>;
-            //if (dd.TryGetValue())
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
-            {
-                if (createMethod != null)
-                {
-                    var t =  createMethod();
-                     SetItem(name, t, lifeSpanSeconds);
-                    return t;
-                }
-            }
-            else
-            {
-                return itm.Item;
-            }
-            return null;
-        }
+        //public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    var dd =  BaseDictionaryGet();
+        //    object empty = null;
+        //    CachedEntryBase itm2;
+        //    CachedEntry<object> itm;
+        //    dd.TryGetValue(name.ToUpper(), out itm2);
+        //    itm = itm2 as CachedEntry<object>;
+        //    //if (dd.TryGetValue())
+        //    //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+        //    if (itm == null || itm.ItemObject == empty || (itm.TimeOut.HasValue && itm.TimeOut.Value < DateTime.Now))
+        //    {
+        //        if (createMethod != null)
+        //        {
+        //            var t =  createMethod();
+        //             SetItem(name, t, lifeSpanSeconds);
+        //            return t;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return itm.Item;
+        //    }
+        //    return null;
+        //}
 
-        public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
-        {
-            var dd =  BaseDictionaryGet();
-            CachedEntryBase itm2 = null;
-            CachedEntry<object> itm = null;
-            dd.TryGetValue(name.ToUpper(), out itm2);
-            itm = itm2 as CachedEntry<object>;
-            //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
-            if (itm == null)
-            {
-                itm = new CachedEntry<object>()
-                {
-                    Created = DateTime.Now,
-                    Name = name,
-                    Changed = DateTime.Now
-                };
-                if (!dd.TryAdd(name.ToUpper(), itm))
-                {
-                    dd.TryGetValue(name.ToUpper(), out itm2);
-                    itm = itm2 as CachedEntry<object>;
-                }
-            }
-            if (itm != null)
-            {
-                if (lifeSpanSeconds.HasValue)
-                {
-                    itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
-                }
-                itm.Changed = DateTime.Now;
-                itm.Item = obj;
-            }
+        //public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        //{
+        //    var dd =  BaseDictionaryGet();
+        //    CachedEntryBase itm2 = null;
+        //    CachedEntry<object> itm = null;
+        //    dd.TryGetValue(name.ToUpper(), out itm2);
+        //    itm = itm2 as CachedEntry<object>;
+        //    //var itm = dd.getByName(name.ToUpper()) as CachedEntry<tt>;
+        //    if (itm == null)
+        //    {
+        //        itm = new CachedEntry<object>()
+        //        {
+        //            Created = DateTime.Now,
+        //            Name = name,
+        //            Changed = DateTime.Now
+        //        };
+        //        if (!dd.TryAdd(name.ToUpper(), itm))
+        //        {
+        //            dd.TryGetValue(name.ToUpper(), out itm2);
+        //            itm = itm2 as CachedEntry<object>;
+        //        }
+        //    }
+        //    if (itm != null)
+        //    {
+        //        if (lifeSpanSeconds.HasValue)
+        //        {
+        //            itm.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+        //        }
+        //        itm.Changed = DateTime.Now;
+        //        itm.Item = obj;
+        //    }
 
-            var lst =
-                (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
-            if (lst.Count > 0)
-            {
-                foreach (var dit in lst)
-                {
-                    dd.TryRemove(dit.Name.ToUpper(), out itm2);
-                }
-            }
-             BaseDictionarySet(dd);
-        }
+        //    var lst =
+        //        (from ce in dd.Values where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now select ce).ToList();
+        //    if (lst.Count > 0)
+        //    {
+        //        foreach (var dit in lst)
+        //        {
+        //            dd.TryRemove(dit.Name.ToUpper(), out itm2);
+        //        }
+        //    }
+        //     BaseDictionarySet(dd);
+        //}
     }
 }
 

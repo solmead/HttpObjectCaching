@@ -13,7 +13,18 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class LocalDataSource : IDataSource
     {
+        public BaseCacheArea Area { get { return BaseCacheArea.Other; } }
         private ConcurrentDictionary<string, CachedEntryBase> _baseDictionary = new ConcurrentDictionary<string, CachedEntryBase>();
+        public int? DefaultTimeOut { get; set; }
+        public LocalDataSource()
+        {
+            
+        }
+        public LocalDataSource(int? defaultTimeOut)
+        {
+            DefaultTimeOut= defaultTimeOut;
+        }
+
 
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
@@ -53,11 +64,19 @@ namespace HttpObjectCaching.Core.DataSources
             CachedEntry<tt> itm;
             _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
             itm = itm2 as CachedEntry<tt>;
+            if (itm != null && !itm.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                itm.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             return itm;
         }
 
         public void SetItem<tt>(CachedEntry<tt> item)
         {
+            if (!item.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                item.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
@@ -69,11 +88,19 @@ namespace HttpObjectCaching.Core.DataSources
             CachedEntry<object> itm;
             _baseDictionary.TryGetValue(name.ToUpper(), out itm2);
             itm = itm2 as CachedEntry<object>;
+            if (itm != null && !itm.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                itm.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             return itm;
         }
 
         public void SetItem(Type type, CachedEntry<object> item)
         {
+            if (!item.TimeOut.HasValue && DefaultTimeOut.HasValue)
+            {
+                item.TimeOut = DateTime.Now.AddSeconds(DefaultTimeOut.Value);
+            }
             CachedEntryBase itm2;
             _baseDictionary.TryRemove(item.Name.ToUpper(), out itm2);
             _baseDictionary.TryAdd(item.Name.ToUpper(), item);
@@ -155,5 +182,40 @@ namespace HttpObjectCaching.Core.DataSources
         {
             GetList<tt>(name).CopyTo(array, arrayIndex);
         }
+        public async Task<List<tt>> GetListAsync<tt>(string name)
+        {
+            return GetList<tt>(name);
+        }
+
+        public async Task AddToListAsync<tt>(string name, tt item)
+        {
+            AddToList<tt>(name, item);
+        }
+
+        public async Task ClearListAsync<tt>(string name)
+        {
+            ClearList<tt>(name);
+        }
+
+        public async Task RemoveFromListAsync<tt>(string name, tt item)
+        {
+            RemoveFromList(name, item);
+        }
+
+        public async Task RemoveFromListAtAsync<tt>(string name, int index)
+        {
+            RemoveFromListAt<tt>(name, index);
+        }
+
+        public async Task InsertIntoListAsync<tt>(string name, int index, tt item)
+        {
+            InsertIntoList<tt>(name, index, item);
+        }
+
+        public async Task SetInListAsync<tt>(string name, int index, tt item)
+        {
+            SetInList(name, index, item);
+        }
+
     }
 }

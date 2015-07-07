@@ -186,6 +186,10 @@
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureRedisCaching\AzureRedisCaching.csproj">
+      <Project>{fc116b9b-12fa-41ef-8d51-bec729f68cbe}</Project>
+      <Name>AzureRedisCaching</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CachingAopExtensions\CachingAopExtensions.csproj">
       <Project>{0b553924-99a3-407b-921c-cc9bef3b9040}</Project>
       <Name>CachingAopExtensions</Name>

@@ -1,12 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Script.Serialization;
 using PostSharp.Aspects;
 
 namespace CachingAopExtensions.Naming
 {
+    [Serializable]
     public class BaseNamer : ICacheEntryNamer
     {
+        public string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters)
+        {
+
+            var concatArguments = Serialize(parameters);
+            //var concatArguments = string.Join("_", serializedArguments);
+            var name = method.Name + "" + concatArguments;
+            if (method.DeclaringType != null)
+            {
+                name = method.DeclaringType.FullName + "." + name;
+            }
+            name = baseName + "_" + name;
+            return name;
+        }
         public string GetName(string baseName, MethodExecutionArgs args)
         {
 
@@ -16,14 +32,7 @@ namespace CachingAopExtensions.Naming
             {
                 dic.Add(p.Name, args.Arguments[p.Position]);
             }
-
-            var concatArguments = Serialize(dic);
-            //var concatArguments = string.Join("_", serializedArguments);
-            var name = baseName + "_" + args.Method.Module.Name + "_" + args.Method.Name + "_" + concatArguments;
-            //var name = baseName + "_" + args.Method.Module.Name + "_" + GetCacheKey(args);
-            
-
-            return name;
+            return GetName(baseName, args.Method as MethodInfo, dic);
         }
 
         //private string GetCacheKey(MethodExecutionArgs args)
