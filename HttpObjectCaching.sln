@@ -18,8 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCaching", "XmlCaching\Xm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRedisCaching", "AzureRedisCaching\AzureRedisCaching.csproj", "{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CachingSyncExtensions", "CachingExtensions\CachingSyncExtensions.csproj", "{2FF1662C-E829-4E88-8819-3A4F766FDB90}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CachingAopExtensions", "CachingAopExtensions\CachingAopExtensions.csproj", "{0B553924-99A3-407B-921C-CC9BEF3B9040}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCacheMVC", "TestCacheMVC\TestCacheMVC.csproj", "{C2270264-7E1E-4DED-A30F-1A76742220E6}"
@@ -46,10 +44,6 @@ Global
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC116B9B-12FA-41EF-8D51-BEC729F68CBE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2FF1662C-E829-4E88-8819-3A4F766FDB90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0B553924-99A3-407B-921C-CC9BEF3B9040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B553924-99A3-407B-921C-CC9BEF3B9040}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B553924-99A3-407B-921C-CC9BEF3B9040}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HttpObjectCaching, Version=5.1.5666.26095, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\HttpObjectCaching.5.1.5666.26095\lib\net45\HttpObjectCaching.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -73,10 +77,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HttpObjectCaching\HttpObjectCaching.csproj">
-      <Project>{f892df2d-7a09-481b-b872-738b5af15cb5}</Project>
-      <Name>HttpObjectCaching</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HttpObjectCaching\HttpObjectCaching.csproj">
       <Project>{f892df2d-7a09-481b-b872-738b5af15cb5}</Project>
       <Name>HttpObjectCaching</Name>
