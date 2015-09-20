@@ -32,9 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HttpObjectCaching, Version=5.1.5666.26095, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\HttpObjectCaching.5.1.5666.26095\lib\net45\HttpObjectCaching.dll</HintPath>
+    <Reference Include="HttpObjectCaching, Version=5.2.5740.23647, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\HttpObjectCaching.5.2.5740.23647\lib\net45\HttpObjectCaching.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -75,12 +75,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HttpObjectCaching\HttpObjectCaching.csproj">
-      <Project>{f892df2d-7a09-481b-b872-738b5af15cb5}</Project>
-      <Name>HttpObjectCaching</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
