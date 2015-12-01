@@ -54,6 +54,7 @@
     <Compile Include="CacheAOP.cs" />
     <Compile Include="CacheResultsAspect.cs" />
     <Compile Include="CachingAspect.cs" />
+    <Compile Include="CachingAspect3.cs" />
     <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Naming\BaseNamer.cs" />
     <Compile Include="Naming\ICacheEntryNamer.cs" />

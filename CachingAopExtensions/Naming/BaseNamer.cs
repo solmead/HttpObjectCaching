@@ -10,6 +10,17 @@ namespace CachingAopExtensions.Naming
     [Serializable]
     public class BaseNamer : ICacheEntryNamer
     {
+        public string GetName(string baseName, MethodInterceptionArgs args)
+        {
+            var param = args.Method.GetParameters();
+            var dic = new Dictionary<string, object>();
+            foreach (var p in param)
+            {
+                dic.Add(p.Name, args.Arguments[p.Position]);
+            }
+            return GetName(baseName, args.Method as MethodInfo, dic);
+        }
+
         public string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters)
         {
 

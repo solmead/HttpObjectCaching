@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using HttpObjectCaching.CacheAreas;
@@ -56,6 +57,46 @@ namespace HttpObjectCaching.Core
             }
             return tObj;
         }
+
+
+        private async Task<Object> LoadItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        {
+            object empty = null;// default(tt);
+            object tObj = null;
+            var entry = await LoadItemAsync(name, type, lifeSpanSeconds);
+            try
+            {
+                tObj = entry.Item;
+            }
+            catch (Exception)
+            {
+
+            }
+            object comp = tObj;
+            if (comp == empty)
+            {
+                if (createMethod != null)
+                {
+                    tObj = await createMethod();
+                    entry.Item = tObj;
+                    await SaveItemAsync(entry);
+                }
+            }
+            return tObj;
+        }
+
+        //public object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    Type d1 = typeof(Task<>);
+        //    Type[] typeArgs = { type };
+        //    Type constructed = d1.MakeGenericType(typeArgs);
+        //    //var ob = delegate { return CacheSystem.Instance; }
+        //    var t = new Task<CacheSystem>(() => { return CacheSystem.Instance; });
+
+        //    object o = Activator.CreateInstance(constructed, BindingFlags.Default, null, );
+        //    var i = LoadItemAsync(name, type, createMethod, lifeSpanSeconds);
+        //    return o;
+        //}
         public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
         {
             object empty = default(tt);
@@ -88,6 +129,24 @@ namespace HttpObjectCaching.Core
             if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
             {
                 entry = new CachedEntry<tt>()
+                {
+                    Name = name,
+                    Changed = DateTime.Now,
+                    Created = DateTime.Now
+                };
+                if (lifeSpanSeconds.HasValue)
+                {
+                    entry.TimeOut = DateTime.Now.AddSeconds(lifeSpanSeconds.Value);
+                }
+            }
+            return entry;
+        }
+        private async Task<CachedEntry<object>> LoadItemAsync(string name, Type type, double? lifeSpanSeconds = null)
+        {
+            var entry = await _dataSource.GetItemAsync<object>(name);
+            if (entry == null || (entry.TimeOut.HasValue && entry.TimeOut.Value < DateTime.Now))
+            {
+                entry = new CachedEntry<object>()
                 {
                     Name = name,
                     Changed = DateTime.Now,
@@ -184,6 +243,13 @@ namespace HttpObjectCaching.Core
             }
             await SaveItemAsync(entry);
         }
+
+        public object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        {
+            return null;
+        }
+
+
         //public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
         //{
         //    //object empty = default(tt);

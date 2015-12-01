@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 namespace HttpObjectCaching.Core.Collections.List
 {
     [Serializable]
-    public class ListToAsyncList<TT> : IAsyncList<TT>
+    public class AsyncList<TT> : IAsyncList<TT>
     {
         public IList<TT> _baseList;
 
-        public ListToAsyncList()
+        public AsyncList()
         {
             _baseList = new List<TT>();
         }
-        public ListToAsyncList(IList<TT> baseList)
+        public AsyncList(IList<TT> baseList)
         {
             _baseList = baseList;
         }

@@ -264,10 +264,37 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds)
+        public static object GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds)
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds);
+            try
+            {
+
+                double? lSS = lifeSpanSeconds;
+                if (lSS == 0)
+                {
+                    lSS = null;
+                }
+                if (!name.Contains("CacheEnabled") && !CacheSystem.Instance.CacheEnabled)
+                {
+                    return createMethod?.Invoke();
+                }
+                if (ca != null)
+                {
+                    name = ca.Name + "_" + name;
+                    return ca.GetItemAsync(name, createMethod, lSS);
+                }
+                if (createMethod != null)
+                {
+                    return createMethod();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error:" + ex.Message + " retrieving cache item [" + name + "] on cache [" + area.ToString() + "]", ex);
+            }
+            return null;
+            //return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -390,9 +417,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
+        public static object GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
         {
-            return await GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -416,9 +443,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod)
+        public static object GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod)
         {
-            return await GetItemAsync(area, name, type, async () => createMethod(), 0);
+            return GetItemAsync(area, name, type, async () => createMethod(), 0);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -442,9 +469,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod)
+        public static object GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod)
         {
-            return await GetItemAsync(area, name, type, createMethod, 0);
+            return GetItemAsync(area, name, type, createMethod, 0);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -464,9 +491,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type)
+        public static object GetItemAsync(CacheArea area, string name, Type type)
         {
-            return await GetItemAsync(area, name, type, async () => null, 0);
+            return GetItemAsync(area, name, type, async () => null, 0);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -488,9 +515,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, double lifeSpanSeconds)
+        public static object GetItemAsync(CacheArea area, string name, Type type, double lifeSpanSeconds)
         {
-            return await GetItemAsync(area, name, type, async () => null, lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => null, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -512,9 +539,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, object defaultValue)
+        public static object GetItemAsync(CacheArea area, string name, Type type, object defaultValue)
         {
-            return await GetItemAsync(area, name, type, async () => defaultValue, 0);
+            return GetItemAsync(area, name, type, async () => defaultValue, 0);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -538,9 +565,9 @@ namespace HttpObjectCaching
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds)
+        public static object GetItemAsync(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds)
         {
-            return await GetItemAsync(area, name, type, async () => defaultValue, lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => defaultValue, lifeSpanSeconds);
         }
         /// <summary>
         /// Pull an item from the cache

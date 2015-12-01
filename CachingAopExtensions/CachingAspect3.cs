@@ -13,14 +13,14 @@ namespace CachingAopExtensions
 {
     [Serializable]
     [MulticastAttributeUsage(MulticastTargets.Method, PersistMetaData = true)]
-    public class CachingAspect : MethodInterceptionAspect
+    public class CachingAspect3 : MethodInterceptionAspect
     {
         public CacheArea CacheArea { get; set; }
         public string BaseName { get; set; }
         public double LifeSpanSeconds { get; set; }
         public string Name { get; set; }
         public ICacheEntryNamer Namer { get; set; }
-        
+
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             if (!string.IsNullOrWhiteSpace(Name))
@@ -36,7 +36,7 @@ namespace CachingAopExtensions
             if (mthInfo != null)
             {
                 var retType = mthInfo.ReturnType;
-                
+
 
                 if (retType.IsGenericType && typeof(Task).IsAssignableFrom(retType))
                 {
@@ -48,18 +48,11 @@ namespace CachingAopExtensions
 
                     //    return (dynamic)await TaskTranslate((dynamic)args.ReturnValue);
                     //});
-                    var ret = Cache.GetItemAsync(CacheArea, name, retType,async () =>
+                    var ret = Cache.GetItemAsync(CacheArea, name, retType, async () =>
                     {
                         base.OnInvoke(args);
                         return (dynamic)await TaskTranslate((dynamic)args.ReturnValue);
                     });
-                    //Type d1 = typeof(Task<>);
-                    //Type[] typeArgs = { retType };
-                    //Type constructed = d1.MakeGenericType(typeArgs);
-                    Type constructed = mthInfo.ReturnType;
-                    object o = Activator.CreateInstance(constructed);
-
-                    
                     args.ReturnValue = ret;
                 }
                 else
