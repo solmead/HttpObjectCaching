@@ -24,6 +24,7 @@
     <RestorePackages>true</RestorePackages>
     <WebGreaseLibPath>..\packages\WebGrease.1.5.2\lib</WebGreaseLibPath>
     <DontImportPostSharp>True</DontImportPostSharp>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -189,10 +190,6 @@
     <ProjectReference Include="..\AzureRedisCaching\AzureRedisCaching.csproj">
       <Project>{fc116b9b-12fa-41ef-8d51-bec729f68cbe}</Project>
       <Name>AzureRedisCaching</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CachingAopExtensions\CachingAopExtensions.csproj">
-      <Project>{0b553924-99a3-407b-921c-cc9bef3b9040}</Project>
-      <Name>CachingAopExtensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\HttpObjectCaching\HttpObjectCaching.csproj">
       <Project>{f892df2d-7a09-481b-b872-738b5af15cb5}</Project>

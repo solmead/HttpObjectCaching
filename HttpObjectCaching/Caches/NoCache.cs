@@ -64,18 +64,27 @@ namespace HttpObjectCaching.Caches
             
         }
 
-        public async Task<object> GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
-        {
-            if (createMethod != null)
-            {
-                return await createMethod();
-            }
-            return null;
-        }
+        //public  object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        //{
+        //    if (createMethod != null)
+        //    {
+        //        return await createMethod();
+        //    }
+        //    return null;
+        //}
 
         public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
         {
             
         }
+
+        //async Task<object> ICacheArea.GetItemAsync(string name, Type type, Func<Task<object>> createMethod, double? lifeSpanSeconds)
+        //{
+        //    if (createMethod != null)
+        //    {
+        //        return await createMethod();
+        //    }
+        //    return null;
+        //}
     }
 }

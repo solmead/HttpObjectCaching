@@ -12,7 +12,6 @@ namespace CachingAopExtensions
 {
     public class TestClass
     {
-        static IDataSource ds=new LocalDataSource();
 
         [CachingAspect(CacheArea = CacheArea.Global)]
         public static async Task<List<int>> DoSomething(int a = 0, string b = "test")
@@ -31,6 +30,13 @@ namespace CachingAopExtensions
         public static List<int> DoSomething3()
         {
             return new List<int>() { 16, 17, 18, 19, 10 };
+        }
+
+        [CachingAspect(CacheArea = CacheArea.Request, AspectPriority = 1)]
+        [CachingAspect(CacheArea = CacheArea.Global, AspectPriority = 2)]
+        public static List<int> DoSomething4(string name = "test")
+        {
+            return new List<int>() { 161, 171, 181, 191, 101 };
         }
 
 

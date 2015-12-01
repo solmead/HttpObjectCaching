@@ -10,7 +10,9 @@ namespace CachingAopExtensions.Naming
 {
    public interface ICacheEntryNamer
    {
-       string GetName(string baseName, MethodExecutionArgs args);
-       string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters);
+        //MethodInterceptionArgs
+        string GetName(string baseName, MethodExecutionArgs args);
+        string GetName(string baseName, MethodInterceptionArgs args);
+        string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters);
    }
 }

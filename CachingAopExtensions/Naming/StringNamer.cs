@@ -17,6 +17,10 @@ namespace CachingAopExtensions.Naming
         }
         public string Name { get; set; }
 
+        public string GetName(string baseName, MethodInterceptionArgs args)
+        {
+            return Name;
+        }
         public string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters)
         {
             return Name;
