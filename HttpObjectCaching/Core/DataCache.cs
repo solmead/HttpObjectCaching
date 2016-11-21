@@ -31,8 +31,11 @@ namespace HttpObjectCaching.Core
             await _dataSource.DeleteAllAsync();
         }
         
-        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
+        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
+
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
 
             object empty = default(tt);
             tt tObj = default(tt);
@@ -97,8 +100,10 @@ namespace HttpObjectCaching.Core
         //    var i = LoadItemAsync(name, type, createMethod, lifeSpanSeconds);
         //    return o;
         //}
-        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
+        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
             object empty = default(tt);
             tt tObj = default(tt);
             var entry = await LoadItemAsync<tt>(name, lifeSpanSeconds);
@@ -221,8 +226,10 @@ namespace HttpObjectCaching.Core
         {
             await _dataSource.SetItemAsync(entry);
         }
-        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
             var entry =  LoadItem<tt>(name, lifeSpanSeconds);
             entry.Item = obj;
             entry.Changed = DateTime.Now;
@@ -232,8 +239,11 @@ namespace HttpObjectCaching.Core
             }
              SaveItem(entry);
         }
-        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
+
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
             var entry = await LoadItemAsync<tt>(name, lifeSpanSeconds);
             entry.Item = obj;
             entry.Changed = DateTime.Now;
@@ -244,8 +254,10 @@ namespace HttpObjectCaching.Core
             await SaveItemAsync(entry);
         }
 
-        public object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
+        public object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
             return null;
         }
 

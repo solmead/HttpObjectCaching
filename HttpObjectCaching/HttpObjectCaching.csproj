@@ -108,6 +108,7 @@
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
     <Compile Include="Core\IDataSource.cs" />
+    <Compile Include="Core\TaggedCacheEntry.cs" />
     <Compile Include="Helpers\AsyncSemaphore.cs" />
     <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />

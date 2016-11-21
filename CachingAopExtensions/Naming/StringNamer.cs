@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using PostSharp.Aspects;
+using PostSharp.Reflection;
 
 namespace CachingAopExtensions.Naming
 {
@@ -21,7 +22,17 @@ namespace CachingAopExtensions.Naming
         {
             return Name;
         }
-        public string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters)
+
+        public string GetName(string baseName, LocationInterceptionArgs args)
+        {
+            return Name;
+        }
+
+        public string GetName(string baseName, PropertyInfo method)
+        {
+            return Name;
+        }
+        public string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters = null)
         {
             return Name;
             
