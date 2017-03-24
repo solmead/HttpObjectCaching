@@ -2,7 +2,7 @@
 using System.Text;
 using System.Xml;
 
-namespace SqlCeDatabaseCaching.Helpers
+namespace DatabaseCaching.Helpers
 {
     public static class XmlSerializer
     {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D6CD63B8-59B0-46D9-AD0A-1EB41EDC433D}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D6CD63
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlCeDatabaseCaching", "DatabaseCaching\SqlCeDatabaseCaching.csproj", "{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseCaching", "DatabaseCaching\DatabaseCaching.csproj", "{9CE976BF-B253-4F35-9C5D-CDDAD75F85DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCaching", "XmlCaching\XmlCaching.csproj", "{4C934A9F-65DF-4B5F-88F5-C0B25F698416}"
 EndProject

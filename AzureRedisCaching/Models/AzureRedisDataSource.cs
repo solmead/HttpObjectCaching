@@ -85,6 +85,7 @@ namespace AzureRedisCaching.Models
             {
                 var t = await CacheDatabase.StringGetAsync(name.ToUpper());
                 //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
+                
                 if (!string.IsNullOrWhiteSpace(t))
                 {
                     return BinarySerializer.Deserialize(t, type) as CachedEntry<object>;

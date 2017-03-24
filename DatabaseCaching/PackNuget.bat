@@ -1,1 +1,1 @@
-"..\.nuget\nuget" pack SqlCeDatabaseCaching.csproj -IncludeReferencedProjects
+"..\.nuget\nuget" pack DatabaseCaching.csproj -IncludeReferencedProjects

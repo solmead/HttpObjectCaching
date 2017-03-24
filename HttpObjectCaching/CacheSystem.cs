@@ -141,14 +141,6 @@ namespace HttpObjectCaching
             }
         }
 
-        public static async Task<string> CookieIdAsync()
-        {
-            return GetCookieValue("cookie", false);
-        }
-        public static async Task CookieIdSetAsync(string value)
-        {
-            SetCookieValue("cookie", value);
-        }
 
 
         private static void SetCookieValue(string name, string value)
@@ -203,7 +195,7 @@ namespace HttpObjectCaching
 
 
                         cookie = new HttpCookie("_" + name + "_Cache", baseData);
-                        cookie.HttpOnly = true;
+                        //cookie.HttpOnly = true;
                         cookie.Path = FormsAuthentication.FormsCookiePath;
                         cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
                         if (isPerminate)
@@ -230,31 +222,39 @@ namespace HttpObjectCaching
         }
 
 
+        public static async Task<string> CookieIdAsync()
+        {
+            return GetCookieValue("my_cook", false);
+        }
+        public static async Task CookieIdSetAsync(string value)
+        {
+            SetCookieValue("my_cook", value);
+        }
         public static string CookieId()
         {
-            return GetCookieValue("cookie", true);
+            return GetCookieValue("my_cook", true);
         }
         public static void CookieIdSet(string value)
         {
-            SetCookieValue("cookie", value);
+            SetCookieValue("my_cook", value);
         }
         public static async Task<string> SessionIdAsync()
         {
-            return GetCookieValue("session", false);
+            return GetCookieValue("my_sess", false);
         }
 
         public static async Task SessionIdSetAsync(string value)
         {
-            SetCookieValue("session", value);
+            SetCookieValue("my_sess", value);
         }
         public static string SessionId()
         {
-            return GetCookieValue("session", false);
+            return GetCookieValue("my_sess", false);
         }
 
         public static void SessionIdSet(string value)
         {
-            SetCookieValue("session", value);
+            SetCookieValue("my_sess", value);
         }
 
         public async Task ClearAllCacheAreasAsync()

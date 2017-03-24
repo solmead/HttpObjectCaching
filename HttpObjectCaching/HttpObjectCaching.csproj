@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+    <Compile Include="Caches\PermanentCache.cs" />
     <Compile Include="Core\Collections\List\AsyncListOnCache.cs" />
     <Compile Include="Core\Collections\DictionaryOnCache.cs" />
     <Compile Include="Core\Collections\List\IAsyncList.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Core\Configuration\CacheElement.cs" />
     <Compile Include="Core\Configuration\CacheElementCollection.cs" />
     <Compile Include="Core\Configuration\CacheRetrieverSection.cs" />
+    <Compile Include="Core\Configuration\PermanentElement.cs" />
     <Compile Include="Core\DataSources\ApplicationDataSource.cs" />
     <Compile Include="Caches\CookieCache.cs" />
     <Compile Include="Caches\GlobalCache.cs" />
@@ -100,13 +102,16 @@
     <Compile Include="Caches\SessionCache.cs" />
     <Compile Include="Caches\ThreadCache.cs" />
     <Compile Include="Core\DataCache.cs" />
+    <Compile Include="Core\Extras\IPermanentRepository.cs" />
     <Compile Include="Core\DataSources\LocalDataSource.cs" />
+    <Compile Include="Core\DataSources\PermanentDataSource.cs" />
     <Compile Include="Core\DataSources\RequestDataSource.cs" />
     <Compile Include="Core\DataSources\ThreadDataSource.cs" />
     <Compile Include="Core\DictionaryCache.cs" />
     <Compile Include="CacheAreas\ICacheArea.cs" />
     <Compile Include="CacheAreas\INameValueLister.cs" />
     <Compile Include="CacheSystem.cs" />
+    <Compile Include="Core\Extras\StoreNowhere.cs" />
     <Compile Include="Core\IDataSource.cs" />
     <Compile Include="Core\TaggedCacheEntry.cs" />
     <Compile Include="Helpers\AsyncSemaphore.cs" />

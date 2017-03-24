@@ -15,6 +15,11 @@ namespace XmlCaching.Helpers
     {
         static object fileLock = new object();
 
+        public static List<FileInfo> GetFiles(DirectoryInfo baseDirectory, string baseName)
+        {
+            var di = new DirectoryInfo(baseDirectory.FullName + "/");
+            return di.GetFiles(baseName + "-*." + Settings.Default.WriteMode.ToString()).ToList();
+        }
 
         public static FileInfo GetFile(DirectoryInfo baseDirectory, string baseName, string itemName)
         {

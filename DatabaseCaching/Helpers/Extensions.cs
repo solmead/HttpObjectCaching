@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SqlCeDatabaseCaching.Helpers
+namespace DatabaseCaching.Helpers
 {
     [Serializable]
     public enum FileMode

@@ -14,5 +14,11 @@ namespace HttpObjectCaching.Core.Configuration
             get { return (CacheElementCollection)this["entries"]; }
             set { this["entries"] = value; }
         }
+        [ConfigurationProperty("permanent_source")]
+        public PermanentElement PermanentElement
+        {
+            get { return (PermanentElement)this["permanent_source"]; }
+            set { this["permanent_source"] = value; }
+        }
     }
 }

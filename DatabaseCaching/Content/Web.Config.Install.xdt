@@ -5,31 +5,13 @@
     </sectionGroup>
   </configSections>
   <applicationSettings xdt:Transform="InsertIfMissing">
-    <SqlCeDatabaseCaching.Properties.Settings xdt:Transform="InsertIfMissing">
-      <setting name="DBDirectory" serializeAs="String">
-        <value>~\App_Data\</value>
+    <DatabaseCaching.Properties.Settings xdt:Transform="InsertIfMissing">
+      <setting name="ConnectionName" serializeAs="String">
+        <value>connString</value>
       </setting>
-      <setting name="MaxFileSizeMB" serializeAs="String">
-        <value>150</value>
-      </setting>
-      <setting name="WriteMode" serializeAs="String">
-        <value>Xml</value>
-      </setting>
-      <setting name="SecondsInMemory" serializeAs="String">
-        <value>60</value>
-      </setting>
-      <setting name="BaseDBName" serializeAs="String">
-        <value>DbCache</value>
-      </setting>
-      <setting name="UseServerName" serializeAs="String">
-        <value>False</value>
-      </setting>
-    </SqlCeDatabaseCaching.Properties.Settings>
+    </DatabaseCaching.Properties.Settings>
   </applicationSettings>
-
   <HttpObjectCachingAreas>
-    <entries>
-      <add area="Permanent" class="HttpObjectCaching.Caches.DatabaseCache, SqlCeDatabaseCaching" xdt:Transform="SetAttributes" xdt:Locator="Match(area)"/>
-    </entries>
+    <permanent_source class="DatabaseCaching.Context.StoreInDatabase, DatabaseCaching" xdt:Transform="SetAttributes"/>
   </HttpObjectCachingAreas>
 </configuration>

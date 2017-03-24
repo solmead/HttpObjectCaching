@@ -24,8 +24,6 @@
     </XmlCaching.Properties.Settings>
   </applicationSettings>
   <HttpObjectCachingAreas>
-    <entries>
-      <add area="Permanent" class="HttpObjectCaching.Caches.XmlCacheCombined, XmlCaching" xdt:Transform="SetAttributes" xdt:Locator="Match(area)"/>
-    </entries>
+    <permanent_source class="XmlCaching.Models.StoreInXML, XmlCaching" xdt:Transform="SetAttributes"/>
   </HttpObjectCachingAreas>
 </configuration>
