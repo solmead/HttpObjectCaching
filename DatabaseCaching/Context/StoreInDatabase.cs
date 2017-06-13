@@ -19,36 +19,43 @@ namespace DatabaseCaching.Context
         }
 
 
-        private void CleanOutTimeOutValues()
+        private void CleanOutTimeOutValues(DataContext database)
         {
-            using (var database = new DataContext())
-            {
-                var lst = (from ce in database.CachedEntries
-                     where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
-                     select ce).ToList();
-                if (lst.Count > 0)
+                try
                 {
-                    database.CachedEntries.RemoveRange(lst);
-                }
 
-                database.SaveChanges();
-            }
+                    var lst = (from ce in database.CachedEntries
+                         where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
+                         select ce).ToList();
+                    if (lst.Count > 0)
+                    {
+                        database.CachedEntries.RemoveRange(lst);
+                        database.SaveChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
         }
-        private async Task CleanOutTimeOutValuesAsync()
+        private async Task CleanOutTimeOutValuesAsync(DataContext database)
         {
-            using (var database = new DataContext())
-            {
-                var lst = await
-                    (from ce in database.CachedEntries
-                     where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
-                     select ce).ToListAsync();
-                if (lst.Count > 0)
+                try
                 {
-                    database.CachedEntries.RemoveRange(lst);
+                    var lst = await
+                        (from ce in database.CachedEntries
+                         where ce.TimeOut.HasValue && ce.TimeOut.Value < DateTime.Now
+                         select ce).ToListAsync();
+                    if (lst.Count > 0)
+                    {
+                        database.CachedEntries.RemoveRange(lst);
+                        await database.SaveChangesAsync();
+                    }
                 }
+                catch (Exception ex)
+                {
 
-                await database.SaveChangesAsync();
-            }
+                }
         }
 
 
@@ -125,9 +132,10 @@ namespace DatabaseCaching.Context
 
 
                 await database.SaveChangesAsync();
+
+                //await CleanOutTimeOutValuesAsync(database);
             }
 
-            await CleanOutTimeOutValuesAsync();
         }
 
         public async Task DeleteAsync(string name)
@@ -219,9 +227,9 @@ namespace DatabaseCaching.Context
 
 
                 database.SaveChanges();
+                //CleanOutTimeOutValues(database);
             }
 
-            CleanOutTimeOutValues();
         }
 
         public void Delete(string name)

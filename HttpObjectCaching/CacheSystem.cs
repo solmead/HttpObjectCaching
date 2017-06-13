@@ -36,7 +36,7 @@ namespace HttpObjectCaching
             {
                 return;
             }
-            var te = (from t in TaggedEntries
+            var te = (from t in TaggedEntries.ToList()
                 where t.CacheArea == cacheArea && t.EntryName.ToUpper() == entryName.ToUpper()
                 select t).FirstOrDefault();
 
