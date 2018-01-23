@@ -88,18 +88,7 @@ namespace HttpObjectCaching.Core
             return tObj;
         }
 
-        //public object GetItemAsync(string name, Type type, Func<Task<object>> createMethod = null, double? lifeSpanSeconds = null)
-        //{
-        //    Type d1 = typeof(Task<>);
-        //    Type[] typeArgs = { type };
-        //    Type constructed = d1.MakeGenericType(typeArgs);
-        //    //var ob = delegate { return CacheSystem.Instance; }
-        //    var t = new Task<CacheSystem>(() => { return CacheSystem.Instance; });
-
-        //    object o = Activator.CreateInstance(constructed, BindingFlags.Default, null, );
-        //    var i = LoadItemAsync(name, type, createMethod, lifeSpanSeconds);
-        //    return o;
-        //}
+       
         public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
             CacheSystem.Instance.AddTaggedEntry(Area, tags, name);

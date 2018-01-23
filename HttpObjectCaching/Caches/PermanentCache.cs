@@ -49,6 +49,10 @@ namespace HttpObjectCaching.Caches
             baseDataSource = base.DataSource as PermanentDataSource;
             var repo = Repository;
 
+            baseDataSource.NeedCacheDatabase = () =>
+            {
+                repo = Repository;
+            };
         }
 
 

@@ -17,6 +17,8 @@ namespace HttpObjectCaching.Core.DataSources
 
         public IPermanentRepository CacheDatabase { get; set; }
 
+        public Action NeedCacheDatabase { get; set; }
+
         public PermanentDataSource()
         {
             
@@ -29,6 +31,17 @@ namespace HttpObjectCaching.Core.DataSources
 
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to read from");
+                }
+            }
             try
             {
 
@@ -47,6 +60,17 @@ namespace HttpObjectCaching.Core.DataSources
             if (item == null)
             {
                 throw new ArgumentNullException();
+            }
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
             }
             object comp = item.Item;
             object empty = default(tt);
@@ -73,6 +97,17 @@ namespace HttpObjectCaching.Core.DataSources
 
         public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to read from");
+                }
+            }
             try
             {
                 var t = await CacheDatabase.GetAsync(name.ToUpper());
@@ -90,6 +125,17 @@ namespace HttpObjectCaching.Core.DataSources
             if (item == null)
             {
                 throw new ArgumentNullException();
+            }
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to read from");
+                }
             }
             object comp = item.Item;
             object empty = null;
@@ -113,11 +159,33 @@ namespace HttpObjectCaching.Core.DataSources
 
         public async Task DeleteItemAsync(string name)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
+            }
             await CacheDatabase.DeleteAsync(name.ToUpper());
         }
 
         public async Task DeleteAllAsync()
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
+            }
             var keys = await CacheDatabase.GetKeysAsync();
             foreach (var key in keys)
             {
@@ -132,6 +200,17 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<tt> GetItem<tt>(string name)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to read from");
+                }
+            }
             try
             {
                 var t = CacheDatabase.Get(name.ToUpper());
@@ -149,6 +228,17 @@ namespace HttpObjectCaching.Core.DataSources
             if (item == null)
             {
                 throw new ArgumentNullException();
+            }
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
             }
             object comp = item.Item;
             object empty = default(tt);
@@ -172,6 +262,17 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<object> GetItem(string name, Type type)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to read from");
+                }
+            }
             try
             {
                 var t = CacheDatabase.Get(name.ToUpper());
@@ -188,7 +289,18 @@ namespace HttpObjectCaching.Core.DataSources
         {
             if (item == null)
             {
-                throw new ArgumentNullException();
+                    throw new ArgumentNullException();
+            }
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
             }
             object comp = item.Item;
             object empty = null;
@@ -215,6 +327,17 @@ namespace HttpObjectCaching.Core.DataSources
 
         public void DeleteItem(string name)
         {
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
+            }
             CacheDatabase.Delete(name.ToUpper());
             //Cache.SetItem<string>(CacheArea.Global, "TestDistributedCache_" + name, null);
         }
@@ -222,6 +345,17 @@ namespace HttpObjectCaching.Core.DataSources
         public void DeleteAll()
         {
 
+            if (CacheDatabase == null)
+            {
+                if (NeedCacheDatabase != null)
+                {
+                    NeedCacheDatabase();
+                }
+                else
+                {
+                    throw new Exception("No Cache Database to write to");
+                }
+            }
             var keys =  CacheDatabase.GetKeys();
             foreach (var key in keys)
             {

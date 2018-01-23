@@ -272,15 +272,19 @@ namespace HttpObjectCaching
             }
         }
 
+        public List<TaggedCacheEntry> GetTaggedCacheEntries(string tag)
+        {
+            return (from t in TaggedEntries
+                where t.Tags.ToUpper().Contains("," + tag.ToUpper() + ",")
+                select t).ToList();
+        }
 
         public async Task ClearTaggedCacheAsync(string tag)
         {
-            var tList = (from t in TaggedEntries
-                         where t.Tags.ToUpper().Contains("," + tag.ToUpper() + ",")
-                         select t).ToList();
+            var tList = GetTaggedCacheEntries(tag);
             foreach (var t in tList)
             {
-                await Cache.SetItemAsync<string>(t.CacheArea, t.EntryName, null);
+                await Cache.SetItemAsync<object>(t.CacheArea, t.EntryName, null);
             }
         }
 
@@ -315,12 +319,10 @@ namespace HttpObjectCaching
 
         public void ClearTaggedCache(string tag)
         {
-            var tList = (from t in TaggedEntries
-                         where t.Tags.ToUpper().Contains("," + tag.ToUpper() + ",")
-                         select t).ToList();
+            var tList = GetTaggedCacheEntries(tag);
             foreach (var t in tList)
             {
-                Cache.SetItem<string>(t.CacheArea, t.EntryName, null);
+                Cache.SetItem<object>(t.CacheArea, t.EntryName, null);
             }
         }
 
