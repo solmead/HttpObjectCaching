@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseCaching.Helpers;
 using DatabaseCaching.Models;
+using HttpObjectCaching;
 using HttpObjectCaching.Core.Extras;
 
 namespace DatabaseCaching.Context
@@ -18,6 +19,13 @@ namespace DatabaseCaching.Context
             DataContext.UpgradeDB();
         }
 
+
+        private static Dictionary<string, CachedEntry> ValuesDictionary
+        {
+            get => Cache.GetItem<Dictionary<string, CachedEntry>>(CacheArea.Global, "StoreInDatabase_ValuesDictionary",
+                () => new Dictionary<string, CachedEntry>());
+            set => Cache.SetItem<Dictionary<string, CachedEntry>>(CacheArea.Global, "StoreInDatabase_ValuesDictionary", value);
+        }
 
         private void CleanOutTimeOutValues(DataContext database)
         {
@@ -58,19 +66,85 @@ namespace DatabaseCaching.Context
                 }
         }
 
+        private async Task<CachedEntry> GetItemAsync(string name)
+        {
+            CachedEntry itm = null;
+
+
+            if (ValuesDictionary.ContainsKey(name.ToUpper()))
+            {
+                itm = ValuesDictionary[name.ToUpper()];
+            }
+
+            //lock (_lock)
+            if (itm == null)
+            {
+                using (var database = new DataContext())
+                {
+                    itm = await (from ce in database.CachedEntries.AsNoTracking() where ce.Name == name select ce).FirstOrDefaultAsync();
+                }
+            }
+
+            itm = itm ?? new CachedEntry()
+            {
+                Name = name,
+            };
+
+            if (ValuesDictionary.ContainsKey(name.ToUpper()))
+            {
+                ValuesDictionary[name.ToUpper()] = itm;
+            }
+            else
+            {
+                ValuesDictionary.Add(name.ToUpper(), itm);
+            }
+
+            return itm;
+        }
+
+        private  CachedEntry GetItem(string name)
+        {
+            CachedEntry itm = null;
+
+
+            if (ValuesDictionary.ContainsKey(name.ToUpper()))
+            {
+                itm = ValuesDictionary[name.ToUpper()];
+            }
+
+            //lock (_lock)
+            if (itm == null)
+            {
+                using (var database = new DataContext())
+                {
+                    itm =  (from ce in database.CachedEntries.AsNoTracking() where ce.Name == name select ce).FirstOrDefault();
+                }
+            }
+
+            itm = itm ?? new CachedEntry()
+            {
+                Created = DateTime.Now,
+                Name = name,
+                Object = ""
+            };
+
+            if (ValuesDictionary.ContainsKey(name.ToUpper()))
+            {
+                ValuesDictionary[name.ToUpper()] = itm;
+            }
+            else
+            {
+                ValuesDictionary.Add(name.ToUpper(), itm);
+            }
+
+            return itm;
+        }
 
 
 
         public async Task<byte[]> GetAsync(string name)
         {
-            CachedEntry itm;
-            //lock (_lock)
-            {
-                using (var database = new DataContext())
-                {
-                    itm = await(from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefaultAsync();
-                }
-            }
+            var itm = await GetItemAsync(name);
             if (itm != null && itm.TimeOut.HasValue && itm.TimeOut.Value >= DateTime.Now)
             {
                 var xml = itm.Object;
@@ -96,17 +170,19 @@ namespace DatabaseCaching.Context
 
             var xml = Convert.ToBase64String(value);
 
+            var itm = await GetItemAsync(name);
+
             using (var database = new DataContext())
             {
-                var itm =
-                    await (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefaultAsync();
-
+                database.CachedEntries.Attach(itm);
                 if (value.Length == 0)
                 {
-                    if (itm != null)
+                    if (itm.Id!=0)
                     {
                         database.CachedEntries.Remove(itm);
                     }
+
+                    ValuesDictionary[name.ToUpper()] = null;
                 }
                 else
                 {
@@ -115,16 +191,6 @@ namespace DatabaseCaching.Context
                     {
                         endTime = DateTime.Now.AddSeconds(timeout.Value.TotalSeconds);
                     }
-                    if (itm == null)
-                    {
-                        itm = new CachedEntry()
-                        {
-                            Created = DateTime.Now,
-                            Name = name,
-                            Object = ""
-                        };
-                        database.CachedEntries.Add(itm);
-                    }
                     itm.TimeOut = endTime;
                     itm.Changed = DateTime.Now;
                     itm.Object = xml;
@@ -132,7 +198,7 @@ namespace DatabaseCaching.Context
 
 
                 await database.SaveChangesAsync();
-
+                database.Entry(itm).State = EntityState.Detached;
                 //await CleanOutTimeOutValuesAsync(database);
             }
 
@@ -159,14 +225,8 @@ namespace DatabaseCaching.Context
         public byte[] Get(string name)
         {
 
-            CachedEntry itm;
-            //lock (_lock)
-            {
-                using (var database = new DataContext())
-                {
-                    itm = (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefault();
-                }
-            }
+
+            var itm =  GetItem(name);
             if (itm != null && itm.TimeOut.HasValue && itm.TimeOut.Value >= DateTime.Now)
             {
                 var xml = itm.Object;
@@ -191,43 +251,37 @@ namespace DatabaseCaching.Context
         {
             var xml = Convert.ToBase64String(value);
 
+            var itm =  GetItem(name);
+
             using (var database = new DataContext())
             {
-                var itm =
-                    (from ce in database.CachedEntries where ce.Name == name select ce).FirstOrDefault();
-
                 if (value.Length == 0)
                 {
-                    if (itm != null)
+                    ValuesDictionary[name.ToUpper()] = null;
+                    if (itm.Id != 0)
                     {
                         database.CachedEntries.Remove(itm);
+                        database.SaveChanges();
                     }
                 }
-                else
+                else if (value.Length>0)
                 {
                     DateTime? endTime = null;
                     if (timeout.HasValue)
                     {
                         endTime = DateTime.Now.AddSeconds(timeout.Value.TotalSeconds);
                     }
-                    if (itm == null)
-                    {
-                        itm = new CachedEntry()
-                        {
-                            Created = DateTime.Now,
-                            Name = name,
-                            Object = ""
-                        };
-                        database.CachedEntries.Add(itm);
-                    }
                     itm.TimeOut = endTime;
                     itm.Changed = DateTime.Now;
                     itm.Object = xml;
+                    database.CachedEntries.Attach(itm);
+                    database.SaveChanges();
+                    database.Entry(itm).State = EntityState.Detached;
                 }
 
 
-                database.SaveChanges();
-                //CleanOutTimeOutValues(database);
+
+                //await CleanOutTimeOutValuesAsync(database);
             }
 
         }

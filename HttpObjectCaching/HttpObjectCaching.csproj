@@ -118,8 +118,6 @@
     <Compile Include="Helpers\BinarySerializer.cs" />
     <Compile Include="Helpers\CachedEntry.cs" />
     <Compile Include="Helpers\Extensions.cs" />
-    <Compile Include="Helpers\SerializableDictionary.cs" />
-    <Compile Include="Helpers\SerializableList.cs" />
     <Compile Include="Helpers\Serializer.cs" />
     <Compile Include="Helpers\StringLock.cs" />
     <Compile Include="Helpers\XmlSerializer.cs" />

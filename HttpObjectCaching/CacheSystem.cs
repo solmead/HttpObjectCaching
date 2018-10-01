@@ -32,42 +32,49 @@ namespace HttpObjectCaching
 
         public void AddTaggedEntry(CacheArea cacheArea, string tags, string entryName)
         {
-            if (string.IsNullOrWhiteSpace(tags))
+            if (string.IsNullOrWhiteSpace(tags) || string.IsNullOrWhiteSpace(entryName))
             {
                 return;
             }
-            var te = (from t in TaggedEntries.ToList()
-                where t.CacheArea == cacheArea && t.EntryName.ToUpper() == entryName.ToUpper()
-                select t).FirstOrDefault();
-
-            if (te == null)
+            try
             {
-                te = new TaggedCacheEntry()
+                var te = (from t in TaggedEntries.ToList()
+                          where t.CacheArea == cacheArea && t.EntryName?.ToUpper() == entryName?.ToUpper()
+                          select t).FirstOrDefault();
+
+                if (te == null)
                 {
-                    CacheArea = cacheArea,
-                    EntryName = entryName,
-                    Tags = ""
-                };
-                TaggedEntries.Add(te);
-            }
+                    te = new TaggedCacheEntry()
+                    {
+                        CacheArea = cacheArea,
+                        EntryName = entryName,
+                        Tags = ""
+                    };
+                    TaggedEntries.Add(te);
+                }
 
-            if (string.IsNullOrWhiteSpace(tags))
+                if (string.IsNullOrWhiteSpace(tags))
+                {
+                    tags = "";
+                }
+                if (string.IsNullOrWhiteSpace(te.Tags))
+                {
+                    te.Tags = "";
+                }
+
+
+
+
+                var tarr = (tags.ToUpper() + "," + te.Tags.ToUpper()).Split(',').ToList();
+                tarr = (from t in tarr where !string.IsNullOrWhiteSpace(t) select t).Distinct().ToList();
+                tarr.Insert(0, "");
+                tarr.Add("");
+                te.Tags = String.Join(",", tarr);
+            }
+            catch (Exception ex)
             {
-                tags = "";
+                
             }
-            if (string.IsNullOrWhiteSpace(te.Tags))
-            {
-                te.Tags = "";
-            }
-            
-
-
-
-            var tarr = (tags.ToUpper() + "," + te.Tags.ToUpper()).Split(',').ToList();
-            tarr = (from t in tarr where !string.IsNullOrWhiteSpace(t) select t).Distinct().ToList();
-            tarr.Insert(0, "");
-            tarr.Add("");
-            te.Tags = String.Join(",", tarr);
 
         }
 
