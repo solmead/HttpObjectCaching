@@ -10,6 +10,12 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class RequestDataSource : IDataSource
     {
+
+        private static List<string> requestCaches = new List<string>();
+
+
+        private ThreadDataSource _threadSource = new ThreadDataSource();
+
         public BaseCacheArea Area { get { return BaseCacheArea.Request; } }
         public async Task<CachedEntry<tt>> GetItemAsync<tt>(string name)
         {
@@ -21,15 +27,15 @@ namespace HttpObjectCaching.Core.DataSources
             SetItem(item);
         }
 
-        public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
-        {
-            return GetItem(name, type);
-        }
+        //public async Task<CachedEntry<object>> GetItemAsync(string name, Type type)
+        //{
+        //    return GetItem(name, type);
+        //}
 
-        public async Task SetItemAsync(Type type, CachedEntry<object> item)
-        {
-            SetItem(type, item);
-        }
+        //public async Task SetItemAsync(Type type, CachedEntry<object> item)
+        //{
+        //    SetItem(type, item);
+        //}
 
         public async Task DeleteItemAsync(string name)
         {
@@ -43,18 +49,31 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<tt> GetItem<tt>(string name)
         {
-            var context = HttpContext.Current;
-            if (context != null)
+            try
             {
+
+                if (!requestCaches.Contains(name.ToUpper()))
+                {
+                    requestCaches.Add(name.ToUpper());
+                }
+                var context = HttpContext.Current;
+                if (context != null)
+                {
                     if (context.Items.Contains(name.ToUpper()))
                     {
-                        var t = (CachedEntry<tt>) context.Items[name.ToUpper()];
+                        var t = (CachedEntry<tt>)context.Items[name.ToUpper()];
                         return t;
                     }
+                }
+                else
+                {
+                    return _threadSource.GetItem<tt>(name);
+                    //return Cache.GetItem<CachedEntry<tt>>(CacheArea.Local, name, default(CachedEntry<tt>));
+                }
             }
-            else
+            catch (Exception e)
             {
-                //return Cache.GetItem<CachedEntry<tt>>(CacheArea.Local, name, default(CachedEntry<tt>));
+                // ignored
             }
             return default(CachedEntry<tt>);
         }
@@ -64,6 +83,11 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
+
+                if (!requestCaches.Contains(item.Name.ToUpper()))
+                {
+                    requestCaches.Add(item.Name.ToUpper());
+                }
                 //lock (requestSetLock)
                 {
                     if (context.Items.Contains(item.Name.ToUpper()))
@@ -75,66 +99,96 @@ namespace HttpObjectCaching.Core.DataSources
             }
             else
             {
+                _threadSource.SetItem<tt>(item);
                 //Cache.SetItem(CacheArea.Local, item.Name, item);
             }
         }
 
-        public CachedEntry<object> GetItem(string name, Type type)
-        {
-            var context = HttpContext.Current;
-            if (context != null)
-            {
-                    if (context.Items.Contains(name.ToUpper()))
-                    {
-                        var t = (CachedEntry<object>)context.Items[name.ToUpper()];
-                        return t;
-                    }
-            }
-            else
-            {
-                //return Cache.GetItem<CachedEntry<object>>(CacheArea.Local, name, default(CachedEntry<object>));
-            }
-            return default(CachedEntry<object>);
-        }
+        //public CachedEntry<object> GetItem(string name, Type type)
+        //{
+        //    try
+        //    {
 
-        public void SetItem(Type type, CachedEntry<object> item)
-        {
-            var context = HttpContext.Current;
-            if (context != null)
-            {
-                //lock (requestSetLock)
-                {
-                    if (context.Items.Contains(item.Name.ToUpper()))
-                    {
-                        context.Items.Remove(item.Name.ToUpper());
-                    }
-                    context.Items.Add(item.Name.ToUpper(), item);
-                }
-            }
-            else
-            {
-                //Cache.SetItem(CacheArea.Local, item.Name, item);
-            }
-        }
+        //        var context = HttpContext.Current;
+        //        if (context != null)
+        //        {
+        //            if (context.Items.Contains(name.ToUpper()))
+        //            {
+        //                var t = (CachedEntry<object>)context.Items[name.ToUpper()];
+        //                return t;
+        //            }
+        //        }
+        //        else
+        //        {
+                    
+        //            //return Cache.GetItem<CachedEntry<object>>(CacheArea.Local, name, default(CachedEntry<object>));
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        // ignored
+        //    }
+        //    return default(CachedEntry<object>);
+        //}
+
+        //public void SetItem(Type type, CachedEntry<object> item)
+        //{
+        //    var context = HttpContext.Current;
+        //    if (context != null)
+        //    {
+        //        //lock (requestSetLock)
+        //        {
+        //            if (context.Items.Contains(item.Name.ToUpper()))
+        //            {
+        //                context.Items.Remove(item.Name.ToUpper());
+        //            }
+        //            context.Items.Add(item.Name.ToUpper(), item);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //Cache.SetItem(CacheArea.Local, item.Name, item);
+        //    }
+        //}
 
         public void DeleteItem(string name)
         {
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
+                if (requestCaches.Contains(name.ToUpper()))
                 {
-                    if (context.Items.Contains(name.ToUpper()))
-                    {
-                        context.Items.Remove(name.ToUpper());
-                    }
+                    requestCaches.Remove(name.ToUpper());
                 }
+                if (context.Items.Contains(name.ToUpper()))
+                {
+                    context.Items.Remove(name.ToUpper());
+                }
+            }
+            else
+            {
+                _threadSource.DeleteItem(name);
             }
         }
 
         public void DeleteAll()
         {
-            //throw new NotImplementedException();
+            foreach (var name in requestCaches.ToList())
+            {
+                DeleteItem(name);
+            }
+
+
+            ////throw new NotImplementedException();
+            //var context = HttpContext.Current;
+            //if (context != null)
+            //{
+            //    var lst = (from string k in context.Items.Keys select k).ToList();
+            //    foreach (var it in lst)
+            //    {
+            //        context.Items.Remove(it);
+            //    }
+            //}
         }
 
 

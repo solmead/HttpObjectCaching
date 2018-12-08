@@ -1,4 +1,4 @@
-namespace SqlCeDatabaseCaching.Migrations
+namespace DatabaseCaching.Migrations
 {
     using System;
     using System.Data.Entity.Migrations;

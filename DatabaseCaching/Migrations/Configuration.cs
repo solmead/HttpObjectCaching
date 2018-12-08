@@ -1,18 +1,18 @@
-namespace SqlCeDatabaseCaching.Migrations
+namespace DatabaseCaching.Migrations
 {
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<SqlCeDatabaseCaching.Context.DataContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<DatabaseCaching.Context.DataContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(SqlCeDatabaseCaching.Context.DataContext context)
+        protected override void Seed(DatabaseCaching.Context.DataContext context)
         {
             //  This method will be called after migrating to the latest version.
 

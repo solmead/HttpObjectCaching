@@ -126,13 +126,14 @@ namespace HttpObjectCaching.Core
             //await BaseDictionarySetAsync(null);
         }
 
-        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
+        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
 
             //using (StringLock.Lock.AcquireLock(Name + "_DataDictionary_Base_" + name.ToUpper()))
             //{
 
-                var dd = BaseDictionaryGet();
+            var dd = BaseDictionaryGet();
                 object empty = default(tt);
                 CachedEntryBase itm2;
                 CachedEntry<tt> itm;
@@ -156,8 +157,11 @@ namespace HttpObjectCaching.Core
                 return default(tt);
             //}
         }
-        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
+        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
+
+
             var dd = await BaseDictionaryGetAsync();
             object empty = default(tt);
             CachedEntryBase itm2;
@@ -181,12 +185,13 @@ namespace HttpObjectCaching.Core
             }
             return default(tt);
         }
-        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
             //using (StringLock.Lock.AcquireLock(Name + "_DataDictionary_Base_" + name.ToUpper()))
             //{
 
-                var dd = BaseDictionaryGet();
+            var dd = BaseDictionaryGet();
                 CachedEntryBase itm2 = null;
                 CachedEntry<tt> itm = null;
                 dd.TryGetValue(name.ToUpper(), out itm2);
@@ -229,8 +234,9 @@ namespace HttpObjectCaching.Core
                 BaseDictionarySet(dd);
             //}
         }
-        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
+            CacheSystem.Instance.AddTaggedEntry(Area, tags, name);
 
             var dd = await BaseDictionaryGetAsync();
             CachedEntryBase itm2 = null;

@@ -12,28 +12,63 @@ namespace CachingAopExtensions
 {
     public class TestClass
     {
+        private List<int> _myList = new List<int>() {5, 4, 3, 2, 1};
+        private List<int> _myList2 = new List<int>() { 55, 44, 33, 22, 11 };
 
-        [CachingAspect(CacheArea = CacheArea.Global)]
+        [CacheProperty(CacheArea = CacheArea.Global)]
+        public List<int> MyList1
+        {
+            get
+            {
+                return _myList;
+            }
+            set
+            {
+                _myList = value;
+            }
+        }
+
+
+        [CacheProperty(CacheArea = CacheArea.Global)]
+        public List<int> MyList2
+        {
+            get
+            {
+                return _myList2;
+            }
+            private set
+            {
+                _myList2 = value;
+            }
+        }
+
+        public void SetMyList(List<int> lst)
+        {
+            MyList2 = lst;
+        }
+
+
+        [CacheFunction(CacheArea = CacheArea.Global)]
         public static async Task<List<int>> DoSomething(int a = 0, string b = "test")
         {
             return new List<int>() {5,4,3,2,1};
         }
 
 
-        [CachingAspect(CacheArea = CacheArea.Global)]
+        [CacheFunction(CacheArea = CacheArea.Global)]
         public static List<int> DoSomething2(int a = 0, string b = "test")
         {
-            return new List<int>() {6,7,8,9,10};
+            return new List<int>() {6,7,8,9,10, a};
         }
 
-        [CachingAspect(CacheArea = CacheArea.Global)]
+        [CacheFunction(CacheArea = CacheArea.Global)]
         public static List<int> DoSomething3()
         {
             return new List<int>() { 16, 17, 18, 19, 10 };
         }
 
-        [CachingAspect(CacheArea = CacheArea.Request, AspectPriority = 1)]
-        [CachingAspect(CacheArea = CacheArea.Global, AspectPriority = 2)]
+        [CacheFunction(CacheArea = CacheArea.Request, AspectPriority = 1)]
+        [CacheFunction(CacheArea = CacheArea.Global, AspectPriority = 2)]
         public static List<int> DoSomething4(string name = "test")
         {
             return new List<int>() { 161, 171, 181, 191, 101 };
@@ -42,7 +77,7 @@ namespace CachingAopExtensions
 
         public static void SetValues(List<int> val)
         {
-            CacheAOP.SetItem(DoSomething3, val);
+            CacheAOP.SetOnFunction(DoSomething3, val);
         }
     }
 }

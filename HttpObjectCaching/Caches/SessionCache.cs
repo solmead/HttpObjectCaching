@@ -8,6 +8,7 @@ namespace HttpObjectCaching.Caches
         {
             Area =CacheArea.Session;
             Name = "DefaultSession";
+            LifeSpanInSeconds = 60*20;
         }
     }
 }

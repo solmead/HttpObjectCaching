@@ -85,6 +85,7 @@ namespace AzureRedisCaching.Models
             {
                 var t = await CacheDatabase.StringGetAsync(name.ToUpper());
                 //var t = Cache.GetItem<string>(CacheArea.Global,"TestDistributedCache_" + name, (string) null);
+                
                 if (!string.IsNullOrWhiteSpace(t))
                 {
                     return BinarySerializer.Deserialize(t, type) as CachedEntry<object>;
@@ -138,7 +139,7 @@ namespace AzureRedisCaching.Models
             foreach (var ep in Connection.GetEndPoints())
             {
                 var server =  Connection.GetServer(ep);
-                var keys = server.Keys();
+                var keys = server.Keys().ToList();
                 foreach (var key in keys)
                 {
                     Console.WriteLine("Removing Key {0} from cache", key.ToString());
@@ -258,7 +259,7 @@ namespace AzureRedisCaching.Models
             foreach (var ep in Connection.GetEndPoints())
             {
                 var server =  Connection.GetServer(ep);
-                var keys = server.Keys();
+                var keys = server.Keys().ToList();
                 foreach (var key in keys)
                 {
                     Console.WriteLine("Removing Key {0} from cache", key.ToString());

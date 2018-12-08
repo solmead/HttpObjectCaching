@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace SqlCeDatabaseCaching.Helpers
+namespace DatabaseCaching.Helpers
 {
     public static class BinarySerializer
     {

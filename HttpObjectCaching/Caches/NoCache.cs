@@ -16,7 +16,7 @@ namespace HttpObjectCaching.Caches
             
         }
 
-        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null)
+        public tt GetItem<tt>(string name, Func<tt> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
             if (createMethod != null)
             {
@@ -25,12 +25,12 @@ namespace HttpObjectCaching.Caches
             return default(tt);
         }
 
-        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public void SetItem<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
             
         }
 
-        public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null)
+        public object GetItem(string name, Type type, Func<object> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
 
             if (createMethod != null)
@@ -40,7 +40,7 @@ namespace HttpObjectCaching.Caches
             return null;
         }
 
-        public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        public void SetItem(string name, Type type, object obj, double? lifeSpanSeconds = null, string tags = "")
         {
             
         }
@@ -50,7 +50,7 @@ namespace HttpObjectCaching.Caches
             
         }
 
-        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null)
+        public async Task<tt> GetItemAsync<tt>(string name, Func<Task<tt>> createMethod = null, double? lifeSpanSeconds = null, string tags = "")
         {
             if (createMethod != null)
             {
@@ -59,7 +59,7 @@ namespace HttpObjectCaching.Caches
             return default(tt);
         }
 
-        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null)
+        public async Task SetItemAsync<tt>(string name, tt obj, double? lifeSpanSeconds = null, string tags = "")
         {
             
         }
@@ -73,7 +73,7 @@ namespace HttpObjectCaching.Caches
         //    return null;
         //}
 
-        public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null)
+        public async Task SetItemAsync(string name, Type type, object obj, double? lifeSpanSeconds = null, string tags = "")
         {
             
         }

@@ -50,7 +50,7 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(ICacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(ICacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds, string tags = "")
         {
             try
             {
@@ -70,7 +70,7 @@ namespace HttpObjectCaching
                 }
                 if (area != null)
                 {
-                    name = area.Name + "_" + name;
+                    //name = area.Name + "_" + name;
                     //if (area.Area < CacheArea.Temp)
                     //{
                     //    return await GetItemAsync(CacheArea.Temp, name + "_Request_TempCache", async () =>
@@ -80,7 +80,7 @@ namespace HttpObjectCaching
                     //}
                     //else
                     {
-                        return await area.GetItemAsync<tt>(name, createMethod, lSS);
+                        return await area.GetItemAsync<tt>(name, createMethod, lSS, tags);
                     }
                 }
                 if (createMethod != null)
@@ -103,7 +103,7 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(ICacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        public static tt GetItem<tt>(ICacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds, string tags = "")
         {
             try
             {
@@ -124,7 +124,7 @@ namespace HttpObjectCaching
 
                 if (area != null)
                 {
-                    name = area.Name + "_" + name;
+                    //name = area.Name + "_" + name;
                     //if (area.Area < CacheArea.Temp)
                     //{
                     //    return GetItem(CacheArea.Temp, name + "_Request_TempCache", () =>
@@ -134,7 +134,7 @@ namespace HttpObjectCaching
                     //}
                     //else
                     {
-                        return  area.GetItem<tt>(name, createMethod, lSS);
+                        return  area.GetItem<tt>(name, createMethod, lSS, tags);
                     }
                 }
                 if (createMethod != null)
@@ -157,15 +157,15 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static async Task SetItemAsync<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds)
+        public static async Task SetItemAsync<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             double? lSS = lifeSpanSeconds;
             if (lSS == 0)
             {
                 lSS = null;
             }
-            name = area.Name + "_" + name;
-            await area.SetItemAsync<tt>(name, obj, lSS);
+            //name = area.Name + "_" + name;
+            await area.SetItemAsync<tt>(name, obj, lSS, tags);
             //if (area.Area < CacheArea.Temp)
             //{
             //    await SetItemAsync(CacheArea.Temp, name + "_Request_TempCache", obj);
@@ -181,15 +181,15 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static void SetItem<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds)
+        public static void SetItem<tt>(ICacheArea area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             double? lSS = lifeSpanSeconds;
             if (lSS == 0)
             {
                 lSS = null;
             }
-            name = area.Name + "_" + name;
-            area.SetItem<tt>(name, obj, lSS);
+            //name = area.Name + "_" + name;
+            area.SetItem<tt>(name, obj, lSS, tags);
             //if (area.Area < CacheArea.Temp)
             //{
             //    SetItem(CacheArea.Temp, name + "_Request_TempCache", obj);
@@ -208,10 +208,10 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = new DataCache(area);
-            return await GetItemAsync<tt>(ca, name, createMethod, lifeSpanSeconds);
+            return await GetItemAsync<tt>(ca, name, createMethod, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -222,10 +222,10 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = new DataCache(area);
-            return GetItem<tt>(ca, name, createMethod, lifeSpanSeconds);
+            return GetItem<tt>(ca, name, createMethod, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -236,10 +236,10 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds);
+            return await GetItemAsync(ca, name, createMethod, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -250,10 +250,10 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            return GetItem(ca, name, createMethod, lifeSpanSeconds);
+            return GetItem(ca, name, createMethod, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -264,7 +264,7 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds)
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
             try
@@ -282,7 +282,7 @@ namespace HttpObjectCaching
                 if (ca != null)
                 {
                     name = ca.Name + "_" + name;
-                    return ca.GetItemAsync(name, createMethod, lSS);
+                    return ca.GetItemAsync(name, createMethod, lSS, tags);
                 }
                 if (createMethod != null)
                 {
@@ -305,10 +305,10 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
+        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            return GetItem(ca, name, createMethod, lifeSpanSeconds);
+            return GetItem(ca, name, createMethod, lifeSpanSeconds, tags);
         }
 
         /// <summary>
@@ -319,10 +319,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = new DataCache(area);
-            await SetItemAsync<tt>(ca, name, obj, lifeSpanSeconds);
+            await SetItemAsync<tt>(ca, name, obj, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -332,10 +332,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static void SetItem<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds)
+        public static void SetItem<tt>(IDataSource area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = new DataCache(area);
-            SetItem<tt>(ca, name, obj, lifeSpanSeconds);
+            SetItem<tt>(ca, name, obj, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -345,10 +345,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
+        public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            await SetItemAsync(ca, name, obj, lifeSpanSeconds);
+            await SetItemAsync(ca, name, obj, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -358,10 +358,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
+        public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            await SetItemAsync(ca, name, obj, lifeSpanSeconds);
+            await SetItemAsync(ca, name, obj, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -371,10 +371,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds)
+        public static void SetItem<tt>(CacheArea area, string name, tt obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            SetItem(ca, name, obj, lifeSpanSeconds);
+            SetItem(ca, name, obj, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -384,10 +384,10 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
         /// <param name="lifeSpanSeconds"></param>
-        public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds)
+        public static void SetItem(CacheArea area, string name, Type type, object obj, double lifeSpanSeconds, string tags = "")
         {
             var ca = CacheSystem.Instance.GetCacheArea(area);
-            SetItem(ca, name, obj, lifeSpanSeconds);
+            SetItem(ca, name, obj, lifeSpanSeconds, tags);
         }
 
 
@@ -404,9 +404,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<tt> createMethod, double lifeSpanSeconds, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => createMethod(), lifeSpanSeconds);
+            return await GetItemAsync<tt>(area, name, async () => createMethod(), lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -417,9 +417,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds)
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod, double lifeSpanSeconds, string tags = "")
         {
-            return GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => createMethod(), lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -430,9 +430,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<tt> createMethod)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<tt> createMethod, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => createMethod(), 0);
+            return await GetItemAsync<tt>(area, name, async () => createMethod(), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -443,9 +443,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod)
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<object> createMethod, string tags = "")
         {
-            return GetItemAsync(area, name, type, async () => createMethod(), 0);
+            return GetItemAsync(area, name, type, async () => createMethod(), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -456,9 +456,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, Func<Task<tt>> createMethod, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, createMethod, 0);
+            return await GetItemAsync<tt>(area, name, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -469,9 +469,11 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod)
+        public static async Task<object> GetItemAsync(CacheArea area, string name, Type type, Func<Task<object>> createMethod, string tags = "")
         {
-            return GetItemAsync(area, name, type, createMethod, 0);
+            //await Task.Delay(10000);
+
+            return await GetItemAsync(area, name, type, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -480,9 +482,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async ()=> default(tt), 0);
+            return await GetItemAsync<tt>(area, name, async ()=> default(tt), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -491,21 +493,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type)
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, string tags = "")
         {
-            return GetItemAsync(area, name, type, async () => null, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="lifeSpanSeconds"></param>
-        /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, double lifeSpanSeconds)
-        {
-            return await GetItemAsync<tt>(area, name, async () => default(tt), lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => null, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -515,46 +505,45 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, double lifeSpanSeconds, string tags = "")
         {
-            return GetItemAsync(area, name, type, async () => null, lifeSpanSeconds);
+            return await GetItemAsync<tt>(area, name, async () => default(tt), lifeSpanSeconds, tags);
         }
         /// <summary>
-        /// Pull an item from the cache
+        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
         /// </summary>
         /// <typeparam name="tt">Type of object being requested</typeparam>
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
-        /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, tt defaultValue)
-        {
-            return await GetItemAsync<tt>(area, name, async () => defaultValue, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
-        /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, object defaultValue)
-        {
-            return GetItemAsync(area, name, type, async () => defaultValue, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, tt defaultValue, double lifeSpanSeconds)
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, double lifeSpanSeconds, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => defaultValue, lifeSpanSeconds);
+            return GetItemAsync(area, name, type, async () => null, lifeSpanSeconds, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, tt defaultValue, string tags = "")
+        {
+            return await GetItemAsync<tt>(area, name, async () => defaultValue, 0, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, object defaultValue, string tags = "")
+        {
+            return GetItemAsync(area, name, type, async () => defaultValue, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -565,9 +554,22 @@ namespace HttpObjectCaching
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItemAsync(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(CacheArea area, string name, tt defaultValue, double lifeSpanSeconds, string tags = "")
         {
-            return GetItemAsync(area, name, type, async () => defaultValue, lifeSpanSeconds);
+            return await GetItemAsync<tt>(area, name, async () => defaultValue, lifeSpanSeconds, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static Task<object> GetItemAsync(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds, string tags = "")
+        {
+            return GetItemAsync(area, name, type, async () => defaultValue, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -578,9 +580,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, Func<Task<tt>> createMethod, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, createMethod, 0);
+            return await GetItemAsync<tt>(area, name, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -589,9 +591,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => default(tt), 0);
+            return await GetItemAsync<tt>(area, name, async () => default(tt), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -601,9 +603,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, double lifeSpanSeconds, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => default(tt), lifeSpanSeconds);
+            return await GetItemAsync<tt>(area, name, async () => default(tt), lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -613,9 +615,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, tt defaultValue)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, tt defaultValue, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => defaultValue, 0);
+            return await GetItemAsync<tt>(area, name, async () => defaultValue, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -626,9 +628,9 @@ namespace HttpObjectCaching
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, tt defaultValue, double lifeSpanSeconds)
+        public static async Task<tt> GetItemAsync<tt>(IDataSource area, string name, tt defaultValue, double lifeSpanSeconds, string tags = "")
         {
-            return await GetItemAsync<tt>(area, name, async () => defaultValue, lifeSpanSeconds);
+            return await GetItemAsync<tt>(area, name, async () => defaultValue, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -639,9 +641,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod)
+        public static tt GetItem<tt>(CacheArea area, string name, Func<tt> createMethod, string tags = "")
         {
-            return GetItem<tt>(area, name, createMethod, 0);
+            return GetItem<tt>(area, name, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -652,9 +654,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod)
+        public static object GetItem(CacheArea area, string name, Type type, Func<object> createMethod, string tags = "")
         {
-            return GetItem(area, name, type, createMethod, 0);
+            return GetItem(area, name, type, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -663,9 +665,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name)
+        public static tt GetItem<tt>(CacheArea area, string name, string tags = "")
         {
-            return GetItem<tt>(area, name, () => default(tt), 0);
+            return GetItem<tt>(area, name, () => default(tt), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -674,21 +676,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type)
+        public static object GetItem(CacheArea area, string name, Type type, string tags = "")
         {
-            return GetItem(area, name, type, () => null, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="lifeSpanSeconds"></param>
-        /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name, double lifeSpanSeconds)
-        {
-            return GetItem<tt>(area, name, () => default(tt), lifeSpanSeconds);
+            return GetItem(area, name, type, () => null, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -698,46 +688,45 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type, double lifeSpanSeconds)
+        public static tt GetItem<tt>(CacheArea area, string name, double lifeSpanSeconds, string tags = "")
         {
-            return GetItem(area, name, type, () => null, lifeSpanSeconds);
+            return GetItem<tt>(area, name, () => default(tt), lifeSpanSeconds, tags);
         }
         /// <summary>
-        /// Pull an item from the cache
+        /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
         /// </summary>
         /// <typeparam name="tt">Type of object being requested</typeparam>
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
-        /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue)
-        {
-            return  GetItem<tt>(area, name, () => defaultValue, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
-        /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type, object defaultValue)
-        {
-            return  GetItem(area, name, type,  () => defaultValue, 0);
-        }
-        /// <summary>
-        /// Pull an item from the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being requested</typeparam>
-        /// <param name="area">What area object is stored in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue, double lifeSpanSeconds)
+        public static object GetItem(CacheArea area, string name, Type type, double lifeSpanSeconds, string tags = "")
         {
-            return  GetItem<tt>(area, name,  () => defaultValue, lifeSpanSeconds);
+            return GetItem(area, name, type, () => null, lifeSpanSeconds, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue, string tags = "")
+        {
+            return  GetItem<tt>(area, name, () => defaultValue, 0, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <returns></returns>
+        public static object GetItem(CacheArea area, string name, Type type, object defaultValue, string tags = "")
+        {
+            return  GetItem(area, name, type,  () => defaultValue, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -748,9 +737,22 @@ namespace HttpObjectCaching
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static object GetItem(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds)
+        public static tt GetItem<tt>(CacheArea area, string name, tt defaultValue, double lifeSpanSeconds, string tags = "")
         {
-            return  GetItem(area, name, type,  () => defaultValue, lifeSpanSeconds);
+            return  GetItem<tt>(area, name,  () => defaultValue, lifeSpanSeconds, tags);
+        }
+        /// <summary>
+        /// Pull an item from the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being requested</typeparam>
+        /// <param name="area">What area object is stored in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
+        /// <param name="lifeSpanSeconds"></param>
+        /// <returns></returns>
+        public static object GetItem(CacheArea area, string name, Type type, object defaultValue, double lifeSpanSeconds, string tags = "")
+        {
+            return  GetItem(area, name, type,  () => defaultValue, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -761,9 +763,9 @@ namespace HttpObjectCaching
         /// <param name="createMethod">Function passed in that will return a new object of type tt if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod)
+        public static tt GetItem<tt>(IDataSource area, string name, Func<tt> createMethod, string tags = "")
         {
-            return GetItem<tt>(area, name, createMethod, 0);
+            return GetItem<tt>(area, name, createMethod, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -772,9 +774,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area object is stored in</param>
         /// <param name="name">Name of object</param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name)
+        public static tt GetItem<tt>(IDataSource area, string name, string tags = "")
         {
-            return  GetItem<tt>(area, name,  () => default(tt), 0);
+            return  GetItem<tt>(area, name,  () => default(tt), 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache, cache instance will be initialized to whatever the default for the type tt is.
@@ -784,9 +786,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, double lifeSpanSeconds)
+        public static tt GetItem<tt>(IDataSource area, string name, double lifeSpanSeconds, string tags = "")
         {
-            return  GetItem<tt>(area, name,  () => default(tt), lifeSpanSeconds);
+            return  GetItem<tt>(area, name,  () => default(tt), lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -796,9 +798,9 @@ namespace HttpObjectCaching
         /// <param name="name">Name of object</param>
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, tt defaultValue)
+        public static tt GetItem<tt>(IDataSource area, string name, tt defaultValue, string tags = "")
         {
-            return  GetItem<tt>(area, name,  () => defaultValue, 0);
+            return  GetItem<tt>(area, name,  () => defaultValue, 0, tags);
         }
         /// <summary>
         /// Pull an item from the cache
@@ -809,9 +811,9 @@ namespace HttpObjectCaching
         /// <param name="defaultValue">Value to initialize the cache location to if cache location and name doesnt exist yet.</param>
         /// <param name="lifeSpanSeconds"></param>
         /// <returns></returns>
-        public static tt GetItem<tt>(IDataSource area, string name, tt defaultValue, double lifeSpanSeconds)
+        public static tt GetItem<tt>(IDataSource area, string name, tt defaultValue, double lifeSpanSeconds, string tags = "")
         {
-            return  GetItem<tt>(area, name,  () => defaultValue, lifeSpanSeconds);
+            return  GetItem<tt>(area, name,  () => defaultValue, lifeSpanSeconds, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -820,9 +822,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area to store object in</param>
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
-        public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj)
+        public static async Task SetItemAsync<tt>(CacheArea area, string name, tt obj, string tags = "")
         {
-            await SetItemAsync(area, name, obj, 0);
+            await SetItemAsync(area, name, obj, 0, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -831,32 +833,11 @@ namespace HttpObjectCaching
         /// <param name="area">What area to store object in</param>
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
-        public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj)
-        {
-            await SetItemAsync(area, name, type, obj, 0);
-        }
-        /// <summary>
-        /// Puts an item into the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being stored</typeparam>
-        /// <param name="area">What area to store object in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="obj">Object to store in cache location</param>
-        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj)
-        {
-            await SetItemAsync(area, name, obj, 0);
-        }
-        /// <summary>
-        /// Puts an item into the cache
-        /// </summary>
-        /// <typeparam name="tt">Type of object being stored</typeparam>
-        /// <param name="area">What area to store object in</param>
-        /// <param name="name">Name of object</param>
-        /// <param name="obj">Object to store in cache location</param>
-        public static void SetItem<tt>(CacheArea area, string name, tt obj)
+        public static async Task SetItemAsync(CacheArea area, string name, Type type, object obj, string tags = "")
         {
 
-            SetItem(area, name, obj, 0);
+            await Task.Delay(10000);
+            await SetItemAsync(area, name, type, obj, 0, tags);
         }
         /// <summary>
         /// Puts an item into the cache
@@ -865,10 +846,33 @@ namespace HttpObjectCaching
         /// <param name="area">What area to store object in</param>
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
-        public static void SetItem(CacheArea area, string name, Type type, object obj)
+        public static async Task SetItemAsync<tt>(IDataSource area, string name, tt obj, string tags = "")
+        {
+            await SetItemAsync(area, name, obj, 0, tags);
+        }
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
+        public static void SetItem<tt>(CacheArea area, string name, tt obj, string tags = "")
         {
 
-            SetItem(area, name, type, obj, 0);
+            SetItem(area, name, obj, 0, tags);
+        }
+        /// <summary>
+        /// Puts an item into the cache
+        /// </summary>
+        /// <typeparam name="tt">Type of object being stored</typeparam>
+        /// <param name="area">What area to store object in</param>
+        /// <param name="name">Name of object</param>
+        /// <param name="obj">Object to store in cache location</param>
+        public static void SetItem(CacheArea area, string name, Type type, object obj, string tags = "")
+        {
+
+            SetItem(area, name, type, obj, 0, tags);
 
         }
         /// <summary>
@@ -878,9 +882,9 @@ namespace HttpObjectCaching
         /// <param name="area">What area to store object in</param>
         /// <param name="name">Name of object</param>
         /// <param name="obj">Object to store in cache location</param>
-        public static void SetItem<tt>(IDataSource area, string name, tt obj)
+        public static void SetItem<tt>(IDataSource area, string name, tt obj, string tags = "")
         {
-            SetItem<tt>(area, name, obj, 0);
+            SetItem<tt>(area, name, obj, 0, tags);
         }
 
         #endregion

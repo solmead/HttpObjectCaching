@@ -1,35 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
 using System.Data.Entity;
-using System.Data.Entity.Core.Common.CommandTrees;
-using System.Data.Entity.Core.EntityClient;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Migrations;
-using System.Data.SqlServerCe;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using SqlCeDatabaseCaching.Migrations;
-using SqlCeDatabaseCaching.Models;
-using SqlCeDatabaseCaching.Properties;
+using DatabaseCaching.Migrations;
+using DatabaseCaching.Models;
+using DatabaseCaching.Properties;
 using HttpObjectCaching;
-using SqlCeDatabaseCaching.Properties;
 
-namespace SqlCeDatabaseCaching.Context
+namespace DatabaseCaching.Context
 {
     class DataContext : DbContext
     {
-        private static string dbfile = Settings.Default.DBDirectory + Settings.Default.BaseDBName + (Settings.Default.UseServerName ? "_" + Environment.MachineName : "") + ".sdf";
-        private static FileInfo fi = new FileInfo(System.Web.Hosting.HostingEnvironment.MapPath(dbfile));
-        private static string cecs = "Data Source=" + fi.FullName;
-        private static string cs = "Provider=System.Data.SqlServerCe.4.0; " + cecs;
+        //private static string dbfile = Settings.Default.DBDirectory + Settings.Default.BaseDBName + (Settings.Default.UseServerName ? "_" + Environment.MachineName : "") + ".sdf";
+        //private static FileInfo fi = new FileInfo(System.Web.Hosting.HostingEnvironment.MapPath(dbfile));
+        //private static string cecs = "Data Source=" + fi.FullName;
+        //private static string cs = "Provider=System.Data.SqlServerCe.4.0; " + cecs;
 
         public DataContext()
-            : base(cecs)
+            : base(Settings.Default.ConnectionName)
         {
 
         }
@@ -37,17 +29,11 @@ namespace SqlCeDatabaseCaching.Context
 
         public static void UpgradeDB()
         {
-            var fi = new FileInfo(System.Web.Hosting.HostingEnvironment.MapPath(dbfile));
-            if (fi.Exists && fi.Length > Settings.Default.MaxFileSizeMB * 1024 * 1024)
-            {
-                fi.Delete();
-            }
-
             Database.SetInitializer<DataContext>(null);
             try
             {
                 var configuration = new Configuration();
-                configuration.TargetDatabase = new DbConnectionInfo( cecs, "System.Data.SqlServerCe.4.0");
+                configuration.TargetDatabase = new DbConnectionInfo(Settings.Default.ConnectionName);
                 var dbMigrator = new DbMigrator(configuration);
             
                 if (dbMigrator.GetPendingMigrations().Count() > 0)

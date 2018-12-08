@@ -13,6 +13,8 @@ namespace CachingAopExtensions.Naming
         //MethodInterceptionArgs
         string GetName(string baseName, MethodExecutionArgs args);
         string GetName(string baseName, MethodInterceptionArgs args);
-        string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters);
-   }
+        string GetName(string baseName, LocationInterceptionArgs args);
+        string GetName(string baseName, MethodInfo method, Dictionary<string, object> parameters = null);
+        string GetName(string baseName, PropertyInfo method);
+    }
 }

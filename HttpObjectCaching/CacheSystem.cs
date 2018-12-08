@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Security;
@@ -25,7 +26,58 @@ namespace HttpObjectCaching
 
         public Dictionary<CacheArea, ICacheArea> CacheAreas { get; private set; }
 
+        public List<TaggedCacheEntry> TaggedEntries { get; set; } = new List<TaggedCacheEntry>();
+
         public bool CacheEnabled { get; set; }
+
+        public void AddTaggedEntry(CacheArea cacheArea, string tags, string entryName)
+        {
+            if (string.IsNullOrWhiteSpace(tags) || string.IsNullOrWhiteSpace(entryName))
+            {
+                return;
+            }
+            try
+            {
+                var te = (from t in TaggedEntries.ToList()
+                          where t.CacheArea == cacheArea && t.EntryName?.ToUpper() == entryName?.ToUpper()
+                          select t).FirstOrDefault();
+
+                if (te == null)
+                {
+                    te = new TaggedCacheEntry()
+                    {
+                        CacheArea = cacheArea,
+                        EntryName = entryName,
+                        Tags = ""
+                    };
+                    TaggedEntries.Add(te);
+                }
+
+                if (string.IsNullOrWhiteSpace(tags))
+                {
+                    tags = "";
+                }
+                if (string.IsNullOrWhiteSpace(te.Tags))
+                {
+                    te.Tags = "";
+                }
+
+
+
+
+                var tarr = (tags.ToUpper() + "," + te.Tags.ToUpper()).Split(',').ToList();
+                tarr = (from t in tarr where !string.IsNullOrWhiteSpace(t) select t).Distinct().ToList();
+                tarr.Insert(0, "");
+                tarr.Add("");
+                te.Tags = String.Join(",", tarr);
+            }
+            catch (Exception ex)
+            {
+                
+            }
+
+        }
+
 
         private CacheSystem()
         {
@@ -96,78 +148,67 @@ namespace HttpObjectCaching
             }
         }
 
-        public static async Task<string> CookieIdAsync()
+
+
+        private static void SetCookieValue(string name, string value)
         {
-                var _cookieId = await Cache.GetItemAsync<string>(CacheArea.Request, "_cookieId",async () => Guid.NewGuid().ToString());
-                var context = HttpContext.Current;
-                if (context != null)
-                {
-                    HttpCookie cookie = null;
-                    try
-                    {
-                        cookie = context.Request.Cookies["cookieCache"];
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
-                    {
-                        _cookieId = cookie.Value;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            cookie = new HttpCookie("cookieCache", _cookieId);
-                            cookie.HttpOnly = true;
-                            cookie.Path = FormsAuthentication.FormsCookiePath;
-                            cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
-                            if (HttpContext.Current.Request.Url.Host.Split('.').Length > 2)
-                            {
-                                cookie.Domain = HttpContext.Current.Request.Url.Host;
-                            }
-                            context.Response.SetCookie(cookie);
-                        }
-                        catch (Exception)
-                        {
-
-                        }
-                    }
-                }
-                return _cookieId;
-            }
-        public static async Task CookieIdSetAsync(string value) { 
-            await Cache.SetItemAsync<string>(CacheArea.Request, "_cookieId", value); 
+            Cache.SetItem<string>(CacheArea.Request, "_" + name + "Id", value);
         }
 
-        public static string CookieId()
+        private static string GetCookieValue(string name, bool isPerminate)
         {
-            var _cookieId =  Cache.GetItem<string>(CacheArea.Request, "_cookieId", () => Guid.NewGuid().ToString());
+            var _cookieId = Cache.GetItem<string>(CacheArea.Request, "_" + name + "Id", () => Guid.NewGuid().ToString());
             var context = HttpContext.Current;
             if (context != null)
             {
+                var baseData = "";
                 HttpCookie cookie = null;
                 try
                 {
-                    cookie = context.Request.Cookies["cookieCache"];
+                    cookie = context.Request.Cookies["_" + name + "_Cache"];
                 }
                 catch (Exception)
                 {
 
                 }
-                if (cookie != null && !string.IsNullOrWhiteSpace(cookie.Value))
-                {
-                    _cookieId = cookie.Value;
-                }
-                else
+
+                //_cookieId = MachineKey.Unprotect(Convert.FromBase64String(cookie?.Value), HttpContext.Current.Request.UserHostAddress);
+                var validCookie = false;
+                if (cookie != null)
                 {
                     try
                     {
-                        cookie = new HttpCookie("cookieCache", _cookieId);
-                        cookie.HttpOnly = true;
+                        baseData = cookie.Value;
+
+                        var cdata = MachineKey.Unprotect(Convert.FromBase64String(baseData), HttpContext.Current.Request.UserHostAddress);
+                        if (cdata != null)
+                        {
+                            _cookieId = Encoding.UTF8.GetString(cdata);
+                            validCookie = true;
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                if (cookie == null || !validCookie)
+                {
+                    try
+                    {
+                        var cdata = Encoding.UTF8.GetBytes(_cookieId);
+                        baseData = Convert.ToBase64String(MachineKey.Protect(cdata,
+                                HttpContext.Current.Request.UserHostAddress));
+
+
+                        cookie = new HttpCookie("_" + name + "_Cache", baseData);
+                        //cookie.HttpOnly = true;
                         cookie.Path = FormsAuthentication.FormsCookiePath;
                         cookie.Secure = string.Equals("https", HttpContext.Current.Request.Url.Scheme, StringComparison.OrdinalIgnoreCase);
+                        if (isPerminate)
+                        {
+                            cookie.Expires = DateTime.Now.AddYears(3);
+                        }
                         if (HttpContext.Current.Request.Url.Host.Split('.').Length > 2)
                         {
                             cookie.Domain = HttpContext.Current.Request.Url.Host;
@@ -179,52 +220,48 @@ namespace HttpObjectCaching
 
                     }
                 }
+
+
+
             }
+            Cache.SetItem<string>(CacheArea.Request, "_" + name + "Id", _cookieId);
             return _cookieId;
+        }
+
+
+        public static async Task<string> CookieIdAsync()
+        {
+            return GetCookieValue("my_cook", false);
+        }
+        public static async Task CookieIdSetAsync(string value)
+        {
+            SetCookieValue("my_cook", value);
+        }
+        public static string CookieId()
+        {
+            return GetCookieValue("my_cook", true);
         }
         public static void CookieIdSet(string value)
         {
-            Cache.SetItem<string>(CacheArea.Request, "_cookieId", value);
+            SetCookieValue("my_cook", value);
         }
         public static async Task<string> SessionIdAsync()
         {
-            var _sessionId = await Cache.GetItemAsync<string>(CacheArea.Request, "_sessionId",async () => Guid.NewGuid().ToString());
-            var context = HttpContext.Current;
-            if (context != null && context.Session != null)
-            {
-                _sessionId = context.Session.SessionID;
-                context.Session["__MySessionLock"] = "112233";
-            }
-            if (string.IsNullOrWhiteSpace(_sessionId))
-            {
-                _sessionId = Guid.NewGuid().ToString();
-            }
-            return _sessionId;
+            return GetCookieValue("my_sess", false);
         }
 
         public static async Task SessionIdSetAsync(string value)
         {
-            await Cache.SetItemAsync<string>(CacheArea.Request, "_sessionId", value);
+            SetCookieValue("my_sess", value);
         }
         public static string SessionId()
         {
-            var _sessionId =  Cache.GetItem<string>(CacheArea.Request, "_sessionId", () => Guid.NewGuid().ToString());
-            var context = HttpContext.Current;
-            if (context != null && context.Session != null)
-            {
-                _sessionId = context.Session.SessionID;
-                context.Session["__MySessionLock"] = "112233";
-            }
-            if (string.IsNullOrWhiteSpace(_sessionId))
-            {
-                _sessionId = Guid.NewGuid().ToString();
-            }
-            return _sessionId;
+            return GetCookieValue("my_sess", false);
         }
 
         public static void SessionIdSet(string value)
         {
-            Cache.SetItem<string>(CacheArea.Request, "_sessionId", value);
+            SetCookieValue("my_sess", value);
         }
 
         public async Task ClearAllCacheAreasAsync()
@@ -241,6 +278,23 @@ namespace HttpObjectCaching
                 }
             }
         }
+
+        public List<TaggedCacheEntry> GetTaggedCacheEntries(string tag)
+        {
+            return (from t in TaggedEntries
+                where t.Tags.ToUpper().Contains("," + tag.ToUpper() + ",")
+                select t).ToList();
+        }
+
+        public async Task ClearTaggedCacheAsync(string tag)
+        {
+            var tList = GetTaggedCacheEntries(tag);
+            foreach (var t in tList)
+            {
+                await Cache.SetItemAsync<object>(t.CacheArea, t.EntryName, null);
+            }
+        }
+
         public async Task ClearCacheAsync(CacheArea area)
         {
             await GetCacheArea(area).ClearCacheAsync();
@@ -269,6 +323,16 @@ namespace HttpObjectCaching
                 }
             }
         }
+
+        public void ClearTaggedCache(string tag)
+        {
+            var tList = GetTaggedCacheEntries(tag);
+            foreach (var t in tList)
+            {
+                Cache.SetItem<object>(t.CacheArea, t.EntryName, null);
+            }
+        }
+
         public void ClearCache(CacheArea area)
         {
             GetCacheArea(area).ClearCache();
