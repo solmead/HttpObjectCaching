@@ -87,7 +87,9 @@ namespace DatabaseCaching.Context
 
             itm = itm ?? new CachedEntry()
             {
+                Created = DateTime.Now,
                 Name = name,
+                Object = ""
             };
 
             if (ValuesDictionary.ContainsKey(name.ToUpper()))
@@ -174,7 +176,15 @@ namespace DatabaseCaching.Context
 
             using (var database = new DataContext())
             {
-                database.CachedEntries.Attach(itm);
+                if (itm.Id > 0)
+                {
+                    database.CachedEntries.Attach(itm);
+                }
+                else
+                {
+                    database.CachedEntries.Add(itm);
+                }
+
                 if (value.Length == 0)
                 {
                     if (itm.Id!=0)
@@ -274,7 +284,15 @@ namespace DatabaseCaching.Context
                     itm.TimeOut = endTime;
                     itm.Changed = DateTime.Now;
                     itm.Object = xml;
-                    database.CachedEntries.Attach(itm);
+
+                    if (itm.Id > 0)
+                    {
+                        database.CachedEntries.Attach(itm);
+                    }
+                    else
+                    {
+                        database.CachedEntries.Add(itm);
+                    }
                     database.SaveChanges();
                     database.Entry(itm).State = EntityState.Detached;
                 }

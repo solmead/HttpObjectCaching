@@ -12,6 +12,7 @@ namespace HttpObjectCaching.Core.DataSources
 {
     public class ApplicationDataSource : IDataSource
     {
+        public static Dictionary<string, string> Names = new Dictionary<string, string>();
 
         public BaseCacheArea Area { get {return BaseCacheArea.Global;} }
 
@@ -49,6 +50,10 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<tt> GetItem<tt>(string name)
         {
+            if (!Names.ContainsKey(name.ToUpper()))
+            {
+                Names.Add(name.ToUpper(), "");
+            }
             try
             {
                 var t = (CachedEntry<tt>)HttpRuntime.Cache[name.ToUpper()];
@@ -66,6 +71,10 @@ namespace HttpObjectCaching.Core.DataSources
             if (item == null)
             {
                 throw new ArgumentNullException();
+            }
+            if (!Names.ContainsKey(item.Name.ToUpper()))
+            {
+                Names.Add(item.Name.ToUpper(), "");
             }
             object comp = item.Item;
             object empty = default(tt);
@@ -114,6 +123,10 @@ namespace HttpObjectCaching.Core.DataSources
 
         public CachedEntry<object> GetItem(string name, Type type)
         {
+            if (!Names.ContainsKey(name.ToUpper()))
+            {
+                Names.Add(name.ToUpper(), "");
+            }
             try
             {
                 var t = (CachedEntry<object>)HttpRuntime.Cache[name.ToUpper()];
@@ -131,6 +144,10 @@ namespace HttpObjectCaching.Core.DataSources
             if (item == null)
             {
                 throw new ArgumentNullException();
+            }
+            if (!Names.ContainsKey(item.Name.ToUpper()))
+            {
+                Names.Add(item.Name.ToUpper(), "");
             }
             object comp = item.Item;
             object empty = null;
@@ -169,6 +186,10 @@ namespace HttpObjectCaching.Core.DataSources
 
         public void DeleteItem(string name)
         {
+            if (Names.ContainsKey(name.ToUpper()))
+            {
+                Names.Remove(name.ToUpper());
+            }
             try
             {
                 HttpRuntime.Cache.Remove(name.ToUpper());
@@ -181,7 +202,20 @@ namespace HttpObjectCaching.Core.DataSources
 
         public void DeleteAll()
         {
-            //throw new NotImplementedException();
+            var keys = Names.Keys.ToList();
+            Names = new Dictionary<string, string>();
+            foreach (var name in keys)
+            {
+
+                try
+                {
+                    HttpRuntime.Cache.Remove(name.ToUpper());
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
 
 

@@ -11,11 +11,21 @@
     <iconUrl>https://github.com/solmead/HttpObjectCaching</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial NuGet Release.</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags></tags>
+    <releaseNotes>
+      The HttpObjectCaching library has been renamed to Utilities.Caching.
+      With an additional library Utilities.Caching.Web
+      This package is empty, but will install the new packages.
+    </releaseNotes>
+    <dependencies>
+      <group>
+        <dependency id="Utilities.Caching" version="6.5.0" />
+        <dependency id="Utilities.Caching.Web" version="6.1.6915.39497" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
-    <file src="Content\web.config.transform" target="Content" />
+    <file src="HttpObjectCaching/readme.txt" target=""/>
   </files>
 </package>

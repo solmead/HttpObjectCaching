@@ -83,7 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Content\Web.Config.Install.xdt">
+    <None Include="Content\Web.Config.Transform">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />

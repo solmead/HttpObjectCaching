@@ -11,6 +11,9 @@ namespace HttpObjectCaching.Core.DataSources
     public class RequestDataSource : IDataSource
     {
 
+        private static List<string> requestCaches = new List<string>();
+
+
         private ThreadDataSource _threadSource = new ThreadDataSource();
 
         public BaseCacheArea Area { get { return BaseCacheArea.Request; } }
@@ -49,6 +52,10 @@ namespace HttpObjectCaching.Core.DataSources
             try
             {
 
+                if (!requestCaches.Contains(name.ToUpper()))
+                {
+                    requestCaches.Add(name.ToUpper());
+                }
                 var context = HttpContext.Current;
                 if (context != null)
                 {
@@ -76,6 +83,11 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
+
+                if (!requestCaches.Contains(item.Name.ToUpper()))
+                {
+                    requestCaches.Add(item.Name.ToUpper());
+                }
                 //lock (requestSetLock)
                 {
                     if (context.Items.Contains(item.Name.ToUpper()))
@@ -144,12 +156,13 @@ namespace HttpObjectCaching.Core.DataSources
             var context = HttpContext.Current;
             if (context != null)
             {
-                //lock (requestSetLock)
+                if (requestCaches.Contains(name.ToUpper()))
                 {
-                    if (context.Items.Contains(name.ToUpper()))
-                    {
-                        context.Items.Remove(name.ToUpper());
-                    }
+                    requestCaches.Remove(name.ToUpper());
+                }
+                if (context.Items.Contains(name.ToUpper()))
+                {
+                    context.Items.Remove(name.ToUpper());
                 }
             }
             else
@@ -160,7 +173,22 @@ namespace HttpObjectCaching.Core.DataSources
 
         public void DeleteAll()
         {
-            //throw new NotImplementedException();
+            foreach (var name in requestCaches.ToList())
+            {
+                DeleteItem(name);
+            }
+
+
+            ////throw new NotImplementedException();
+            //var context = HttpContext.Current;
+            //if (context != null)
+            //{
+            //    var lst = (from string k in context.Items.Keys select k).ToList();
+            //    foreach (var it in lst)
+            //    {
+            //        context.Items.Remove(it);
+            //    }
+            //}
         }
 
 

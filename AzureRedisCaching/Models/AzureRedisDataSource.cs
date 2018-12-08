@@ -139,7 +139,7 @@ namespace AzureRedisCaching.Models
             foreach (var ep in Connection.GetEndPoints())
             {
                 var server =  Connection.GetServer(ep);
-                var keys = server.Keys();
+                var keys = server.Keys().ToList();
                 foreach (var key in keys)
                 {
                     Console.WriteLine("Removing Key {0} from cache", key.ToString());
@@ -259,7 +259,7 @@ namespace AzureRedisCaching.Models
             foreach (var ep in Connection.GetEndPoints())
             {
                 var server =  Connection.GetServer(ep);
-                var keys = server.Keys();
+                var keys = server.Keys().ToList();
                 foreach (var key in keys)
                 {
                     Console.WriteLine("Removing Key {0} from cache", key.ToString());
